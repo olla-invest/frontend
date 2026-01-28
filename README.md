@@ -1,73 +1,116 @@
-# React + TypeScript + Vite
+````md
+# allo
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+> Vite + React + TypeScript
 
-Currently, two official plugins are available:
+---
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Babel](https://babeljs.io/) (or [oxc](https://oxc.rs) when used in [rolldown-vite](https://vite.dev/guide/rolldown)) for Fast Refresh
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/) for Fast Refresh
+## 🛠 기술 스택
 
-## React Compiler
+- **Runtime**: Node.js v22.22
+- **Package Manager**: pnpm
+- **Framework**: React
+- **Language**: TypeScript
+- **Build Tool**: Vite
+- **UI**: shadcn/ui, Tailwind CSS
+- **Lint**: ESLint
 
-The React Compiler is not enabled on this template because of its impact on dev & build performances. To add it, see [this documentation](https://react.dev/learn/react-compiler/installation).
+---
 
-## Expanding the ESLint configuration
+## 🚀 설치 및 실행
 
-If you are developing a production application, we recommend updating the configuration to enable type-aware lint rules:
+### 1. Node.js 버전 확인
 
-```js
-export default defineConfig([
-  globalIgnores(['dist']),
-  {
-    files: ['**/*.{ts,tsx}'],
-    extends: [
-      // Other configs...
+```bash
+node -v
+# v22.22 이상 권장
+```
+````
 
-      // Remove tseslint.configs.recommended and replace with this
-      tseslint.configs.recommendedTypeChecked,
-      // Alternatively, use this for stricter rules
-      tseslint.configs.strictTypeChecked,
-      // Optionally, add this for stylistic rules
-      tseslint.configs.stylisticTypeChecked,
+### 2. 패키지 설치
 
-      // Other configs...
-    ],
-    languageOptions: {
-      parserOptions: {
-        project: ['./tsconfig.node.json', './tsconfig.app.json'],
-        tsconfigRootDir: import.meta.dirname,
-      },
-      // other options...
-    },
-  },
-])
+```bash
+pnpm install
 ```
 
-You can also install [eslint-plugin-react-x](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-x) and [eslint-plugin-react-dom](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-dom) for React-specific lint rules:
+### 3. 개발 서버 실행
 
-```js
-// eslint.config.js
-import reactX from 'eslint-plugin-react-x'
-import reactDom from 'eslint-plugin-react-dom'
-
-export default defineConfig([
-  globalIgnores(['dist']),
-  {
-    files: ['**/*.{ts,tsx}'],
-    extends: [
-      // Other configs...
-      // Enable lint rules for React
-      reactX.configs['recommended-typescript'],
-      // Enable lint rules for React DOM
-      reactDom.configs.recommended,
-    ],
-    languageOptions: {
-      parserOptions: {
-        project: ['./tsconfig.node.json', './tsconfig.app.json'],
-        tsconfigRootDir: import.meta.dirname,
-      },
-      // other options...
-    },
-  },
-])
+```bash
+pnpm dev
 ```
+
+### 4. 빌드
+
+```bash
+pnpm build
+```
+
+### 5. 빌드 결과 미리보기
+
+```bash
+pnpm preview
+```
+
+---
+
+## 📁 프로젝트 구조
+
+```bash
+allo/
+├─ public/              # 정적 파일 (index.html, favicon 등)
+├─ src/
+│  ├─ assets/           # 이미지, 아이콘, 폰트 등
+│  ├─ components/       # 재사용 컴포넌트
+│  │  └─ ui/            # shadcn/ui 컴포넌트
+│  │     └─ Button.tsx
+│  ├─ layouts/          # 화면 별 레이아웃 구조
+│  │     └─ MainLayout.tsx
+│  ├─ pages/            # 라우팅 단위 페이지
+│  │  └─ home/
+│  │    └─ index.tsx
+│  │    └─ conponents   # 특정 페이지에서 사용하는 컴포넌트 모음
+│  ├─ hooks/            # 커스텀 훅
+│  │  └─ useAuth.ts
+│  ├─ utils/            # 유틸 함수
+│  │  └─ formatDate.ts
+│  ├─ types/            # TypeScript 타입 정의
+│  │  └─ index.d.ts
+│  ├─ styles/           # 전역 스타일 / CSS / SCSS
+│  │  └─ global.css
+│  ├─ App.tsx           # 최상위 컴포넌트
+│  └─ main.tsx          # ReactDOM 렌더링 진입점
+├─ .gitignore
+├─ package.json
+├─ pnpm-lock.yaml
+├─ tsconfig.json
+├─ eslint.config.js
+```
+
+---
+
+## 🎨 코드 스타일 & 컨벤션
+
+- shadcn UI 컴포넌트는 `src/components/ui`에 위치
+- 페이지 컴포넌트는 `src/pages`에 위치
+- 비즈니스 로직은 `hooks`와 `utils`로 분리
+- 커밋 메시지는 Conventional Commits 스타일 권장
+  예: `feat: 로그인 페이지 추가`, `fix: 버튼 클릭 버그 수정`
+
+---
+
+## 🔐 환경 변수 (필요 시)
+
+`.env` 파일을 프로젝트 루트에 생성하고 아래와 같이 설정합니다:
+
+```env
+VITE_API_BASE_URL=https://api.example.com
+```
+
+---
+
+## 🌍 배포
+
+- 배포 플랫폼: Vercel / Netlify / 기타
+- 배포 URL: (추후 추가)
+
+---
