@@ -20,12 +20,13 @@ import { Dialog, DialogContent, DialogTrigger } from "@/components/ui/dialog";
 import { DropdownMenu, DropdownMenuCheckboxItem, DropdownMenuContent, DropdownMenuGroup, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { useExcelDownload } from "@/hooks/useExcelDownload";
+import { TableLoading } from "@/components/TableLoading";
 
 import ChartFilter from "./ChartFilter";
 import type { StockRankingApiResponse, StockRankingApiItem } from "@/types/api/stocks";
 import InvestmentIndicatorGuide from "./InvestmentIndicatorGuideDialog";
 
-import { getRealTimeChart } from "@/api/stocks";
+import { getRealTimeChart, getRealTimeChartStatus } from "@/api/stocks";
 
 const columns: ColumnDef<StockRankingApiItem>[] = [
   {
@@ -113,6 +114,14 @@ const columns: ColumnDef<StockRankingApiItem>[] = [
   },
 ];
 
+export interface ChartFilterState {
+  rs: string;
+  market: string;
+  isHighPrice: boolean | null;
+  theme: string;
+  price: number | null;
+}
+
 export function LiveChart() {
   const [tableData, setTableData] = useState<StockRankingApiResponse | null>(null);
   const [sorting, setSorting] = React.useState<SortingState>([]);
@@ -120,16 +129,71 @@ export function LiveChart() {
   const [columnVisibility, setColumnVisibility] = React.useState<VisibilityState>({});
   const [rowSelection, setRowSelection] = React.useState({});
 
+  //페이지 네이션
   const [page, setPage] = useState(1); // 1-based
   const [pageSize, setPageSize] = useState(50);
 
+  //필터
+  const [filter, setFilter] = useState<ChartFilterState>({
+    rs: "",
+    market: "0",
+    isHighPrice: null,
+    theme: "all",
+    price: null,
+  });
+
+  //로딩 상태관리
+  const [loading, setLoading] = useState(true);
+
   useEffect(() => {
-    getRealTimeChart({
-      page,
-      pageSize,
-    })
-      .then((res) => setTableData(res.data))
-      .catch(console.error);
+    let cancelled = false;
+    let intervalId: ReturnType<typeof setInterval> | null = null;
+
+    const startPolling = async () => {
+      try {
+        setLoading(true);
+        // 1. 최초 호출
+        await getRealTimeChart({
+          page,
+          pageSize,
+        });
+
+        // 2️. 상태 폴링 시작
+        intervalId = setInterval(async () => {
+          try {
+            const statusRes = await getRealTimeChartStatus();
+            if (cancelled) return;
+
+            if (statusRes.data.initialized) {
+              // 3. initialized === true → 폴링 중단
+              if (intervalId) clearInterval(intervalId);
+
+              const res = await getRealTimeChart({
+                page,
+                pageSize,
+              });
+
+              if (!cancelled) {
+                setLoading(false);
+                setTableData(res.data);
+              }
+            }
+          } catch (e) {
+            console.error("status polling error", e);
+          }
+        }, 10000);
+      } catch (e) {
+        setLoading(false);
+        console.error(e);
+      }
+    };
+    setLoading(false);
+    startPolling();
+
+    return () => {
+      cancelled = true;
+      if (intervalId) clearInterval(intervalId);
+    };
   }, [page, pageSize]);
 
   const table = useReactTable({
@@ -167,7 +231,7 @@ export function LiveChart() {
 
   return (
     <div className="w-full flex flex-col h-full">
-      <ChartFilter />
+      <ChartFilter filter={filter} setFilter={setFilter} />
 
       <div className="flex justify-between items-center py-4">
         <div className="flex gap-2 items-center max-h-8 text-muted-foreground text-xs">
@@ -179,17 +243,15 @@ export function LiveChart() {
         </div>
         <div className="flex gap-2 items-center max-h-8">
           <Dialog>
-            <form>
-              <DialogTrigger asChild>
-                <Button variant="outline" size="sm">
-                  <i className="icon icon-info" />
-                  투자 주요지표 안내
-                </Button>
-              </DialogTrigger>
-              <DialogContent className="w-full sm:max-w-lg md:max-w-2xl">
-                <InvestmentIndicatorGuide />
-              </DialogContent>
-            </form>
+            <DialogTrigger asChild>
+              <Button variant="outline" size="sm">
+                <i className="icon icon-info" />
+                투자 주요지표 안내
+              </Button>
+            </DialogTrigger>
+            <DialogContent className="w-full sm:max-w-lg md:max-w-2xl">
+              <InvestmentIndicatorGuide />
+            </DialogContent>
           </Dialog>
           <Button variant="outline" size="sm" onClick={downloadAll}>
             <DownloadIcon />
@@ -221,7 +283,7 @@ export function LiveChart() {
           </DropdownMenu>
         </div>
       </div>
-      <div className="flex flex-col gap-4 h-[calc(100%-164px)]">
+      <div className="flex flex-col gap-4 h-[calc(100%-172px)]">
         <Table>
           <TableHeader className="sticky top-0 left-0 bg-white shadow-[0_1px_0_0_rgba(0,0,0,0.1)]">
             {table.getHeaderGroups().map((hg) => (
@@ -234,7 +296,9 @@ export function LiveChart() {
           </TableHeader>
 
           <TableBody>
-            {table.getRowModel().rows.length ? (
+            {loading ? (
+              <TableLoading colSpan={columns.length} />
+            ) : table.getRowModel().rows.length ? (
               table.getRowModel().rows.map((row) => (
                 <TableRow key={row.id}>
                   {row.getVisibleCells().map((cell) => (
@@ -243,7 +307,7 @@ export function LiveChart() {
                 </TableRow>
               ))
             ) : (
-              <TableRow>
+              <TableRow className="h-75">
                 <TableCell colSpan={columns.length} className="text-center">
                   데이터가 없습니다.
                 </TableCell>
@@ -251,66 +315,67 @@ export function LiveChart() {
             )}
           </TableBody>
         </Table>
-        <Pagination className="justify-end">
-          <PaginationContent>
-            {/* 이전 */}
-            <PaginationItem>
-              <PaginationPrevious
-                href="#"
-                onClick={(e) => {
-                  e.preventDefault();
-                  if (page > 1) setPage(page - 1);
-                }}
-                className={page <= 1 ? "pointer-events-none opacity-50" : ""}
-              />
-            </PaginationItem>
-
-            {/* 페이지 번호 3개 고정 */}
-            {(() => {
-              const totalPages = tableData?.totalPages ?? 0;
-              if (totalPages === 0) return null;
-
-              const start = Math.max(1, Math.min(page - 1, totalPages - 2));
-              const pages = Array.from({ length: 3 }, (_, i) => start + i).filter((p) => p <= totalPages);
-
-              return pages.map((pageNumber) => (
-                <PaginationItem key={pageNumber}>
-                  <PaginationLink
-                    href="#"
-                    isActive={page === pageNumber}
-                    onClick={(e) => {
-                      e.preventDefault();
-                      setPage(pageNumber);
-                    }}
-                  >
-                    {pageNumber}
-                  </PaginationLink>
-                </PaginationItem>
-              ));
-            })()}
-
-            {/* Ellipsis */}
-            {tableData && tableData.totalPages > 3 && page < tableData.totalPages - 1 && (
+        {tableData?.totalCount && tableData?.totalCount > 0 ? (
+          <Pagination className="justify-end">
+            <PaginationContent>
+              {/* 이전 */}
               <PaginationItem>
-                <PaginationEllipsis />
+                <PaginationPrevious
+                  href="#"
+                  onClick={(e) => {
+                    e.preventDefault();
+                    if (page > 1) setPage(page - 1);
+                  }}
+                  className={page <= 1 ? "pointer-events-none opacity-50" : ""}
+                />
               </PaginationItem>
-            )}
 
-            {/* 다음 */}
-            <PaginationItem>
-              <PaginationNext
-                href="#"
-                onClick={(e) => {
-                  e.preventDefault();
-                  if (page < (tableData?.totalPages ?? 1)) {
-                    setPage(page + 1);
-                  }
-                }}
-                className={page >= (tableData?.totalPages ?? 1) ? "pointer-events-none opacity-50" : ""}
-              />
-            </PaginationItem>
-          </PaginationContent>
-        </Pagination>
+              {/* 페이지 번호 3개 고정 */}
+              {(() => {
+                const totalPages = tableData?.totalPages ?? 0;
+                if (totalPages === 0) return null;
+
+                const start = Math.max(1, Math.min(page - 1, totalPages - 2));
+                const pages = Array.from({ length: 3 }, (_, i) => start + i).filter((p) => p <= totalPages);
+
+                return pages.map((pageNumber) => (
+                  <PaginationItem key={pageNumber}>
+                    <PaginationLink
+                      href="#"
+                      isActive={page === pageNumber}
+                      onClick={(e) => {
+                        e.preventDefault();
+                        setPage(pageNumber);
+                      }}
+                    >
+                      {pageNumber}
+                    </PaginationLink>
+                  </PaginationItem>
+                ));
+              })()}
+
+              {/* Ellipsis */}
+              {tableData && tableData.totalPages > 3 && page < tableData.totalPages - 1 && (
+                <PaginationItem>
+                  <PaginationEllipsis />
+                </PaginationItem>
+              )}
+              {/* 다음 */}
+              <PaginationItem>
+                <PaginationNext
+                  href="#"
+                  onClick={(e) => {
+                    e.preventDefault();
+                    if (page < (tableData?.totalPages ?? 1)) {
+                      setPage(page + 1);
+                    }
+                  }}
+                  className={page >= (tableData?.totalPages ?? 1) ? "pointer-events-none opacity-50" : ""}
+                />
+              </PaginationItem>
+            </PaginationContent>
+          </Pagination>
+        ) : null}
       </div>
     </div>
   );

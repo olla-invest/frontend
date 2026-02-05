@@ -4,16 +4,32 @@ import { ButtonGroup, ButtonGroupText } from "@/components/ui/button-group";
 import { Input } from "@/components/ui/input";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuGroup, DropdownMenuLabel, DropdownMenuRadioGroup, DropdownMenuRadioItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
 import { ChevronDown } from "lucide-react";
+import type { ChartFilterState } from "@/pages/home/components/LiveChart";
 
-export default function ChartFilter() {
+interface ChartFilterProps {
+  filter: ChartFilterState;
+  setFilter: React.Dispatch<React.SetStateAction<ChartFilterState>>;
+}
+
+export default function ChartFilter(props: ChartFilterProps) {
+  const filterValue = { ...props.filter };
+  const filterSetter = props.setFilter;
   return (
     <div className="mt-2 pb-4 border-b">
       <form className="flex gap-2">
-        <Tabs defaultValue="all">
+        <Tabs
+          value={filterValue.market}
+          onValueChange={(value) =>
+            filterSetter((prev) => ({
+              ...prev,
+              market: value,
+            }))
+          }
+        >
           <TabsList className="p-0.75">
-            <TabsTrigger value="all">전체</TabsTrigger>
-            <TabsTrigger value="kospi">코스피</TabsTrigger>
-            <TabsTrigger value="kosdaq">코스닥</TabsTrigger>
+            <TabsTrigger value="0">전체</TabsTrigger>
+            <TabsTrigger value="10">코스피</TabsTrigger>
+            <TabsTrigger value="8">코스닥</TabsTrigger>
           </TabsList>
         </Tabs>
         <Button variant="outline">
@@ -30,7 +46,16 @@ export default function ChartFilter() {
               <DropdownMenuLabel className="border-b p-1">
                 <div className="px-2 py-1.5">신고가 여부</div>
               </DropdownMenuLabel>
-              <DropdownMenuRadioGroup value={"all"} className="px-2 py-1.5">
+              <DropdownMenuRadioGroup
+                className="px-2 py-1.5"
+                value={filterValue.isHighPrice === null ? "all" : filterValue.isHighPrice ? "true" : "false"}
+                onValueChange={(value) => {
+                  filterSetter((prev) => ({
+                    ...prev,
+                    isHighPrice: value === "all" ? null : value === "true",
+                  }));
+                }}
+              >
                 <DropdownMenuRadioItem value="all">전체기간</DropdownMenuRadioItem>
                 <DropdownMenuRadioItem value="true">신고가</DropdownMenuRadioItem>
                 <DropdownMenuRadioItem value="false">신고가 미해당(-표시)</DropdownMenuRadioItem>
@@ -49,7 +74,16 @@ export default function ChartFilter() {
               <DropdownMenuLabel className="border-b p-1">
                 <div className="px-2 py-1.5">테마</div>
               </DropdownMenuLabel>
-              <DropdownMenuRadioGroup value={"all"} className="px-2 py-1.5">
+              <DropdownMenuRadioGroup
+                className="px-2 py-1.5"
+                value={filterValue.isHighPrice === null ? "all" : filterValue.isHighPrice ? "true" : "false"}
+                onValueChange={(value) => {
+                  filterSetter((prev) => ({
+                    ...prev,
+                    isHighPrice: value === "all" ? null : value === "true",
+                  }));
+                }}
+              >
                 <DropdownMenuRadioItem value="all">전체</DropdownMenuRadioItem>
                 <DropdownMenuRadioItem value="semiconductor">반도체</DropdownMenuRadioItem>
                 <DropdownMenuRadioItem value="ai">AI</DropdownMenuRadioItem>

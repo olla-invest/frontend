@@ -23,3 +23,8 @@ export interface StockRankingApiItem {
   upName: string;
   rankChange3Days: number[];
 }
+
+export interface StockRankingApiStatus {
+  initialized: boolean;
+  lastDataUpdate: string;
+}

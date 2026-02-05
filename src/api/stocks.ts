@@ -6,3 +6,4 @@ export interface GetRealTimeChartParams {
   marketType?: string;
 }
 export const getRealTimeChart = (params: GetRealTimeChartParams) => api.get<StockRankingApiResponse>("/real-time-chart/stocks", { params });
+export const getRealTimeChartStatus = () => api.get("real-time-chart/status");
