@@ -1,4 +1,8 @@
 import api from "@/lib/api";
 import type { StockRankingApiResponse } from "@/types/api/stocks";
-
-export const getRealTimeChart = () => api.get<StockRankingApiResponse>("/real-time-chart/stocks");
+export interface GetRealTimeChartParams {
+  page: number;
+  pageSize: number;
+  marketType?: string;
+}
+export const getRealTimeChart = (params: GetRealTimeChartParams) => api.get<StockRankingApiResponse>("/real-time-chart/stocks", { params });

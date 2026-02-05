@@ -1,9 +1,6 @@
-import React, { useEffect, useState } from "react";
+import React from "react";
 import { LiveChart } from "./components/LiveChart";
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
-
-import { getRealTimeChart } from "@/api/stocks";
-import type { StockRankingApiResponse } from "@/types/api/stocks";
 
 type TabItem = {
   name: string;
@@ -17,14 +14,6 @@ const tabs: TabItem[] = [
 ];
 
 const Home: React.FC = () => {
-  const [stockTableData, setStockTableData] = useState<StockRankingApiResponse | null>(null);
-
-  useEffect(() => {
-    getRealTimeChart()
-      .then((res) => setStockTableData(res.data))
-      .catch(console.error);
-  }, []);
-
   return (
     <div className="h-[calc(100vh-120px)]">
       <div className="pt-2 pb-14 px-6 h-full overflow-hidden">
@@ -38,7 +27,7 @@ const Home: React.FC = () => {
           </TabsList>
 
           <TabsContent value="liveChart" className="h-full">
-            <LiveChart tableData={stockTableData} />
+            <LiveChart />
           </TabsContent>
 
           <TabsContent value="issueTheme">

@@ -1,11 +1,10 @@
 "use client";
 
-import * as React from "react";
+import React, { useEffect, useState } from "react";
 import {
   flexRender,
   getCoreRowModel,
   getFilteredRowModel,
-  getPaginationRowModel,
   getSortedRowModel,
   useReactTable,
   type ColumnDef,
@@ -13,6 +12,7 @@ import {
   type SortingState,
   type VisibilityState,
 } from "@tanstack/react-table";
+import { Pagination, PaginationContent, PaginationItem, PaginationLink, PaginationPrevious, PaginationNext, PaginationEllipsis } from "@/components/ui/pagination";
 import { ChevronDown, CircleCheckIcon, DownloadIcon } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -25,9 +25,7 @@ import ChartFilter from "./ChartFilter";
 import type { StockRankingApiResponse, StockRankingApiItem } from "@/types/api/stocks";
 import InvestmentIndicatorGuide from "./InvestmentIndicatorGuideDialog";
 
-interface Props {
-  tableData: StockRankingApiResponse | null;
-}
+import { getRealTimeChart } from "@/api/stocks";
 
 const columns: ColumnDef<StockRankingApiItem>[] = [
   {
@@ -115,28 +113,50 @@ const columns: ColumnDef<StockRankingApiItem>[] = [
   },
 ];
 
-export function LiveChart({ tableData }: Props) {
-  console.log(tableData);
+export function LiveChart() {
+  const [tableData, setTableData] = useState<StockRankingApiResponse | null>(null);
   const [sorting, setSorting] = React.useState<SortingState>([]);
   const [columnFilters, setColumnFilters] = React.useState<ColumnFiltersState>([]);
   const [columnVisibility, setColumnVisibility] = React.useState<VisibilityState>({});
   const [rowSelection, setRowSelection] = React.useState({});
 
+  const [page, setPage] = useState(1); // 1-based
+  const [pageSize, setPageSize] = useState(50);
+
+  useEffect(() => {
+    getRealTimeChart({
+      page,
+      pageSize,
+    })
+      .then((res) => setTableData(res.data))
+      .catch(console.error);
+  }, [page, pageSize]);
+
   const table = useReactTable({
     data: tableData?.stocks ?? [],
+    manualPagination: true,
+    pageCount: tableData?.totalPages ?? -1,
     columns,
     state: {
       sorting,
       columnFilters,
       columnVisibility,
       rowSelection,
+      pagination: {
+        pageIndex: page - 1, // TanStack은 0-based
+        pageSize,
+      },
+    },
+    onPaginationChange: (updater) => {
+      const next = typeof updater === "function" ? updater({ pageIndex: page - 1, pageSize }) : updater;
+      setPage(next.pageIndex + 1);
+      setPageSize(next.pageSize);
     },
     onSortingChange: setSorting,
     onColumnFiltersChange: setColumnFilters,
     onColumnVisibilityChange: setColumnVisibility,
     onRowSelectionChange: setRowSelection,
     getCoreRowModel: getCoreRowModel(),
-    getPaginationRowModel: getPaginationRowModel(),
     getSortedRowModel: getSortedRowModel(),
     getFilteredRowModel: getFilteredRowModel(),
   });
@@ -155,7 +175,7 @@ export function LiveChart({ tableData }: Props) {
             <span>조회기간:</span>
             <span>- ~ - (- -:-:- 업데이트)</span>
           </div>
-          <span className="text-sm">전체 {tableData?.stocks.length}건</span>
+          <span className="text-sm">전체 {tableData?.totalCount?.toLocaleString() ?? 0}건</span>
         </div>
         <div className="flex gap-2 items-center max-h-8">
           <Dialog>
@@ -185,7 +205,14 @@ export function LiveChart({ tableData }: Props) {
             <DropdownMenuContent align="end">
               <DropdownMenuGroup>
                 {[10, 20, 30, 50].map((size) => (
-                  <DropdownMenuCheckboxItem key={size} checked={table.getState().pagination.pageSize === size} onCheckedChange={() => table.setPageSize(size)}>
+                  <DropdownMenuCheckboxItem
+                    key={size}
+                    checked={pageSize === size}
+                    onCheckedChange={() => {
+                      setPage(1);
+                      setPageSize(size);
+                    }}
+                  >
                     {size}
                   </DropdownMenuCheckboxItem>
                 ))}
@@ -194,7 +221,7 @@ export function LiveChart({ tableData }: Props) {
           </DropdownMenu>
         </div>
       </div>
-      <div className="flex flex-col h-[calc(100%-164px)]">
+      <div className="flex flex-col gap-4 h-[calc(100%-164px)]">
         <Table>
           <TableHeader className="sticky top-0 left-0 bg-white shadow-[0_1px_0_0_rgba(0,0,0,0.1)]">
             {table.getHeaderGroups().map((hg) => (
@@ -224,14 +251,66 @@ export function LiveChart({ tableData }: Props) {
             )}
           </TableBody>
         </Table>
-        <div className="flex justify-end gap-2 pt-4">
-          <Button size="sm" variant="outline" onClick={() => table.previousPage()} disabled={!table.getCanPreviousPage()}>
-            이전
-          </Button>
-          <Button size="sm" variant="outline" onClick={() => table.nextPage()} disabled={!table.getCanNextPage()}>
-            다음
-          </Button>
-        </div>
+        <Pagination className="justify-end">
+          <PaginationContent>
+            {/* 이전 */}
+            <PaginationItem>
+              <PaginationPrevious
+                href="#"
+                onClick={(e) => {
+                  e.preventDefault();
+                  if (page > 1) setPage(page - 1);
+                }}
+                className={page <= 1 ? "pointer-events-none opacity-50" : ""}
+              />
+            </PaginationItem>
+
+            {/* 페이지 번호 3개 고정 */}
+            {(() => {
+              const totalPages = tableData?.totalPages ?? 0;
+              if (totalPages === 0) return null;
+
+              const start = Math.max(1, Math.min(page - 1, totalPages - 2));
+              const pages = Array.from({ length: 3 }, (_, i) => start + i).filter((p) => p <= totalPages);
+
+              return pages.map((pageNumber) => (
+                <PaginationItem key={pageNumber}>
+                  <PaginationLink
+                    href="#"
+                    isActive={page === pageNumber}
+                    onClick={(e) => {
+                      e.preventDefault();
+                      setPage(pageNumber);
+                    }}
+                  >
+                    {pageNumber}
+                  </PaginationLink>
+                </PaginationItem>
+              ));
+            })()}
+
+            {/* Ellipsis */}
+            {tableData && tableData.totalPages > 3 && page < tableData.totalPages - 1 && (
+              <PaginationItem>
+                <PaginationEllipsis />
+              </PaginationItem>
+            )}
+
+            {/* 다음 */}
+            <PaginationItem>
+              <PaginationNext
+                href="#"
+                onClick={(e) => {
+                  e.preventDefault();
+                  if (page < (tableData?.totalPages ?? 1)) {
+                    setPage(page + 1);
+                  }
+                }}
+                className={page >= (tableData?.totalPages ?? 1) ? "pointer-events-none opacity-50" : ""}
+              />
+            </PaginationItem>
+          </PaginationContent>
+        </Pagination>
       </div>
     </div>
   );
