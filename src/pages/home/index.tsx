@@ -17,10 +17,10 @@ const Home: React.FC = () => {
   return (
     <div className="h-[calc(100vh-120px)]">
       <div className="pt-2 pb-14 px-6 h-full overflow-hidden">
-        <Tabs defaultValue="liveChart" className="h-full overflow-hidden">
-          <TabsList variant="line" className="w-full justify-start border-b">
+        <Tabs defaultValue="liveChart" className="w-full overflow-hidden">
+          <TabsList variant="line" className="justify-start border-b w-full">
             {tabs.map((tab) => (
-              <TabsTrigger key={tab.value} value={tab.value}>
+              <TabsTrigger key={tab.value} value={tab.value} className="grow-0">
                 {tab.name}
               </TabsTrigger>
             ))}
