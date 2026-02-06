@@ -66,7 +66,7 @@ export default function ChartFilter(props: ChartFilterProps) {
         <DropdownMenu>
           <DropdownMenuTrigger asChild>
             <Button variant="outline">
-              태마 <ChevronDown />
+              테마 <ChevronDown />
             </Button>
           </DropdownMenuTrigger>
           <DropdownMenuContent className="w-52 p-0" align="start">
