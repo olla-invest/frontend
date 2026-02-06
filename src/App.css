@@ -1,0 +1,6 @@
+header .logo {
+  background: url("./assets/images/olla-logo.svg") no-repeat;
+  width: 40px;
+  background-size: cover;
+  height: 17px;
+}
