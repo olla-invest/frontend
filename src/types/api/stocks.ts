@@ -5,6 +5,11 @@ export interface StockRankingApiResponse {
   totalCount: number;
   totalPages: number;
   count: number;
+  meta: {
+    dataDate: string;
+    lastUpdatedAt: string;
+    isInitialized: boolean;
+  };
   stocks: StockRankingApiItem[];
 }
 
