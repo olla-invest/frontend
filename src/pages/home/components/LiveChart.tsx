@@ -117,8 +117,8 @@ const columns: ColumnDef<StockRankingApiItem>[] = [
 export interface ChartFilterState {
   rs: string;
   market: string;
-  isHighPrice: boolean | null;
-  theme: string;
+  isHighPrice: ({ value: string; name: string } | null)[];
+  theme: ({ value: string; name: string } | null)[];
   price: number | null;
 }
 
@@ -137,8 +137,8 @@ export function LiveChart() {
   const [filter, setFilter] = useState<ChartFilterState>({
     rs: "",
     market: "0",
-    isHighPrice: null,
-    theme: "all",
+    isHighPrice: [null],
+    theme: [null],
     price: null,
   });
 

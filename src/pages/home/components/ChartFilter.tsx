@@ -2,7 +2,7 @@ import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Button } from "@/components/ui/button";
 import { ButtonGroup, ButtonGroupText } from "@/components/ui/button-group";
 import { Input } from "@/components/ui/input";
-import { DropdownMenu, DropdownMenuContent, DropdownMenuGroup, DropdownMenuLabel, DropdownMenuRadioGroup, DropdownMenuRadioItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
+import { DropdownMenu, DropdownMenuContent, DropdownMenuGroup, DropdownMenuLabel, DropdownMenuCheckboxItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
 import { ChevronDown } from "lucide-react";
 import type { ChartFilterState } from "@/pages/home/components/LiveChart";
 
@@ -10,6 +10,32 @@ interface ChartFilterProps {
   filter: ChartFilterState;
   setFilter: React.Dispatch<React.SetStateAction<ChartFilterState>>;
 }
+
+function getThemeLabel(themes: ({ value: string; name: string } | null)[]) {
+  const validThemes = themes.filter(Boolean) as { value: string; name: string }[];
+
+  if (validThemes.length === 0) return "전체";
+  if (validThemes.length === 1) return validThemes[0].name;
+  return `${validThemes[0].name} 외 ${validThemes.length - 1}개`;
+}
+
+function getHighPriceLabel(values: ({ value: string; name: string } | null)[]) {
+  const valid = values.filter(Boolean) as { value: string; name: string }[];
+
+  if (valid.length === 0) return "전체기간";
+  if (valid.length === 1) return valid[0].name;
+  return `${valid[0].name} 외 ${valid.length - 1}개`;
+}
+
+const THEME_OPTIONS = [
+  { value: "semiconductor", name: "반도체" },
+  { value: "bio", name: "제약" },
+  { value: "ai", name: "AI" },
+];
+const HIGH_PRICE_OPTIONS = [
+  { value: "true", name: "신고가" },
+  { value: "false", name: "신고가 미해당(-표시)" },
+];
 
 export default function ChartFilter(props: ChartFilterProps) {
   const filterValue = { ...props.filter };
@@ -38,59 +64,105 @@ export default function ChartFilter(props: ChartFilterProps) {
         <DropdownMenu>
           <DropdownMenuTrigger asChild>
             <Button variant="outline">
-              신고가 여부 <ChevronDown />
+              신고가 여부
+              <span className="text-primary">{getHighPriceLabel(filterValue.isHighPrice)}</span> <ChevronDown />
             </Button>
           </DropdownMenuTrigger>
+
           <DropdownMenuContent className="w-52 p-0" align="start">
             <DropdownMenuGroup>
               <DropdownMenuLabel className="border-b p-1">
                 <div className="px-2 py-1.5">신고가 여부</div>
               </DropdownMenuLabel>
-              <DropdownMenuRadioGroup
-                className="px-2 py-1.5"
-                value={filterValue.isHighPrice === null ? "all" : filterValue.isHighPrice ? "true" : "false"}
-                onValueChange={(value) => {
-                  filterSetter((prev) => ({
-                    ...prev,
-                    isHighPrice: value === "all" ? null : value === "true",
-                  }));
-                }}
-              >
-                <DropdownMenuRadioItem value="all">전체기간</DropdownMenuRadioItem>
-                <DropdownMenuRadioItem value="true">신고가</DropdownMenuRadioItem>
-                <DropdownMenuRadioItem value="false">신고가 미해당(-표시)</DropdownMenuRadioItem>
-              </DropdownMenuRadioGroup>
+
+              <div className="px-2 py-1.5 flex flex-col gap-1">
+                {/* 전체 */}
+                <DropdownMenuCheckboxItem
+                  checked={filterValue.isHighPrice.length === 0}
+                  onCheckedChange={() => {
+                    filterSetter((prev) => ({
+                      ...prev,
+                      isHighPrice: [],
+                    }));
+                  }}
+                >
+                  전체기간
+                </DropdownMenuCheckboxItem>
+
+                {HIGH_PRICE_OPTIONS.map((option) => {
+                  const checked = filterValue.isHighPrice.some((v) => v?.value === option.value);
+
+                  return (
+                    <DropdownMenuCheckboxItem
+                      key={option.value}
+                      checked={checked}
+                      onCheckedChange={(isChecked) => {
+                        filterSetter((prev) => ({
+                          ...prev,
+                          isHighPrice: isChecked ? [...prev.isHighPrice, option] : prev.isHighPrice.filter((v) => v?.value !== option.value),
+                        }));
+                      }}
+                    >
+                      {option.name}
+                    </DropdownMenuCheckboxItem>
+                  );
+                })}
+              </div>
             </DropdownMenuGroup>
           </DropdownMenuContent>
         </DropdownMenu>
+
         <DropdownMenu>
           <DropdownMenuTrigger asChild>
             <Button variant="outline">
-              테마 <ChevronDown />
+              테마
+              <span className="text-primary">{getThemeLabel(filterValue.theme)}</span> <ChevronDown />
             </Button>
           </DropdownMenuTrigger>
+
           <DropdownMenuContent className="w-52 p-0" align="start">
             <DropdownMenuGroup>
               <DropdownMenuLabel className="border-b p-1">
                 <div className="px-2 py-1.5">테마</div>
               </DropdownMenuLabel>
-              <DropdownMenuRadioGroup
-                className="px-2 py-1.5"
-                value={filterValue.isHighPrice === null ? "all" : filterValue.isHighPrice ? "true" : "false"}
-                onValueChange={(value) => {
-                  filterSetter((prev) => ({
-                    ...prev,
-                    isHighPrice: value === "all" ? null : value === "true",
-                  }));
-                }}
-              >
-                <DropdownMenuRadioItem value="all">전체</DropdownMenuRadioItem>
-                <DropdownMenuRadioItem value="semiconductor">반도체</DropdownMenuRadioItem>
-                <DropdownMenuRadioItem value="ai">AI</DropdownMenuRadioItem>
-              </DropdownMenuRadioGroup>
+
+              <div className="px-2 py-1.5 flex flex-col gap-1">
+                {/* 전체 */}
+                <DropdownMenuCheckboxItem
+                  checked={filterValue.theme.length === 0}
+                  onCheckedChange={() => {
+                    filterSetter((prev) => ({
+                      ...prev,
+                      theme: [],
+                    }));
+                  }}
+                >
+                  전체
+                </DropdownMenuCheckboxItem>
+
+                {THEME_OPTIONS.map((theme) => {
+                  const checked = filterValue.theme.some((t) => t?.value === theme.value);
+
+                  return (
+                    <DropdownMenuCheckboxItem
+                      key={theme.value}
+                      checked={checked}
+                      onCheckedChange={(isChecked) => {
+                        filterSetter((prev) => ({
+                          ...prev,
+                          theme: isChecked ? [...prev.theme, theme] : prev.theme.filter((t) => t?.value !== theme.value),
+                        }));
+                      }}
+                    >
+                      {theme.name}
+                    </DropdownMenuCheckboxItem>
+                  );
+                })}
+              </div>
             </DropdownMenuGroup>
           </DropdownMenuContent>
         </DropdownMenu>
+
         <ButtonGroup>
           <ButtonGroupText className="bg-white text-foreground">거래대금</ButtonGroupText>
           <Input className="text-muted-foreground text-right" placeholder="1,000,000,000" />
