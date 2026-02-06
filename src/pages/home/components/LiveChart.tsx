@@ -44,8 +44,22 @@ const columns: ColumnDef<StockRankingApiItem>[] = [
   {
     accessorKey: "currentPrice",
     header: "현재가",
-    cell: ({ row }) => <div>{formatNumber(row.getValue("currentPrice"))}</div>,
+    cell: ({ row }) => {
+      const price = row.getValue<number>("currentPrice");
+      const rate = row.original.investmentIndicators;
+
+      return (
+        <div className="flex gap-1 p-2 items-end min-w-40">
+          {/* 현재가 */}
+          <div>{formatNumber(price)}</div>
+          <div className={`w-12.5 shrink-0 text-xs ${rate.startsWith("+") ? "text-red-500" : rate.startsWith("-") ? "text-blue-500" : "text-muted-foreground"}`}>{rate}</div>
+
+          {/* 전일 대비 */}
+        </div>
+      );
+    },
   },
+
   {
     accessorKey: "exchange",
     header: "거래소",
@@ -70,18 +84,9 @@ const columns: ColumnDef<StockRankingApiItem>[] = [
       ),
   },
   {
-    id: "investmentIndicators",
+    id: "investmentIndicatorsDtl",
     header: "투자 중요지표",
-    cell: ({ row }) => {
-      const { investmentIndicators, investmentIndicatorsDtl } = row.original;
-
-      return (
-        <div>
-          <div>{investmentIndicators}</div>
-          <div className="text-xs text-muted-foreground">{investmentIndicatorsDtl}</div>
-        </div>
-      );
-    },
+    cell: ({ row }) => <div>{row.getValue("investmentIndicatorsDtl")}</div>,
   },
   {
     accessorKey: "theme",
@@ -148,6 +153,8 @@ export function LiveChart() {
 
   //로딩 상태관리
   const [loading, setLoading] = useState(true);
+  const [updateTime, setUpdateTime] = useState("- -:-:-");
+  const [dataDate, setDataDate] = useState("- ~ - ");
 
   const pollingRef = React.useRef<ReturnType<typeof setInterval> | null>(null);
 
@@ -185,6 +192,8 @@ export function LiveChart() {
               const res = await getRealTimeChart({ page, pageSize });
               if (!cancelled) {
                 setTableData(res.data);
+                setUpdateTime(res.data.meta.lastUpdatedAt);
+                setDataDate(res.data.meta.dataDate);
                 setLoading(false);
               }
             }
@@ -250,7 +259,9 @@ export function LiveChart() {
         <div className="flex gap-2 items-center max-h-8 text-muted-foreground text-xs">
           <div className="bg-muted p-2 rounded-sm flex align-middle gap-1">
             <span>조회기간:</span>
-            <span>- ~ - (- -:-:- 업데이트)</span>
+            <span>
+              {dataDate} ({updateTime} 업데이트)
+            </span>
           </div>
           <span className="text-sm">전체 {tableData?.totalCount?.toLocaleString() ?? 0}건</span>
         </div>
@@ -302,7 +313,9 @@ export function LiveChart() {
             {table.getHeaderGroups().map((hg) => (
               <TableRow key={hg.id}>
                 {hg.headers.map((header) => (
-                  <TableHead key={header.id}>{flexRender(header.column.columnDef.header, header.getContext())}</TableHead>
+                  <TableHead key={header.id} className="text-muted-foreground!">
+                    {flexRender(header.column.columnDef.header, header.getContext())}
+                  </TableHead>
                 ))}
               </TableRow>
             ))}
