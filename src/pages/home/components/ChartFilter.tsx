@@ -1,3 +1,4 @@
+import { useState } from "react";
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Button } from "@/components/ui/button";
 import { ButtonGroup, ButtonGroupText } from "@/components/ui/button-group";
@@ -27,6 +28,8 @@ function getHighPriceLabel(values: ({ value: string; name: string } | null)[]) {
   return `${valid[0].name} 외 ${valid.length - 1}개`;
 }
 
+const formatWithComma = (value: string) => value.replace(/\B(?=(\d{3})+(?!\d))/g, ",");
+
 const THEME_OPTIONS = [
   { value: "semiconductor", name: "반도체" },
   { value: "bio", name: "제약" },
@@ -40,6 +43,7 @@ const HIGH_PRICE_OPTIONS = [
 export default function ChartFilter(props: ChartFilterProps) {
   const filterValue = { ...props.filter };
   const filterSetter = props.setFilter;
+  const [priceInput, setPriceInput] = useState("1,000,000,000");
   return (
     <div className="mt-2 pb-4 border-b">
       <form className="flex gap-2">
@@ -165,10 +169,35 @@ export default function ChartFilter(props: ChartFilterProps) {
 
         <ButtonGroup>
           <ButtonGroupText className="bg-white text-foreground">거래대금</ButtonGroupText>
-          <Input className="text-muted-foreground text-right" placeholder="1,000,000,000" />
+          <Input
+            className="text-muted-foreground text-right"
+            placeholder="금액을 입력해 주세요"
+            inputMode="numeric"
+            pattern="[0-9]*"
+            value={priceInput}
+            onChange={(e) => {
+              const raw = e.target.value.replace(/[^0-9]/g, "");
+              const formatted = formatWithComma(raw);
+
+              setPriceInput(formatted);
+
+              filterSetter((prev) => ({
+                ...prev,
+                price: raw === "" ? null : Number(raw),
+              }));
+            }}
+          />
+
           <ButtonGroupText className="bg-white text-foreground">원</ButtonGroupText>
         </ButtonGroup>
-        <Button type="button" variant="outline" className="text-primary">
+        <Button
+          type="button"
+          variant="outline"
+          className="text-primary"
+          onClick={() => {
+            alert(`필터기능 준비중입니다\n\n${JSON.stringify(filterValue, null, 2)}`);
+          }}
+        >
           조회
         </Button>
       </form>

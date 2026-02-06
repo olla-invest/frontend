@@ -28,6 +28,8 @@ import InvestmentIndicatorGuide from "./InvestmentIndicatorGuideDialog";
 
 import { getRealTimeChart, getRealTimeChartStatus } from "@/api/stocks";
 
+export const formatNumber = (value?: number | string) => (value == null ? "-" : Number(value).toLocaleString());
+
 const columns: ColumnDef<StockRankingApiItem>[] = [
   {
     accessorKey: "rank",
@@ -42,7 +44,7 @@ const columns: ColumnDef<StockRankingApiItem>[] = [
   {
     accessorKey: "currentPrice",
     header: "현재가",
-    cell: ({ row }) => <div>{row.getValue("currentPrice")}</div>,
+    cell: ({ row }) => <div>{formatNumber(row.getValue("currentPrice"))}</div>,
   },
   {
     accessorKey: "exchange",
@@ -87,7 +89,7 @@ const columns: ColumnDef<StockRankingApiItem>[] = [
     cell: ({ row }) => <div>{row.getValue("theme")}</div>,
   },
   {
-    accessorKey: "rankChange3Days",
+    accessorKey: "rankHistory",
     header: () => (
       <div className="text-center">
         <div className="text-xs">최근 3일 순위변동</div>
@@ -99,15 +101,17 @@ const columns: ColumnDef<StockRankingApiItem>[] = [
       </div>
     ),
     cell: ({ row }) => {
-      const values = row.getValue("rankChange3Days") as number[] | undefined;
+      const v = row.getValue("rankHistory") as {
+        oneDayAgo: number | null;
+        today: number | null;
+        twoDaysAgo: number | null;
+      };
 
       return (
         <div className="flex">
-          {[0, 1, 2].map((i) => (
-            <span key={i} className="flex-1 text-center">
-              {values?.[i] ?? "-"}
-            </span>
-          ))}
+          <span className="flex-1 text-center">{v.oneDayAgo ?? "-"}</span>
+          <span className="flex-1 text-center">{v.today ?? "-"}</span>
+          <span className="flex-1 text-center">{v.twoDaysAgo ?? "-"}</span>
         </div>
       );
     },
@@ -137,62 +141,71 @@ export function LiveChart() {
   const [filter, setFilter] = useState<ChartFilterState>({
     rs: "",
     market: "0",
-    isHighPrice: [null],
-    theme: [null],
-    price: null,
+    isHighPrice: [],
+    theme: [],
+    price: 1000000000,
   });
 
   //로딩 상태관리
   const [loading, setLoading] = useState(true);
 
+  const pollingRef = React.useRef<ReturnType<typeof setInterval> | null>(null);
+
   useEffect(() => {
     let cancelled = false;
-    let intervalId: ReturnType<typeof setInterval> | null = null;
 
     const startPolling = async () => {
       try {
         setLoading(true);
-        // 1. 최초 호출
-        await getRealTimeChart({
-          page,
-          pageSize,
-        });
 
-        // 2️. 상태 폴링 시작
-        intervalId = setInterval(async () => {
+        // 1️⃣ 최초 호출
+        const firstRes = await getRealTimeChart({ page, pageSize });
+        if (cancelled) return;
+
+        // 이미 초기화된 상태면 바로 종료
+        const statusRes = await getRealTimeChartStatus();
+        if (statusRes.data.initialized) {
+          setTableData(firstRes.data);
+          setLoading(false);
+          return;
+        }
+
+        // 2️⃣ polling 시작
+        pollingRef.current = setInterval(async () => {
           try {
-            const statusRes = await getRealTimeChartStatus();
+            const status = await getRealTimeChartStatus();
             if (cancelled) return;
 
-            if (statusRes.data.initialized) {
-              // 3. initialized === true → 폴링 중단
-              if (intervalId) clearInterval(intervalId);
+            if (status.data.initialized) {
+              if (pollingRef.current) {
+                clearInterval(pollingRef.current);
+                pollingRef.current = null;
+              }
 
-              const res = await getRealTimeChart({
-                page,
-                pageSize,
-              });
-
+              const res = await getRealTimeChart({ page, pageSize });
               if (!cancelled) {
-                setLoading(false);
                 setTableData(res.data);
+                setLoading(false);
               }
             }
           } catch (e) {
             console.error("status polling error", e);
           }
-        }, 10000);
+        }, 3000);
       } catch (e) {
         setLoading(false);
         console.error(e);
       }
     };
-    setLoading(false);
+
     startPolling();
 
     return () => {
       cancelled = true;
-      if (intervalId) clearInterval(intervalId);
+      if (pollingRef.current) {
+        clearInterval(pollingRef.current);
+        pollingRef.current = null;
+      }
     };
   }, [page, pageSize]);
 

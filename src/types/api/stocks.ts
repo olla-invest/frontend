@@ -21,7 +21,11 @@ export interface StockRankingApiItem {
   investmentIndicatorsDtl: string;
   theme: string;
   upName: string;
-  rankChange3Days: number[];
+  rrankHistory: {
+    oneDayAgo: number | null;
+    today: number | null;
+    twoDaysAgo: number | null;
+  };
 }
 
 export interface StockRankingApiStatus {
