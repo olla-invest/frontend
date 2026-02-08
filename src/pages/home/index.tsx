@@ -18,9 +18,9 @@ const Home: React.FC = () => {
     <div className="h-[calc(100vh-120px)]">
       <div className="pt-2 pb-14 px-6 h-full overflow-hidden">
         <Tabs defaultValue="liveChart" className="w-full h-full overflow-hidden">
-          <TabsList variant="line" className="justify-start border-b w-full">
+          <TabsList variant="line" className="justify-start border-b w-full p-0 pb-0.5 gap-4">
             {tabs.map((tab) => (
-              <TabsTrigger key={tab.value} value={tab.value} className="grow-0">
+              <TabsTrigger key={tab.value} value={tab.value} className="grow-0 px-0 py-2 text-base">
                 {tab.name}
               </TabsTrigger>
             ))}

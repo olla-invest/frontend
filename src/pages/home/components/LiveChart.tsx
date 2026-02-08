@@ -13,18 +13,18 @@ import {
   type VisibilityState,
 } from "@tanstack/react-table";
 import { Pagination, PaginationContent, PaginationItem, PaginationLink, PaginationPrevious, PaginationNext, PaginationEllipsis } from "@/components/ui/pagination";
-import { ChevronDown, CircleCheckIcon, DownloadIcon } from "lucide-react";
+import { ChevronDown, CircleCheckIcon } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Dialog, DialogContent, DialogTrigger } from "@/components/ui/dialog";
 import { DropdownMenu, DropdownMenuCheckboxItem, DropdownMenuContent, DropdownMenuGroup, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
-import { useExcelDownload } from "@/hooks/useExcelDownload";
 import { TableLoading } from "@/components/TableLoading";
 
 import ChartFilter from "./ChartFilter";
 import type { StockRankingApiResponse, StockRankingApiItem } from "@/types/api/stocks";
 import InvestmentIndicatorGuide from "./InvestmentIndicatorGuideDialog";
+import { format, subDays } from "date-fns";
 
 import { getRealTimeChart, getRealTimeChartStatus } from "@/api/stocks";
 
@@ -33,26 +33,26 @@ export const formatNumber = (value?: number | string) => (value == null ? "-" : 
 const columns: ColumnDef<StockRankingApiItem>[] = [
   {
     accessorKey: "rank",
-    header: "순위",
+    header: () => <div className="text-left w-16">순위</div>,
     cell: ({ row }) => <div>{row.getValue("rank")}</div>,
   },
   {
     accessorKey: "companyName",
-    header: "기업",
-    cell: ({ row }) => <div className="font-semibold">{row.getValue("companyName")}</div>,
+    header: () => <div className="min-w-40">기업</div>,
+    cell: ({ row }) => <div className="font-semibold text-slate-800">{row.getValue("companyName")}</div>,
   },
   {
     accessorKey: "currentPrice",
-    header: "현재가",
+    header: () => <div className="text-right min-w-40">현재가</div>,
     cell: ({ row }) => {
       const price = row.getValue<number>("currentPrice");
       const rate = row.original.investmentIndicators;
 
       return (
-        <div className="flex gap-1 p-2 items-end min-w-40">
+        <div className="flex gap-1 items-end min-w-40 justify-end">
           {/* 현재가 */}
           <div>{formatNumber(price)}</div>
-          <div className={`w-12.5 shrink-0 text-xs ${rate.startsWith("+") ? "text-red-500" : rate.startsWith("-") ? "text-blue-500" : "text-muted-foreground"}`}>{rate}</div>
+          <div className={`w-12.5 shrink-0 text-sm ${rate.startsWith("+") ? "text-rose-500" : rate.startsWith("-") ? "text-blue-500" : "text-muted-foreground"}`}>{rate}</div>
 
           {/* 전일 대비 */}
         </div>
@@ -62,41 +62,44 @@ const columns: ColumnDef<StockRankingApiItem>[] = [
 
   {
     accessorKey: "exchange",
-    header: "거래소",
-    cell: ({ row }) => <div>{row.getValue("exchange")}</div>,
+    header: () => <div className="text-right min-w-32">거래소</div>,
+    cell: ({ row }) => <div className="text-right">{row.getValue("exchange")}</div>,
   },
   {
     accessorKey: "relativeStrengthScore",
-    header: "시장대비강도 점수",
-    cell: ({ row }) => <div>{row.getValue("relativeStrengthScore")}</div>,
+    header: () => <div className="text-right min-w-32">시장대비강도 점수</div>,
+    cell: ({ row }) => <div className="text-right">{row.getValue("relativeStrengthScore")}</div>,
   },
   {
     accessorKey: "isHighPrice",
-    header: "신고가 여부",
-    cell: ({ row }) =>
-      row.getValue("isHighPrice") ? (
-        <Badge variant="outline">
-          <CircleCheckIcon className="text-red-400" />
-          신고가
-        </Badge>
-      ) : (
-        "-"
-      ),
+    header: () => <div className="text-right min-w-32">신고가 여부</div>,
+    cell: ({ row }) => (
+      <div className="text-right">
+        {row.getValue("isHighPrice") ? (
+          <Badge variant="outline">
+            <CircleCheckIcon className="text-red-400" />
+            신고가
+          </Badge>
+        ) : (
+          "-"
+        )}
+      </div>
+    ),
   },
   {
     id: "investmentIndicatorsDtl",
-    header: "투자 중요지표",
-    cell: ({ row }) => <div>{row.getValue("investmentIndicatorsDtl")}</div>,
+    header: () => <div className="text-right min-w-32">투자 중요지표</div>,
+    cell: ({ row }) => <div className="text-right">{row.getValue("investmentIndicatorsDtl")}</div>,
   },
   {
     accessorKey: "theme",
-    header: "테마",
-    cell: ({ row }) => <div>{row.getValue("theme")}</div>,
+    header: () => <div className="text-right min-w-32">테마</div>,
+    cell: ({ row }) => <div className="text-right">{row.getValue("theme")}</div>,
   },
   {
     accessorKey: "rankHistory",
     header: () => (
-      <div className="text-center">
+      <div className="text-center min-w-40">
         <div className="text-xs">최근 3일 순위변동</div>
         <div className="flex">
           <span className="flex-1">D-1</span>
@@ -123,8 +126,14 @@ const columns: ColumnDef<StockRankingApiItem>[] = [
   },
 ];
 
+export interface RSFilterValue {
+  from: string; // yyyy-MM-dd
+  to: string; // yyyy-MM-dd
+  ratio: number;
+}
+
 export interface ChartFilterState {
-  rs: string;
+  rs: RSFilterValue[];
   market: string;
   isHighPrice: ({ value: string; name: string } | null)[];
   theme: ({ value: string; name: string } | null)[];
@@ -140,11 +149,17 @@ export function LiveChart() {
 
   //페이지 네이션
   const [page, setPage] = useState(1); // 1-based
-  const [pageSize, setPageSize] = useState(50);
+  const [pageSize, setPageSize] = useState(10);
 
   //필터
   const [filter, setFilter] = useState<ChartFilterState>({
-    rs: "",
+    rs: [
+      {
+        from: format(subDays(new Date(), 63), "yyyy-MM-dd"),
+        to: format(new Date(), "yyyy-MM-dd"),
+        ratio: 100,
+      },
+    ],
     market: "0",
     isHighPrice: [],
     theme: [],
@@ -173,6 +188,8 @@ export function LiveChart() {
         const statusRes = await getRealTimeChartStatus();
         if (statusRes.data.initialized) {
           setTableData(firstRes.data);
+          setUpdateTime(format(new Date(firstRes.data.meta.lastUpdatedAt), "yyyy-MM-dd HH:mm:ss"));
+          setDataDate(firstRes.data.meta.dataDate);
           setLoading(false);
           return;
         }
@@ -192,7 +209,7 @@ export function LiveChart() {
               const res = await getRealTimeChart({ page, pageSize });
               if (!cancelled) {
                 setTableData(res.data);
-                setUpdateTime(res.data.meta.lastUpdatedAt);
+                setUpdateTime(format(new Date(res.data.meta.lastUpdatedAt), "yyyy-MM-dd HH:mm:ss"));
                 setDataDate(res.data.meta.dataDate);
                 setLoading(false);
               }
@@ -247,10 +264,6 @@ export function LiveChart() {
     getFilteredRowModel: getFilteredRowModel(),
   });
 
-  const { downloadAll } = useExcelDownload(table, {
-    fileName: "실시간_주식_랭킹.csv",
-  });
-
   return (
     <div className="w-full flex flex-col h-full">
       <ChartFilter filter={filter} setFilter={setFilter} />
@@ -277,10 +290,6 @@ export function LiveChart() {
               <InvestmentIndicatorGuide />
             </DialogContent>
           </Dialog>
-          <Button variant="outline" size="sm" onClick={downloadAll}>
-            <DownloadIcon />
-            엑셀 다운로드
-          </Button>
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
               <Button variant="outline" size="sm">
@@ -326,7 +335,7 @@ export function LiveChart() {
               <TableLoading colSpan={columns.length} />
             ) : table.getRowModel().rows.length ? (
               table.getRowModel().rows.map((row) => (
-                <TableRow key={row.id}>
+                <TableRow key={row.id} className="h-12.25">
                   {row.getVisibleCells().map((cell) => (
                     <TableCell key={cell.id}>{flexRender(cell.column.columnDef.cell, cell.getContext())}</TableCell>
                   ))}

@@ -5,7 +5,12 @@ import { ButtonGroup, ButtonGroupText } from "@/components/ui/button-group";
 import { Input } from "@/components/ui/input";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuGroup, DropdownMenuLabel, DropdownMenuCheckboxItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
 import { ChevronDown } from "lucide-react";
+import RSSetting from "../components/RSSettingDropdownContent";
 import type { ChartFilterState } from "@/pages/home/components/LiveChart";
+import type { RSPeriod } from "@/pages/home/components/RSSettingDropdownContent";
+import { v4 as uuid } from "uuid";
+import { format, subDays } from "date-fns";
+import type { DateRange } from "react-day-picker";
 
 interface ChartFilterProps {
   filter: ChartFilterState;
@@ -44,6 +49,21 @@ export default function ChartFilter(props: ChartFilterProps) {
   const filterValue = { ...props.filter };
   const filterSetter = props.setFilter;
   const [priceInput, setPriceInput] = useState("1,000,000,000");
+  const [rsOpen, setRsOpen] = useState(false);
+  /** 기본 기간: 오늘 기준 최근 63일 */
+  const DEFAULT_RANGE: DateRange = {
+    from: subDays(new Date(), 62),
+    to: new Date(),
+  };
+  const [rsPeriods, setRsPeriods] = useState<RSPeriod[]>([
+    {
+      id: uuid(),
+      date: DEFAULT_RANGE,
+      ratio: 100,
+      auto: true,
+    },
+  ]);
+
   return (
     <div className="mt-2 pb-4 border-b">
       <form className="flex gap-2">
@@ -62,9 +82,42 @@ export default function ChartFilter(props: ChartFilterProps) {
             <TabsTrigger value="8">코스닥</TabsTrigger>
           </TabsList>
         </Tabs>
-        <Button variant="outline">
-          RS 상세설정 <ChevronDown />
-        </Button>
+        <DropdownMenu open={rsOpen} onOpenChange={setRsOpen}>
+          <DropdownMenuTrigger asChild>
+            <Button variant="outline">
+              RS 상세설정 <ChevronDown />
+            </Button>
+          </DropdownMenuTrigger>
+          <DropdownMenuContent className="w-93.75 p-0" align="start">
+            <DropdownMenuGroup>
+              <DropdownMenuLabel className="border-b p-4">
+                <div className="text-base font-medium mb-2">RS 상세 설정</div>
+                <div className="text-sm text-muted-foreground">시장 대비 강도 기간 및 비중을 설정할 수 있습니다.</div>
+              </DropdownMenuLabel>
+
+              <RSSetting value={rsPeriods} onChange={setRsPeriods} />
+              <div className="p-4 text-right">
+                <Button
+                  onClick={() => {
+                    filterSetter((prev) => ({
+                      ...prev,
+                      rs: rsPeriods
+                        .filter((p) => p.date?.from && p.date?.to)
+                        .map((p) => ({
+                          from: format(p.date!.from!, "yyyy-MM-dd"),
+                          to: format(p.date!.to!, "yyyy-MM-dd"),
+                          ratio: p.ratio,
+                        })),
+                    }));
+                    setRsOpen(false);
+                  }}
+                >
+                  적용
+                </Button>
+              </div>
+            </DropdownMenuGroup>
+          </DropdownMenuContent>
+        </DropdownMenu>
         <DropdownMenu>
           <DropdownMenuTrigger asChild>
             <Button variant="outline">
