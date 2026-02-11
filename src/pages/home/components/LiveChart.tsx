@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useEffect, useState } from "react";
+import { useEffect, useState } from "react";
 import {
   flexRender,
   getCoreRowModel,
@@ -19,14 +19,14 @@ import { Badge } from "@/components/ui/badge";
 import { Dialog, DialogContent, DialogTrigger } from "@/components/ui/dialog";
 import { DropdownMenu, DropdownMenuCheckboxItem, DropdownMenuContent, DropdownMenuGroup, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
-import { TableLoading } from "@/components/TableLoading";
 
 import ChartFilter from "./ChartFilter";
 import type { StockRankingApiResponse, StockRankingApiItem } from "@/types/api/stocks";
 import InvestmentIndicatorGuide from "./InvestmentIndicatorGuideDialog";
 import { format, subDays } from "date-fns";
 
-import { getRealTimeChart, getRealTimeChartStatus } from "@/api/stocks";
+import { getRealTimeChart } from "@/api/stocks";
+import { LoadingUi } from "@/components/LoadingUi";
 
 export const formatNumber = (value?: number | string) => (value == null ? "-" : Number(value).toLocaleString());
 
@@ -135,21 +135,26 @@ export interface RSFilterValue {
 export interface ChartFilterState {
   rs: RSFilterValue[];
   market: string;
-  isHighPrice: ({ value: string; name: string } | null)[];
+  isHighPrice: { value: string; name: string } | null;
   theme: ({ value: string; name: string } | null)[];
   price: number | null;
 }
 
 export function LiveChart() {
   const [tableData, setTableData] = useState<StockRankingApiResponse | null>(null);
-  const [sorting, setSorting] = React.useState<SortingState>([]);
-  const [columnFilters, setColumnFilters] = React.useState<ColumnFiltersState>([]);
-  const [columnVisibility, setColumnVisibility] = React.useState<VisibilityState>({});
-  const [rowSelection, setRowSelection] = React.useState({});
+  const [sorting, setSorting] = useState<SortingState>([]);
+  const [columnFilters, setColumnFilters] = useState<ColumnFiltersState>([]);
+  const [columnVisibility, setColumnVisibility] = useState<VisibilityState>({});
+  const [rowSelection, setRowSelection] = useState({});
 
   //페이지 네이션
   const [page, setPage] = useState(1); // 1-based
   const [pageSize, setPageSize] = useState(10);
+
+  //로딩 상태관리
+  const [loading, setLoading] = useState(true);
+  const [updateTime, setUpdateTime] = useState("- -:-:-");
+  const [dataDate, setDataDate] = useState("- ~ - ");
 
   //필터
   const [filter, setFilter] = useState<ChartFilterState>({
@@ -161,78 +166,59 @@ export function LiveChart() {
       },
     ],
     market: "0",
-    isHighPrice: [],
+    isHighPrice: null,
     theme: [],
     price: 1000000000,
   });
+  const [appliedFilter, setAppliedFilter] = useState<ChartFilterState>(filter);
 
-  //로딩 상태관리
-  const [loading, setLoading] = useState(true);
-  const [updateTime, setUpdateTime] = useState("- -:-:-");
-  const [dataDate, setDataDate] = useState("- ~ - ");
+  const buildFetchParams = (filter: ChartFilterState, targetPage: number) => {
+    const params = {
+      marketType: filter.market === "0" ? "0" : filter.market,
+      page: targetPage,
+      pageSize: pageSize,
+      theme: filter.theme.length > 0 ? filter.theme.map((t) => t?.value).filter((v): v is string => Boolean(v)) : undefined,
+      isHighPrice: filter.isHighPrice !== null ? (filter.isHighPrice.value === "true" ? true : false) : undefined,
+      minTradingValue: filter.price ?? undefined,
+    };
+    const body = filter.rs.map((r) => ({
+      rsStartDate: r.from.replaceAll("-", ""),
+      rsEndDate: r.to.replaceAll("-", ""),
+      strength: r.ratio,
+    }));
 
-  const pollingRef = React.useRef<ReturnType<typeof setInterval> | null>(null);
+    return { params, body };
+  };
+
+  const fetchData = async (targetFilter: ChartFilterState, targetPage: number) => {
+    try {
+      setLoading(true);
+
+      const { params, body } = buildFetchParams(targetFilter, targetPage);
+
+      const res = await getRealTimeChart(params, body);
+
+      setTableData(res.data);
+      setUpdateTime(format(new Date(res.data.meta.lastUpdatedAt), "yyyy-MM-dd HH:mm:ss"));
+      setDataDate(res.data.meta.dataDate);
+    } catch (error) {
+      console.error("❌ API 호출 실패:", error);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleSearch = async () => {
+    const nextFilter = { ...filter };
+
+    setAppliedFilter(nextFilter);
+    setPage(1);
+
+    await fetchData(nextFilter, 1);
+  };
 
   useEffect(() => {
-    let cancelled = false;
-
-    const startPolling = async () => {
-      try {
-        setLoading(true);
-
-        // 1️⃣ 최초 호출
-        const firstRes = await getRealTimeChart({ page, pageSize });
-        if (cancelled) return;
-
-        // 이미 초기화된 상태면 바로 종료
-        const statusRes = await getRealTimeChartStatus();
-        if (statusRes.data.initialized) {
-          setTableData(firstRes.data);
-          setUpdateTime(format(new Date(firstRes.data.meta.lastUpdatedAt), "yyyy-MM-dd HH:mm:ss"));
-          setDataDate(firstRes.data.meta.dataDate);
-          setLoading(false);
-          return;
-        }
-
-        // 2️⃣ polling 시작
-        pollingRef.current = setInterval(async () => {
-          try {
-            const status = await getRealTimeChartStatus();
-            if (cancelled) return;
-
-            if (status.data.initialized) {
-              if (pollingRef.current) {
-                clearInterval(pollingRef.current);
-                pollingRef.current = null;
-              }
-
-              const res = await getRealTimeChart({ page, pageSize });
-              if (!cancelled) {
-                setTableData(res.data);
-                setUpdateTime(format(new Date(res.data.meta.lastUpdatedAt), "yyyy-MM-dd HH:mm:ss"));
-                setDataDate(res.data.meta.dataDate);
-                setLoading(false);
-              }
-            }
-          } catch (e) {
-            console.error("status polling error", e);
-          }
-        }, 3000);
-      } catch (e) {
-        setLoading(false);
-        console.error(e);
-      }
-    };
-
-    startPolling();
-
-    return () => {
-      cancelled = true;
-      if (pollingRef.current) {
-        clearInterval(pollingRef.current);
-        pollingRef.current = null;
-      }
-    };
+    fetchData(appliedFilter, page);
   }, [page, pageSize]);
 
   const table = useReactTable({
@@ -266,7 +252,7 @@ export function LiveChart() {
 
   return (
     <div className="w-full flex flex-col h-full">
-      <ChartFilter filter={filter} setFilter={setFilter} />
+      <ChartFilter filter={filter} setFilter={setFilter} onSearch={handleSearch} />
 
       <div className="flex justify-between items-center py-4">
         <div className="flex gap-2 items-center max-h-8 text-muted-foreground text-xs">
@@ -317,7 +303,7 @@ export function LiveChart() {
         </div>
       </div>
       <div className="flex flex-col gap-4 h-[calc(100%-172px)]">
-        <Table>
+        <Table className="h-full">
           <TableHeader className="sticky top-0 left-0 bg-white shadow-[0_1px_0_0_rgba(0,0,0,0.1)]">
             {table.getHeaderGroups().map((hg) => (
               <TableRow key={hg.id}>
@@ -331,26 +317,29 @@ export function LiveChart() {
           </TableHeader>
 
           <TableBody>
-            {loading ? (
-              <TableLoading colSpan={columns.length} />
-            ) : table.getRowModel().rows.length ? (
-              table.getRowModel().rows.map((row) => (
-                <TableRow key={row.id} className="h-12.25">
-                  {row.getVisibleCells().map((cell) => (
-                    <TableCell key={cell.id}>{flexRender(cell.column.columnDef.cell, cell.getContext())}</TableCell>
-                  ))}
-                </TableRow>
-              ))
-            ) : (
-              <TableRow className="h-75">
-                <TableCell colSpan={columns.length} className="text-center">
-                  데이터가 없습니다.
-                </TableCell>
-              </TableRow>
-            )}
+            {loading
+              ? null
+              : table.getRowModel().rows.length
+                ? table.getRowModel().rows.map((row) => (
+                    <TableRow key={row.id} className="h-12.25">
+                      {row.getVisibleCells().map((cell) => (
+                        <TableCell key={cell.id}>{flexRender(cell.column.columnDef.cell, cell.getContext())}</TableCell>
+                      ))}
+                    </TableRow>
+                  ))
+                : null}
           </TableBody>
         </Table>
-        {tableData?.totalCount && tableData?.totalCount > 0 ? (
+        {loading ? (
+          <LoadingUi message="데이터 조회중 입니다" />
+        ) : table.getRowModel().rows.length ? (
+          ""
+        ) : (
+          <div className="h-full">
+            <div className="text-center">데이터가 없습니다.</div>
+          </div>
+        )}
+        {!loading && tableData?.totalCount && tableData?.totalCount > 0 ? (
           <Pagination className="justify-end">
             <PaginationContent>
               {/* 이전 */}

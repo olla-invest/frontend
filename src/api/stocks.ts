@@ -1,9 +1,17 @@
 import api from "@/lib/api";
 import type { StockRankingApiResponse } from "@/types/api/stocks";
 export interface GetRealTimeChartParams {
-  page: number;
-  pageSize: number;
   marketType?: string;
+  page?: number;
+  pageSize?: number;
+  isHighPrice?: boolean | undefined;
+  theme?: string[];
+  minTradingValue?: number | undefined;
 }
-export const getRealTimeChart = (params: GetRealTimeChartParams) => api.get<StockRankingApiResponse>("/real-time-chart/stocks", { params });
+export type GetRealTimeChartBody = {
+  rsStartDate: string;
+  rsEndDate: string;
+  strength: number;
+}[];
+export const getRealTimeChart = (params: GetRealTimeChartParams, body?: GetRealTimeChartBody) => api.post<StockRankingApiResponse>("/real-time-chart/stocks", body ?? {}, { params });
 export const getRealTimeChartStatus = () => api.get("real-time-chart/status");

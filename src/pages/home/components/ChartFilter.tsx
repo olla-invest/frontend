@@ -3,7 +3,16 @@ import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Button } from "@/components/ui/button";
 import { ButtonGroup, ButtonGroupText } from "@/components/ui/button-group";
 import { Input } from "@/components/ui/input";
-import { DropdownMenu, DropdownMenuContent, DropdownMenuGroup, DropdownMenuLabel, DropdownMenuCheckboxItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuGroup,
+  DropdownMenuRadioGroup,
+  DropdownMenuRadioItem,
+  DropdownMenuLabel,
+  DropdownMenuCheckboxItem,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
 import { ChevronDown } from "lucide-react";
 import RSSetting from "../components/RSSettingDropdownContent";
 import type { ChartFilterState } from "@/pages/home/components/LiveChart";
@@ -15,6 +24,7 @@ import type { DateRange } from "react-day-picker";
 interface ChartFilterProps {
   filter: ChartFilterState;
   setFilter: React.Dispatch<React.SetStateAction<ChartFilterState>>;
+  onSearch: (filter: ChartFilterState) => void;
 }
 
 function getThemeLabel(themes: ({ value: string; name: string } | null)[]) {
@@ -25,12 +35,9 @@ function getThemeLabel(themes: ({ value: string; name: string } | null)[]) {
   return `${validThemes[0].name} 외 ${validThemes.length - 1}개`;
 }
 
-function getHighPriceLabel(values: ({ value: string; name: string } | null)[]) {
-  const valid = values.filter(Boolean) as { value: string; name: string }[];
-
-  if (valid.length === 0) return "전체기간";
-  if (valid.length === 1) return valid[0].name;
-  return `${valid[0].name} 외 ${valid.length - 1}개`;
+function getHighPriceLabel(value: { value: string; name: string } | null) {
+  if (!value) return "전체기간";
+  return value.name;
 }
 
 const formatWithComma = (value: string) => value.replace(/\B(?=(\d{3})+(?!\d))/g, ",");
@@ -127,45 +134,40 @@ export default function ChartFilter(props: ChartFilterProps) {
           </DropdownMenuTrigger>
 
           <DropdownMenuContent className="w-52 p-0" align="start">
-            <DropdownMenuGroup>
-              <DropdownMenuLabel className="border-b p-1">
-                <div className="px-2 py-1.5">신고가 여부</div>
-              </DropdownMenuLabel>
+            <DropdownMenuLabel className="border-b p-1">
+              <div className="px-2 py-1.5">신고가 여부</div>
+            </DropdownMenuLabel>
 
+            <DropdownMenuRadioGroup
+              value={filterValue.isHighPrice?.value ?? "all"}
+              onValueChange={(value) => {
+                if (value === "all") {
+                  filterSetter((prev) => ({
+                    ...prev,
+                    isHighPrice: null,
+                  }));
+                  return;
+                }
+
+                const selected = HIGH_PRICE_OPTIONS.find((o) => o.value === value);
+
+                filterSetter((prev) => ({
+                  ...prev,
+                  isHighPrice: selected ?? null,
+                }));
+              }}
+            >
               <div className="px-2 py-1.5 flex flex-col gap-1">
                 {/* 전체 */}
-                <DropdownMenuCheckboxItem
-                  checked={filterValue.isHighPrice.length === 0}
-                  onCheckedChange={() => {
-                    filterSetter((prev) => ({
-                      ...prev,
-                      isHighPrice: [],
-                    }));
-                  }}
-                >
-                  전체기간
-                </DropdownMenuCheckboxItem>
+                <DropdownMenuRadioItem value="all">전체기간</DropdownMenuRadioItem>
 
-                {HIGH_PRICE_OPTIONS.map((option) => {
-                  const checked = filterValue.isHighPrice.some((v) => v?.value === option.value);
-
-                  return (
-                    <DropdownMenuCheckboxItem
-                      key={option.value}
-                      checked={checked}
-                      onCheckedChange={(isChecked) => {
-                        filterSetter((prev) => ({
-                          ...prev,
-                          isHighPrice: isChecked ? [...prev.isHighPrice, option] : prev.isHighPrice.filter((v) => v?.value !== option.value),
-                        }));
-                      }}
-                    >
-                      {option.name}
-                    </DropdownMenuCheckboxItem>
-                  );
-                })}
+                {HIGH_PRICE_OPTIONS.map((option) => (
+                  <DropdownMenuRadioItem key={option.value} value={option.value}>
+                    {option.name}
+                  </DropdownMenuRadioItem>
+                ))}
               </div>
-            </DropdownMenuGroup>
+            </DropdownMenuRadioGroup>
           </DropdownMenuContent>
         </DropdownMenu>
 
@@ -243,14 +245,7 @@ export default function ChartFilter(props: ChartFilterProps) {
 
           <ButtonGroupText className="bg-white text-foreground">원</ButtonGroupText>
         </ButtonGroup>
-        <Button
-          type="button"
-          variant="outline"
-          className="text-primary"
-          onClick={() => {
-            alert(`필터기능 준비중입니다\n\n${JSON.stringify(filterValue, null, 2)}`);
-          }}
-        >
+        <Button type="button" variant="outline" className="text-primary" onClick={() => props.onSearch(filterValue)}>
           조회
         </Button>
       </form>
