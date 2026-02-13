@@ -25,6 +25,7 @@ interface ChartFilterProps {
   filter: ChartFilterState;
   setFilter: React.Dispatch<React.SetStateAction<ChartFilterState>>;
   onSearch: (filter: ChartFilterState) => void;
+  themeOptions: { value: string; name: string }[];
 }
 
 function getThemeLabel(themes: ({ value: string; name: string } | null)[]) {
@@ -42,11 +43,6 @@ function getHighPriceLabel(value: { value: string; name: string } | null) {
 
 const formatWithComma = (value: string) => value.replace(/\B(?=(\d{3})+(?!\d))/g, ",");
 
-const THEME_OPTIONS = [
-  { value: "semiconductor", name: "반도체" },
-  { value: "bio", name: "제약" },
-  { value: "ai", name: "AI" },
-];
 const HIGH_PRICE_OPTIONS = [
   { value: "true", name: "신고가" },
   { value: "false", name: "신고가 미해당(-표시)" },
@@ -57,6 +53,7 @@ export default function ChartFilter(props: ChartFilterProps) {
   const filterSetter = props.setFilter;
   const [priceInput, setPriceInput] = useState("1,000,000,000");
   const [rsOpen, setRsOpen] = useState(false);
+  const { themeOptions } = props;
   /** 기본 기간: 오늘 기준 최근 63일 */
   const DEFAULT_RANGE: DateRange = {
     from: subDays(new Date(), 62),
@@ -67,7 +64,6 @@ export default function ChartFilter(props: ChartFilterProps) {
       id: uuid(),
       date: DEFAULT_RANGE,
       ratio: 100,
-      auto: true,
     },
   ]);
 
@@ -91,7 +87,7 @@ export default function ChartFilter(props: ChartFilterProps) {
         </Tabs>
         <DropdownMenu open={rsOpen} onOpenChange={setRsOpen}>
           <DropdownMenuTrigger asChild>
-            <Button variant="outline">
+            <Button variant="outline" className={`${filterValue.rs && "border-muted-foreground!"}`}>
               RS 상세설정 <ChevronDown />
             </Button>
           </DropdownMenuTrigger>
@@ -127,8 +123,8 @@ export default function ChartFilter(props: ChartFilterProps) {
         </DropdownMenu>
         <DropdownMenu>
           <DropdownMenuTrigger asChild>
-            <Button variant="outline">
-              신고가 여부
+            <Button variant="outline" className={`${filterValue.isHighPrice && "border-muted-foreground!"}`}>
+              신고가 여부 <div className="size-0.5 bg-muted-foreground rounded-full" />
               <span className="text-primary">{getHighPriceLabel(filterValue.isHighPrice)}</span> <ChevronDown />
             </Button>
           </DropdownMenuTrigger>
@@ -173,8 +169,9 @@ export default function ChartFilter(props: ChartFilterProps) {
 
         <DropdownMenu>
           <DropdownMenuTrigger asChild>
-            <Button variant="outline">
+            <Button variant="outline" className={`${filterValue.theme.length !== 0 && "border-muted-foreground!"}`}>
               테마
+              <div className="size-0.5 bg-muted-foreground rounded-full" />
               <span className="text-primary">{getThemeLabel(filterValue.theme)}</span> <ChevronDown />
             </Button>
           </DropdownMenuTrigger>
@@ -185,7 +182,7 @@ export default function ChartFilter(props: ChartFilterProps) {
                 <div className="px-2 py-1.5">테마</div>
               </DropdownMenuLabel>
 
-              <div className="px-2 py-1.5 flex flex-col gap-1">
+              <div className="px-2 py-1.5 flex flex-col gap-1 max-h-62.5 overflow-y-auto">
                 {/* 전체 */}
                 <DropdownMenuCheckboxItem
                   checked={filterValue.theme.length === 0}
@@ -199,7 +196,7 @@ export default function ChartFilter(props: ChartFilterProps) {
                   전체
                 </DropdownMenuCheckboxItem>
 
-                {THEME_OPTIONS.map((theme) => {
+                {themeOptions?.map((theme) => {
                   const checked = filterValue.theme.some((t) => t?.value === theme.value);
 
                   return (
@@ -233,9 +230,7 @@ export default function ChartFilter(props: ChartFilterProps) {
             onChange={(e) => {
               const raw = e.target.value.replace(/[^0-9]/g, "");
               const formatted = formatWithComma(raw);
-
               setPriceInput(formatted);
-
               filterSetter((prev) => ({
                 ...prev,
                 price: raw === "" ? null : Number(raw),

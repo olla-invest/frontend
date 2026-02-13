@@ -13,5 +13,11 @@ export type GetRealTimeChartBody = {
   rsEndDate: string;
   strength: number;
 }[];
-export const getRealTimeChart = (params: GetRealTimeChartParams, body?: GetRealTimeChartBody) => api.post<StockRankingApiResponse>("/real-time-chart/stocks", body ?? {}, { params });
+export const getRealTimeChart = (params: GetRealTimeChartParams, body?: GetRealTimeChartBody) =>
+  api.post<StockRankingApiResponse>("/real-time-chart/stocks", body ?? null, {
+    params,
+    paramsSerializer: {
+      indexes: null,
+    },
+  });
 export const getRealTimeChartStatus = () => api.get("real-time-chart/status");

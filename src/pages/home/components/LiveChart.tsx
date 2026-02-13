@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useState, useMemo } from "react";
 import {
   flexRender,
   getCoreRowModel,
@@ -23,7 +23,7 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@
 import ChartFilter from "./ChartFilter";
 import type { StockRankingApiResponse, StockRankingApiItem } from "@/types/api/stocks";
 import InvestmentIndicatorGuide from "./InvestmentIndicatorGuideDialog";
-import { format, subDays } from "date-fns";
+import { format } from "date-fns";
 
 import { getRealTimeChart } from "@/api/stocks";
 import { LoadingUi } from "@/components/LoadingUi";
@@ -133,7 +133,7 @@ export interface RSFilterValue {
 }
 
 export interface ChartFilterState {
-  rs: RSFilterValue[];
+  rs: RSFilterValue[] | null;
   market: string;
   isHighPrice: { value: string; name: string } | null;
   theme: ({ value: string; name: string } | null)[];
@@ -158,17 +158,11 @@ export function LiveChart() {
 
   //필터
   const [filter, setFilter] = useState<ChartFilterState>({
-    rs: [
-      {
-        from: format(subDays(new Date(), 63), "yyyy-MM-dd"),
-        to: format(new Date(), "yyyy-MM-dd"),
-        ratio: 100,
-      },
-    ],
+    rs: null,
     market: "0",
     isHighPrice: null,
     theme: [],
-    price: 1000000000,
+    price: null,
   });
   const [appliedFilter, setAppliedFilter] = useState<ChartFilterState>(filter);
 
@@ -181,11 +175,13 @@ export function LiveChart() {
       isHighPrice: filter.isHighPrice !== null ? (filter.isHighPrice.value === "true" ? true : false) : undefined,
       minTradingValue: filter.price ?? undefined,
     };
-    const body = filter.rs.map((r) => ({
-      rsStartDate: r.from.replaceAll("-", ""),
-      rsEndDate: r.to.replaceAll("-", ""),
-      strength: r.ratio,
-    }));
+    const body = filter.rs
+      ? filter.rs.map((r) => ({
+          rsStartDate: r.from.replaceAll("-", ""),
+          rsEndDate: r.to.replaceAll("-", ""),
+          strength: r.ratio,
+        }))
+      : undefined;
 
     return { params, body };
   };
@@ -221,6 +217,17 @@ export function LiveChart() {
     fetchData(appliedFilter, page);
   }, [page, pageSize]);
 
+  const themeOptions = useMemo(() => {
+    if (!tableData?.stocks) return [];
+
+    const uniqueThemes = Array.from(new Set(tableData.stocks.map((stock) => stock.theme).filter((theme): theme is string => Boolean(theme))));
+
+    return uniqueThemes.map((theme) => ({
+      value: theme,
+      name: theme,
+    }));
+  }, [tableData]);
+
   const table = useReactTable({
     data: tableData?.stocks ?? [],
     manualPagination: true,
@@ -252,7 +259,7 @@ export function LiveChart() {
 
   return (
     <div className="w-full flex flex-col h-full">
-      <ChartFilter filter={filter} setFilter={setFilter} onSearch={handleSearch} />
+      <ChartFilter filter={filter} setFilter={setFilter} themeOptions={themeOptions} onSearch={handleSearch} />
 
       <div className="flex justify-between items-center py-4">
         <div className="flex gap-2 items-center max-h-8 text-muted-foreground text-xs">
