@@ -22,6 +22,7 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@
 
 import ChartFilter from "./ChartFilter";
 import type { StockRankingApiResponse, StockRankingApiItem } from "@/types/api/stocks";
+import type { GetRealTimeChartRequest } from "@/api/stocks";
 import InvestmentIndicatorGuide from "./InvestmentIndicatorGuideDialog";
 import { format } from "date-fns";
 
@@ -155,6 +156,7 @@ export function LiveChart() {
   const [loading, setLoading] = useState(true);
   const [updateTime, setUpdateTime] = useState("- -:-:-");
   const [dataDate, setDataDate] = useState("- ~ - ");
+  const [isError, setIsError] = useState(false);
 
   //필터
   const [filter, setFilter] = useState<ChartFilterState>({
@@ -166,38 +168,47 @@ export function LiveChart() {
   });
   const [appliedFilter, setAppliedFilter] = useState<ChartFilterState>(filter);
 
-  const buildFetchParams = (filter: ChartFilterState, targetPage: number) => {
-    const params = {
+  const buildRequest = (filter: ChartFilterState, targetPage: number): GetRealTimeChartRequest => {
+    const themes = filter.theme.map((t) => t?.value).filter((v): v is string => Boolean(v));
+
+    return {
       marketType: filter.market === "0" ? "0" : filter.market,
       page: targetPage,
-      pageSize: pageSize,
-      theme: filter.theme.length > 0 ? filter.theme.map((t) => t?.value).filter((v): v is string => Boolean(v)) : undefined,
-      isHighPrice: filter.isHighPrice !== null ? (filter.isHighPrice.value === "true" ? true : false) : undefined,
-      minTradingValue: filter.price ?? undefined,
-    };
-    const body = filter.rs
-      ? filter.rs.map((r) => ({
-          rsStartDate: r.from.replaceAll("-", ""),
-          rsEndDate: r.to.replaceAll("-", ""),
-          strength: r.ratio,
-        }))
-      : undefined;
+      pageSize,
 
-    return { params, body };
+      filters:
+        filter.isHighPrice !== null || themes.length > 0 || filter.price !== null
+          ? {
+              isHighPrice: filter.isHighPrice !== null ? filter.isHighPrice.value === "true" : undefined,
+              theme: themes.length > 0 ? themes : undefined,
+              minTradingValue: filter.price ?? undefined,
+            }
+          : undefined,
+
+      rsFilters: filter.rs
+        ? filter.rs.map((r) => ({
+            rsStartDate: r.from.replaceAll("-", ""),
+            rsEndDate: r.to.replaceAll("-", ""),
+            strength: r.ratio,
+          }))
+        : undefined,
+    };
   };
 
   const fetchData = async (targetFilter: ChartFilterState, targetPage: number) => {
     try {
       setLoading(true);
 
-      const { params, body } = buildFetchParams(targetFilter, targetPage);
+      const requestBody = buildRequest(targetFilter, targetPage);
 
-      const res = await getRealTimeChart(params, body);
+      const res = await getRealTimeChart(requestBody);
 
       setTableData(res.data);
       setUpdateTime(format(new Date(res.data.meta.lastUpdatedAt), "yyyy-MM-dd HH:mm:ss"));
       setDataDate(res.data.meta.dataDate);
+      setIsError(false);
     } catch (error) {
+      setIsError(true);
       console.error("❌ API 호출 실패:", error);
     } finally {
       setLoading(false);
@@ -342,8 +353,19 @@ export function LiveChart() {
         ) : table.getRowModel().rows.length ? (
           ""
         ) : (
-          <div className="h-full">
-            <div className="text-center">데이터가 없습니다.</div>
+          <div className="h-full flex items-center justify-center">
+            {isError ? (
+              <div className="flex flex-col gap-2 items-center">
+                <span className="text-center text-sm text-muted-foreground">조회중 오류가 발생했습니다</span>
+                <Button onClick={() => fetchData(appliedFilter, page)} className="w-fit">
+                  재조회
+                </Button>
+              </div>
+            ) : (
+              <div className="text-center text-sm text-muted-foreground">
+                <span>데이터가 없습니다.</span>
+              </div>
+            )}
           </div>
         )}
         {!loading && tableData?.totalCount && tableData?.totalCount > 0 ? (
