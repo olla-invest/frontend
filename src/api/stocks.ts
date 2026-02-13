@@ -6,7 +6,7 @@ export interface GetRealTimeChartRequest {
   pageSize: number;
   filters?: {
     isHighPrice?: boolean;
-    theme?: string[];
+    theme?: number[];
     minTradingValue?: number;
   };
   rsFilters?: {

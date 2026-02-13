@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState, useMemo } from "react";
+import { useEffect, useState } from "react";
 import {
   flexRender,
   getCoreRowModel,
@@ -137,7 +137,7 @@ export interface ChartFilterState {
   rs: RSFilterValue[] | null;
   market: string;
   isHighPrice: { value: string; name: string } | null;
-  theme: ({ value: string; name: string } | null)[];
+  theme: ({ code: number; name: string; description: string } | null)[];
   price: number | null;
 }
 
@@ -169,7 +169,7 @@ export function LiveChart() {
   const [appliedFilter, setAppliedFilter] = useState<ChartFilterState>(filter);
 
   const buildRequest = (filter: ChartFilterState, targetPage: number): GetRealTimeChartRequest => {
-    const themes = filter.theme.map((t) => t?.value).filter((v): v is string => Boolean(v));
+    const themes = filter.theme.map((t) => t?.code).filter((v): v is number => Boolean(v));
 
     return {
       marketType: filter.market === "0" ? "0" : filter.market,
@@ -228,17 +228,6 @@ export function LiveChart() {
     fetchData(appliedFilter, page);
   }, [page, pageSize]);
 
-  const themeOptions = useMemo(() => {
-    if (!tableData?.stocks) return [];
-
-    const uniqueThemes = Array.from(new Set(tableData.stocks.map((stock) => stock.theme).filter((theme): theme is string => Boolean(theme))));
-
-    return uniqueThemes.map((theme) => ({
-      value: theme,
-      name: theme,
-    }));
-  }, [tableData]);
-
   const table = useReactTable({
     data: tableData?.stocks ?? [],
     manualPagination: true,
@@ -270,7 +259,7 @@ export function LiveChart() {
 
   return (
     <div className="w-full flex flex-col h-full">
-      <ChartFilter filter={filter} setFilter={setFilter} themeOptions={themeOptions} onSearch={handleSearch} />
+      <ChartFilter filter={filter} setFilter={setFilter} onSearch={handleSearch} />
 
       <div className="flex justify-between items-center py-4">
         <div className="flex gap-2 items-center max-h-8 text-muted-foreground text-xs">
@@ -320,7 +309,7 @@ export function LiveChart() {
           </DropdownMenu>
         </div>
       </div>
-      <div className="flex flex-col gap-4 h-[calc(100%-172px)]">
+      <div className="flex flex-col gap-4 max-h-[calc(100%-172px)] flex-1 justify-between">
         <Table className="h-full">
           <TableHeader className="sticky top-0 left-0 bg-white shadow-[0_1px_0_0_rgba(0,0,0,0.1)]">
             {table.getHeaderGroups().map((hg) => (

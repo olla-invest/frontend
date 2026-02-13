@@ -20,16 +20,16 @@ import type { RSPeriod } from "@/pages/home/components/RSSettingDropdownContent"
 import { v4 as uuid } from "uuid";
 import { format, subDays } from "date-fns";
 import type { DateRange } from "react-day-picker";
+import { THEME_CODES } from "@/constants/theme";
 
 interface ChartFilterProps {
   filter: ChartFilterState;
   setFilter: React.Dispatch<React.SetStateAction<ChartFilterState>>;
   onSearch: (filter: ChartFilterState) => void;
-  themeOptions: { value: string; name: string }[];
 }
 
-function getThemeLabel(themes: ({ value: string; name: string } | null)[]) {
-  const validThemes = themes.filter(Boolean) as { value: string; name: string }[];
+function getThemeLabel(themes: ({ code: number; name: string } | null)[]) {
+  const validThemes = themes.filter(Boolean) as { code: number; name: string }[];
 
   if (validThemes.length === 0) return "전체";
   if (validThemes.length === 1) return validThemes[0].name;
@@ -53,7 +53,6 @@ export default function ChartFilter(props: ChartFilterProps) {
   const filterSetter = props.setFilter;
   const [priceInput, setPriceInput] = useState("1,000,000,000");
   const [rsOpen, setRsOpen] = useState(false);
-  const { themeOptions } = props;
   /** 기본 기간: 오늘 기준 최근 63일 */
   const DEFAULT_RANGE: DateRange = {
     from: subDays(new Date(), 62),
@@ -196,17 +195,17 @@ export default function ChartFilter(props: ChartFilterProps) {
                   전체
                 </DropdownMenuCheckboxItem>
 
-                {themeOptions?.map((theme) => {
-                  const checked = filterValue.theme.some((t) => t?.value === theme.value);
+                {THEME_CODES?.map((theme) => {
+                  const checked = filterValue.theme.some((t) => t?.code === theme.code);
 
                   return (
                     <DropdownMenuCheckboxItem
-                      key={theme.value}
+                      key={theme.code}
                       checked={checked}
                       onCheckedChange={(isChecked) => {
                         filterSetter((prev) => ({
                           ...prev,
-                          theme: isChecked ? [...prev.theme, theme] : prev.theme.filter((t) => t?.value !== theme.value),
+                          theme: isChecked ? [...prev.theme, theme] : prev.theme.filter((t) => t?.code !== theme.code),
                         }));
                       }}
                     >
