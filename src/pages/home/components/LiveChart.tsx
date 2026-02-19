@@ -60,10 +60,10 @@ const columns: ColumnDef<StockRankingApiItem>[] = [
         <div className="flex gap-1 items-end min-w-40 justify-end">
           {/* 현재가 */}
           <div>{formatNumber(price)}</div>
-          {rate ? (
-            <div className={`w-12.5 shrink-0 text-sm text-right ${rate.startsWith("+") ? "text-rose-500" : rate.startsWith("-") ? "text-blue-500" : "text-muted-foreground"}`}>{rate}</div>
-          ) : (
+          {rate === "-" ? (
             <div className="w-12.5 shrink-0 text-sm text-right text-muted-foreground">0%</div>
+          ) : (
+            <div className={`w-12.5 shrink-0 text-sm text-right ${rate.startsWith("+") ? "text-rose-500" : rate.startsWith("-") ? "text-blue-500" : "text-muted-foreground"}`}>{rate}</div>
           )}
           {/* 전일 대비 */}
         </div>
