@@ -80,9 +80,9 @@ export default function ChartFilter(props: ChartFilterProps) {
           }
         >
           <TabsList className="p-0.75">
-            <TabsTrigger value="0">전체</TabsTrigger>
-            <TabsTrigger value="10">코스피</TabsTrigger>
-            <TabsTrigger value="8">코스닥</TabsTrigger>
+            <TabsTrigger value="all">전체</TabsTrigger>
+            <TabsTrigger value="0">코스피</TabsTrigger>
+            <TabsTrigger value="10">코스닥</TabsTrigger>
           </TabsList>
         </Tabs>
         <DropdownMenu open={rsOpen} onOpenChange={setRsOpen}>

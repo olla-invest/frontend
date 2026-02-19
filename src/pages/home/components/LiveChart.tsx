@@ -174,7 +174,7 @@ export function LiveChart() {
   //필터
   const [filter, setFilter] = useState<ChartFilterState>({
     rs: null,
-    market: "0",
+    market: "all",
     isHighPrice: null,
     theme: [],
     price: null,
@@ -323,20 +323,12 @@ export function LiveChart() {
         </div>
       </div>
       <div className="flex flex-col gap-4 max-h-[calc(100%-172px)] flex-1 justify-between overflow-x-auto">
-        <Table className="h-full table-fixed min-w-max">
+        <Table className="h-full min-w-max">
           <TableHeader className="sticky top-0 left-0 bg-white shadow-[0_1px_0_0_rgba(0,0,0,0.1)] shrink-0">
             {table.getHeaderGroups().map((hg) => (
               <TableRow key={hg.id}>
                 {hg.headers.map((header) => (
-                  <TableHead
-                    key={header.id}
-                    className="text-muted-foreground!"
-                    style={{
-                      width: header.getSize(),
-                      minWidth: header.getSize(),
-                      maxWidth: header.getSize(),
-                    }}
-                  >
+                  <TableHead key={header.id} className={`text-muted-foreground! ${header.id === "rankHistory" ? "w-40" : null}`}>
                     {flexRender(header.column.columnDef.header, header.getContext())}
                   </TableHead>
                 ))}
@@ -351,16 +343,7 @@ export function LiveChart() {
                 ? table.getRowModel().rows.map((row) => (
                     <TableRow key={row.id} className="h-12.25">
                       {row.getVisibleCells().map((cell) => (
-                        <TableCell
-                          key={cell.id}
-                          style={{
-                            width: cell.column.getSize(),
-                            minWidth: cell.column.getSize(),
-                            maxWidth: cell.column.getSize(),
-                          }}
-                        >
-                          {flexRender(cell.column.columnDef.cell, cell.getContext())}
-                        </TableCell>
+                        <TableCell key={cell.id}>{flexRender(cell.column.columnDef.cell, cell.getContext())}</TableCell>
                       ))}
                     </TableRow>
                   ))
