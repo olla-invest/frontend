@@ -7,7 +7,7 @@ export default function MainLayout({ children }: { children: React.ReactNode }) 
   return (
     <SidebarProvider>
       <MainSidebar />
-      <SidebarInset>
+      <SidebarInset className="max-w-468 my-0 mx-auto">
         <Header />
         {children}
         <Footer />

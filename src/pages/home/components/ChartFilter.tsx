@@ -52,6 +52,7 @@ export default function ChartFilter(props: ChartFilterProps) {
   const filterValue = { ...props.filter };
   const filterSetter = props.setFilter;
   const [priceInput, setPriceInput] = useState("1,000,000,000");
+  const [priceChange, setPriceChange] = useState(false);
   const [rsOpen, setRsOpen] = useState(false);
   /** 기본 기간: 오늘 기준 최근 63일 */
   const DEFAULT_RANGE: DateRange = {
@@ -221,12 +222,13 @@ export default function ChartFilter(props: ChartFilterProps) {
         <ButtonGroup>
           <ButtonGroupText className="bg-white text-foreground">거래대금</ButtonGroupText>
           <Input
-            className="text-muted-foreground text-right"
+            className={`${priceChange ? "text-foreground" : "text-muted-foreground"} text-right`}
             placeholder="금액을 입력해 주세요"
             inputMode="numeric"
             pattern="[0-9]*"
             value={priceInput}
             onChange={(e) => {
+              setPriceChange(true);
               const raw = e.target.value.replace(/[^0-9]/g, "");
               const formatted = formatWithComma(raw);
               setPriceInput(formatted);

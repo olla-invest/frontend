@@ -40,7 +40,14 @@ const columns: ColumnDef<StockRankingApiItem>[] = [
   {
     accessorKey: "companyName",
     header: () => <div className="min-w-40">기업</div>,
-    cell: ({ row }) => <div className="font-semibold text-slate-800">{row.getValue("companyName")}</div>,
+    cell: ({ row }) => {
+      return (
+        <div className="flex gap-2 items-center">
+          <div className="size-8 bg-[#D9D9D9] rounded-full"></div>
+          <span className="font-semibold text-slate-800">{row.getValue("companyName")}</span>
+        </div>
+      );
+    },
   },
   {
     accessorKey: "currentPrice",
@@ -53,8 +60,11 @@ const columns: ColumnDef<StockRankingApiItem>[] = [
         <div className="flex gap-1 items-end min-w-40 justify-end">
           {/* 현재가 */}
           <div>{formatNumber(price)}</div>
-          <div className={`w-12.5 shrink-0 text-sm ${rate.startsWith("+") ? "text-rose-500" : rate.startsWith("-") ? "text-blue-500" : "text-muted-foreground"}`}>{rate}</div>
-
+          {rate ? (
+            <div className={`w-12.5 shrink-0 text-sm text-right ${rate.startsWith("+") ? "text-rose-500" : rate.startsWith("-") ? "text-blue-500" : "text-muted-foreground"}`}>{rate}</div>
+          ) : (
+            <div className="w-12.5 shrink-0 text-sm text-right text-muted-foreground">0%</div>
+          )}
           {/* 전일 대비 */}
         </div>
       );
@@ -99,8 +109,11 @@ const columns: ColumnDef<StockRankingApiItem>[] = [
   },
   {
     accessorKey: "rankHistory",
+    size: 160,
+    minSize: 160,
+    maxSize: 160,
     header: () => (
-      <div className="text-center min-w-40">
+      <div className="text-center">
         <div className="text-xs">최근 3일 순위변동</div>
         <div className="flex">
           <span className="flex-1">D-1</span>
@@ -309,13 +322,21 @@ export function LiveChart() {
           </DropdownMenu>
         </div>
       </div>
-      <div className="flex flex-col gap-4 max-h-[calc(100%-172px)] flex-1 justify-between">
-        <Table className="h-full">
-          <TableHeader className="sticky top-0 left-0 bg-white shadow-[0_1px_0_0_rgba(0,0,0,0.1)]">
+      <div className="flex flex-col gap-4 max-h-[calc(100%-172px)] flex-1 justify-between overflow-x-auto">
+        <Table className="h-full table-fixed min-w-max">
+          <TableHeader className="sticky top-0 left-0 bg-white shadow-[0_1px_0_0_rgba(0,0,0,0.1)] shrink-0">
             {table.getHeaderGroups().map((hg) => (
               <TableRow key={hg.id}>
                 {hg.headers.map((header) => (
-                  <TableHead key={header.id} className="text-muted-foreground!">
+                  <TableHead
+                    key={header.id}
+                    className="text-muted-foreground!"
+                    style={{
+                      width: header.getSize(),
+                      minWidth: header.getSize(),
+                      maxWidth: header.getSize(),
+                    }}
+                  >
                     {flexRender(header.column.columnDef.header, header.getContext())}
                   </TableHead>
                 ))}
@@ -330,7 +351,16 @@ export function LiveChart() {
                 ? table.getRowModel().rows.map((row) => (
                     <TableRow key={row.id} className="h-12.25">
                       {row.getVisibleCells().map((cell) => (
-                        <TableCell key={cell.id}>{flexRender(cell.column.columnDef.cell, cell.getContext())}</TableCell>
+                        <TableCell
+                          key={cell.id}
+                          style={{
+                            width: cell.column.getSize(),
+                            minWidth: cell.column.getSize(),
+                            maxWidth: cell.column.getSize(),
+                          }}
+                        >
+                          {flexRender(cell.column.columnDef.cell, cell.getContext())}
+                        </TableCell>
                       ))}
                     </TableRow>
                   ))
