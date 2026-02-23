@@ -7,12 +7,13 @@ import "./App.css";
 const App: React.FC = () => {
   return (
     <Router>
-      <MainLayout>
-        <Routes>
+      <Routes>
+        {/* Layout Route */}
+        <Route element={<MainLayout />}>
           <Route path="/" element={<Navigate to="/home" replace />} />
           <Route path="/home" element={<Home />} />
-        </Routes>
-      </MainLayout>
+        </Route>
+      </Routes>
     </Router>
   );
 };

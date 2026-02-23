@@ -39,7 +39,7 @@ export function MainSidebar() {
       </SidebarContent>
       <SidebarFooter className="p-2">
         <div className="size-8 p-1">
-          <i className="icon icon-star" />
+          <i className="icon icon-star-four" />
         </div>
       </SidebarFooter>
     </Sidebar>

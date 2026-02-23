@@ -219,7 +219,7 @@ h1 {
   filter: invert(45%) sepia(42%) saturate(4440%) hue-rotate(221deg) brightness(94%) contrast(101%);
 }
 
-.icon-star {
+.icon-star-four {
   width: 24px;
   height: 24px;
   background-image: url("../src/assets/icons/star-four.svg");
@@ -229,4 +229,15 @@ h1 {
   width: 16px;
   height: 16px;
   background-image: url("../src/assets/icons/info.svg");
+}
+
+.icon-star {
+  width: 24px;
+  height: 24px;
+  background-image: url("../src/assets/icons/star.svg");
+}
+.icon-star-fill {
+  width: 24px;
+  height: 24px;
+  background-image: url("../src/assets/icons/star-fill.svg");
 }

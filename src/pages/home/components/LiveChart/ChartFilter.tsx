@@ -14,9 +14,9 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { ChevronDown } from "lucide-react";
-import RSSetting from "../components/RSSettingDropdownContent";
+import RSSetting from "./RSSettingDropdownContent";
 import type { ChartFilterState } from "@/pages/home/components/LiveChart";
-import type { RSPeriod } from "@/pages/home/components/RSSettingDropdownContent";
+import type { RSPeriod } from "@/pages/home/components/LiveChart/RSSettingDropdownContent";
 import { v4 as uuid } from "uuid";
 import { format, subDays } from "date-fns";
 import type { DateRange } from "react-day-picker";
