@@ -16,7 +16,8 @@ export interface RSPeriod {
 
 interface RSSettingProps {
   value: RSPeriod[];
-  onChange: React.Dispatch<React.SetStateAction<RSPeriod[]>>;
+  onChange: (value: RSPeriod[]) => void;
+  isOnModal?: boolean;
 }
 
 /** 항상 합계 100 유지 */
@@ -41,9 +42,10 @@ function normalize(periods: RSPeriod[]): RSPeriod[] {
   });
 }
 
-export default function RSSetting({ value, onChange }: RSSettingProps) {
+export default function RSSetting({ value, onChange, isOnModal }: RSSettingProps) {
   const updatePeriods = (updater: (prev: RSPeriod[]) => RSPeriod[]) => {
-    onChange((prev) => normalize(updater(prev)));
+    const next = normalize(updater(value));
+    onChange(next);
   };
 
   const updateRatio = (id: string, ratio: number) => {
@@ -108,7 +110,7 @@ export default function RSSetting({ value, onChange }: RSSettingProps) {
                   </Button>
                 </PopoverTrigger>
 
-                <PopoverContent className="w-auto p-0" align="start">
+                <PopoverContent className={`w-auto p-0 ${isOnModal ? "z-1001" : null}`} align="start">
                   <Calendar mode="range" selected={period.date} disabled={{ after: new Date() }} onSelect={(date) => updateDate(period.id, date)} numberOfMonths={2} />
                 </PopoverContent>
               </Popover>
