@@ -1,6 +1,9 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useState, useCallback, useRef } from "react";
+import { useChartSocket } from "@/hooks/useChartSocket";
+import { useLiveStore } from "@/store/liveChartStore";
+
 import {
   flexRender,
   getCoreRowModel,
@@ -12,7 +15,9 @@ import {
   type SortingState,
   type VisibilityState,
 } from "@tanstack/react-table";
+
 import { Pagination, PaginationContent, PaginationItem, PaginationLink, PaginationPrevious, PaginationNext, PaginationEllipsis } from "@/components/ui/pagination";
+
 import { ChevronDown, CircleCheckIcon } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -32,6 +37,82 @@ import LiveChartDetail from "./LiveChart/LiveChartDetail";
 
 export const formatNumber = (value?: number | string) => (value == null ? "-" : Number(value).toLocaleString());
 
+/* =========================
+  컬럼 정의
+========================= */
+export interface RSFilterValue {
+  from: string; // yyyy-MM-dd
+  to: string; // yyyy-MM-dd
+  ratio: number;
+}
+
+export interface ChartFilterState {
+  rs: RSFilterValue[] | null;
+  market: string;
+  isHighPrice: { value: string; name: string } | null;
+  theme: ({ code: number; name: string; description: string } | null)[];
+  price: number | null;
+}
+interface LivePriceCellProps {
+  stockCode: string;
+  basePrice: number;
+  baseRate: string;
+}
+
+function LivePriceCell({ stockCode, basePrice, baseRate }: LivePriceCellProps) {
+  const livePrice = useLiveStore((state) => state.prices[stockCode]);
+
+  const displayPrice = livePrice?.price ?? basePrice;
+  const rate = livePrice?.changeRate ?? baseRate;
+
+  const prevPriceRef = useRef<number | null>(null);
+  const timeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+
+  const [highlight, setHighlight] = useState<"up" | "down" | null>(null);
+
+  useEffect(() => {
+    if (prevPriceRef.current === null) {
+      prevPriceRef.current = displayPrice;
+      return;
+    }
+
+    if (displayPrice === prevPriceRef.current) return;
+
+    const direction = displayPrice > prevPriceRef.current ? "up" : "down";
+
+    prevPriceRef.current = displayPrice;
+
+    requestAnimationFrame(() => {
+      setHighlight(direction);
+    });
+
+    //이전 타이머 제거
+    if (timeoutRef.current) {
+      clearTimeout(timeoutRef.current);
+    }
+
+    timeoutRef.current = setTimeout(() => {
+      setHighlight(null);
+    }, 300);
+
+    return () => {
+      if (timeoutRef.current) clearTimeout(timeoutRef.current);
+    };
+  }, [displayPrice]);
+
+  return (
+    <div
+      className={`flex gap-1 items-end min-w-40 justify-end
+      transition-colors duration-300
+      ${highlight === "up" ? "bg-rose-100" : highlight === "down" ? "bg-blue-100" : ""}`}
+    >
+      <div>{formatNumber(displayPrice)}</div>
+
+      <div className={`w-14 shrink-0 text-sm text-right ${rate?.startsWith("+") ? "text-rose-500" : rate?.startsWith("-") ? "text-blue-500" : "text-muted-foreground"}`}>{rate}</div>
+    </div>
+  );
+}
+
 const columns: ColumnDef<StockRankingApiItem>[] = [
   {
     accessorKey: "rank",
@@ -41,37 +122,18 @@ const columns: ColumnDef<StockRankingApiItem>[] = [
   {
     accessorKey: "companyName",
     header: () => <div className="min-w-40">기업</div>,
-    cell: ({ row }) => {
-      return (
-        <div className="flex gap-2 items-center">
-          <div className="size-8 bg-[#D9D9D9] rounded-full"></div>
-          <span className="font-semibold text-slate-800">{row.getValue("companyName")}</span>
-        </div>
-      );
-    },
+    cell: ({ row }) => (
+      <div className="flex gap-2 items-center">
+        <div className="size-8 bg-[#D9D9D9] rounded-full" />
+        <span className="font-semibold text-slate-800">{row.getValue("companyName")}</span>
+      </div>
+    ),
   },
   {
     accessorKey: "currentPrice",
     header: () => <div className="text-right min-w-40">현재가</div>,
-    cell: ({ row }) => {
-      const price = row.getValue<number>("currentPrice");
-      const rate = row.original.investmentIndicators;
-
-      return (
-        <div className="flex gap-1 items-end min-w-40 justify-end">
-          {/* 현재가 */}
-          <div>{formatNumber(price)}</div>
-          {rate === "-" ? (
-            <div className="w-12.5 shrink-0 text-sm text-right text-muted-foreground">0%</div>
-          ) : (
-            <div className={`w-14 shrink-0 text-sm text-right ${rate.startsWith("+") ? "text-rose-500" : rate.startsWith("-") ? "text-blue-500" : "text-muted-foreground"}`}>{rate}</div>
-          )}
-          {/* 전일 대비 */}
-        </div>
-      );
-    },
+    cell: ({ row }) => <LivePriceCell stockCode={row.original.id} basePrice={row.getValue<number>("currentPrice")} baseRate={row.original.investmentIndicators} />,
   },
-
   {
     accessorKey: "exchange",
     header: () => <div className="text-right min-w-32">거래소</div>,
@@ -140,20 +202,6 @@ const columns: ColumnDef<StockRankingApiItem>[] = [
     },
   },
 ];
-
-export interface RSFilterValue {
-  from: string; // yyyy-MM-dd
-  to: string; // yyyy-MM-dd
-  ratio: number;
-}
-
-export interface ChartFilterState {
-  rs: RSFilterValue[] | null;
-  market: string;
-  isHighPrice: { value: string; name: string } | null;
-  theme: ({ code: number; name: string; description: string } | null)[];
-  price: number | null;
-}
 
 export function LiveChart() {
   const [tableData, setTableData] = useState<StockRankingApiResponse | null>(null);
@@ -227,7 +275,7 @@ export function LiveChart() {
       setIsError(false);
     } catch (error) {
       setIsError(true);
-      console.error("❌ API 호출 실패:", error);
+      console.error("API 실패:", error);
     } finally {
       setLoading(false);
     }
@@ -242,9 +290,15 @@ export function LiveChart() {
     await fetchData(nextFilter, 1);
   };
 
+  const refetch = useCallback(() => {
+    fetchData(appliedFilter, page);
+  }, [appliedFilter, page]);
+
+  useChartSocket(refetch);
+
   useEffect(() => {
     fetchData(appliedFilter, page);
-  }, [page, pageSize]);
+  }, [page, pageSize, appliedFilter]);
 
   const table = useReactTable({
     data: tableData?.stocks ?? [],

@@ -13,9 +13,10 @@ interface RSSettingDropdownProps {
   onChange: (periods: RSPeriod[]) => void;
   onApply: (formatted: { from: string; to: string; ratio: number }[]) => void;
   isOnModal?: boolean;
+  popPosition?: "start" | "center" | "end" | undefined;
 }
 
-export default function RSSettingDropdown({ periods, onChange, onApply, isOnModal = false }: RSSettingDropdownProps) {
+export default function RSSettingDropdown({ periods, onChange, onApply, isOnModal = false, popPosition = "start" }: RSSettingDropdownProps) {
   const [open, setOpen] = useState(false);
 
   const handleApply = useCallback(() => {
@@ -40,7 +41,7 @@ export default function RSSettingDropdown({ periods, onChange, onApply, isOnModa
         </Button>
       </DropdownMenuTrigger>
 
-      <DropdownMenuContent className={`w-93.75 p-0 ${isOnModal ? "z-1001" : null}`} align="start">
+      <DropdownMenuContent className={`w-93.75 p-0 ${isOnModal ? "z-1001" : null}`} align={popPosition}>
         <DropdownMenuGroup>
           <DropdownMenuLabel className="border-b p-4">
             <div className="text-base font-medium mb-2">RS 상세 설정</div>

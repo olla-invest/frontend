@@ -47,6 +47,7 @@ export default function DetailMarketStrength() {
           <span className="text-xs text-muted-foreground">RS 기준 : 63일 (100%)</span>
           <RSSettingDropdown
             isOnModal={true}
+            popPosition="end"
             periods={rsPeriods}
             onChange={setRsPeriods}
             onApply={(formatted) =>

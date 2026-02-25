@@ -4,7 +4,10 @@ import Home from "./pages/home";
 import MainLayout from "./layouts/MainLayout";
 import "./App.css";
 
+import { useChartSocket } from "./hooks/useChartSocket";
+
 const App: React.FC = () => {
+  useChartSocket();
   return (
     <Router>
       <Routes>
