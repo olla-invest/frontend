@@ -3,7 +3,7 @@ import { devtools } from "zustand/middleware";
 import type { PriceUpdatedPayload } from "@/soket/socketTypes";
 
 /**
- * 🔥 UI에서 사용할 정규화된 타입
+ * UI에서 사용할 정규화된 타입
  * price는 항상 number
  */
 interface NormalizedPrice {

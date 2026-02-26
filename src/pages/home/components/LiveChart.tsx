@@ -79,7 +79,6 @@ function LivePriceCell({ stockCode, basePrice, baseRate }: LivePriceCellProps) {
     if (displayPrice === prevPriceRef.current) return;
 
     const direction = displayPrice > prevPriceRef.current ? "up" : "down";
-
     prevPriceRef.current = displayPrice;
 
     requestAnimationFrame(() => {
@@ -108,7 +107,7 @@ function LivePriceCell({ stockCode, basePrice, baseRate }: LivePriceCellProps) {
     >
       <div>{formatNumber(displayPrice)}</div>
 
-      <div className={`w-14 shrink-0 text-sm text-right ${rate?.startsWith("+") ? "text-rose-500" : rate?.startsWith("-") ? "text-blue-500" : "text-muted-foreground"}`}>{rate}</div>
+      <div className={`w-14 shrink-0 text-sm text-right ${rate?.startsWith("+") ? "text-rose-500" : rate?.startsWith("-") ? "text-blue-500" : "text-muted-foreground"}`}>{rate}%</div>
     </div>
   );
 }
