@@ -1,5 +1,6 @@
 "use client";
 
+import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Calendar } from "@/components/ui/calendar";
 import { Field } from "@/components/ui/field";
@@ -14,16 +15,10 @@ interface DatePickerWithRangeProps {
     to: Date;
   };
   setPeriod: (range: { from: Date; to: Date }) => void;
-
-  /** 미래 날짜 선택 허용 여부 (기본 false) */
   allowFuture?: boolean;
 }
 
-export function DatePickerWithRange({
-  period,
-  setPeriod,
-  allowFuture = false, // ✅ 기본값 false
-}: DatePickerWithRangeProps) {
+export function DatePickerWithRange({ period, setPeriod, allowFuture = false }: DatePickerWithRangeProps) {
   const today = endOfDay(new Date());
 
   const fallbackRange: DateRange = {
@@ -33,9 +28,23 @@ export function DatePickerWithRange({
 
   const selectedRange: DateRange = period ?? fallbackRange;
 
+  const [draftRange, setDraftRange] = useState<DateRange>(selectedRange);
+
+  const [open, setOpen] = useState(false);
+
+  const handleApply = () => {
+    if (draftRange?.from && draftRange?.to) {
+      setPeriod({
+        from: draftRange.from,
+        to: draftRange.to,
+      });
+      setOpen(false);
+    }
+  };
+
   return (
     <Field className="w-fit">
-      <Popover modal>
+      <Popover open={open} onOpenChange={setOpen} modal>
         <PopoverTrigger asChild>
           <Button variant="outline" className="justify-start px-2 font-normal flex-1 text-sm">
             <CalendarDays className="mr-1 h-4 w-4 text-muted-foreground" />
@@ -50,22 +59,21 @@ export function DatePickerWithRange({
           </Button>
         </PopoverTrigger>
 
-        <PopoverContent className="w-auto p-0 z-1001" align="start">
+        <PopoverContent className="w-auto p-0 z-1001 space-y-3" align="end">
           <Calendar
+            className="p-3 mb-0"
             mode="range"
-            defaultMonth={selectedRange.from}
-            selected={selectedRange}
+            defaultMonth={draftRange?.from}
+            selected={draftRange}
             numberOfMonths={1}
             disabled={allowFuture ? undefined : (date) => isAfter(date, today)}
             onSelect={(range) => {
-              if (range?.from && range?.to) {
-                setPeriod({
-                  from: range.from,
-                  to: range.to,
-                });
-              }
+              setDraftRange(range ?? fallbackRange);
             }}
           />
+          <div className="flex justify-end gap-2 p-3 border-t">
+            <Button onClick={handleApply}>적용</Button>
+          </div>
         </PopoverContent>
       </Popover>
     </Field>

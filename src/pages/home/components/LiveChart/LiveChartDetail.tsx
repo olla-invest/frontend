@@ -62,7 +62,8 @@ export default function LiveChartDetail(props: LiveChartDetailProps) {
           })}
         </div>
       </div>
-      <div className="py-2 px-6 h-[calc(100%-80px)]">
+      {/* 컨텐츠 영역만 스크롤 하고싶을때  h-[calc(100%-80px)]추가*/}
+      <div className="py-2 px-6">
         <Tabs defaultValue="chart" className="h-full">
           <TabsList variant="line" className="justify-start border-b w-full p-0 pb-0.5 gap-4 mb-2">
             {tabs.map((tab) => (
@@ -72,7 +73,7 @@ export default function LiveChartDetail(props: LiveChartDetailProps) {
             ))}
           </TabsList>
           <TabsContent value="chart" className="h-full overflow-y-auto">
-            <DetailChart />
+            <DetailChart stockCode={props.detailInfo} />
           </TabsContent>
           <TabsContent value="marketStrength" className="h-full overflow-y-auto">
             <DetailMarketStrength />

@@ -28,6 +28,7 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@
 import ChartFilter from "./LiveChart/ChartFilter";
 import type { StockRankingApiResponse, StockRankingApiItem } from "@/types/api/stocks";
 import type { GetRealTimeChartRequest } from "@/api/stocks";
+import type { MetricsUpdatedPayload } from "@/soket/socketTypes";
 import InvestmentIndicatorGuide from "./LiveChart/InvestmentIndicatorGuideDialog";
 import { format } from "date-fns";
 
@@ -289,11 +290,25 @@ export function LiveChart() {
     await fetchData(nextFilter, 1);
   };
 
-  const refetch = useCallback(() => {
-    fetchData(appliedFilter, page);
-  }, [appliedFilter, page]);
+  const refetch = useCallback(async () => {
+    if (loading) return; // 중복 방지
+    await fetchData(appliedFilter, page);
+  }, [appliedFilter, page, loading]);
 
-  useChartSocket(refetch);
+  const lastReloadRef = useRef<string | null>(null);
+
+  const handleMetricsUpdated = useCallback(
+    (data: MetricsUpdatedPayload) => {
+      if (data.tradeDate !== dataDate) return;
+      if (lastReloadRef.current === data.tradeDate) return;
+
+      lastReloadRef.current = data.tradeDate;
+      refetch();
+    },
+    [dataDate, refetch],
+  );
+
+  useChartSocket(handleMetricsUpdated);
 
   useEffect(() => {
     fetchData(appliedFilter, page);

@@ -1,12 +1,16 @@
-import { useState } from "react";
+"use client";
+
+import { useEffect, useState } from "react";
 import { Table, TableBody, TableHeader, TableHead, TableRow, TableCell } from "@/components/ui/table";
-import { flexRender, getCoreRowModel, getFilteredRowModel, getSortedRowModel, useReactTable, type ColumnDef } from "@tanstack/react-table";
-import type { StockRankingApiResponse, StockRankingApiItem } from "@/types/api/stocks";
+import { flexRender, getCoreRowModel, getFilteredRowModel, getSortedRowModel, getPaginationRowModel, useReactTable, type ColumnDef } from "@tanstack/react-table";
+import type { TableDetail, TableDetailItem } from "@/types/api/chartDetails";
 import { DatePickerWithRange } from "@/components/DatePickerWithRange";
 import { subDays } from "date-fns";
+import { getChartTableDetailData } from "@/api/ChartDetails";
+import { TablePagination } from "@/components/TablePagination";
 
-export default function DetailChart() {
-  const [tableData] = useState<StockRankingApiResponse | null>(null);
+export default function DetailChart({ stockCode }: { stockCode: string }) {
+  const [tableData, setTableData] = useState<TableDetail | null>(null);
   const [loading] = useState(false);
 
   const [period, setPeriod] = useState({
@@ -14,20 +18,36 @@ export default function DetailChart() {
     to: new Date(),
   });
 
-  //페이지 네이션
-  const [page, setPage] = useState(1); // 1-based
-  const [pageSize, setPageSize] = useState(10);
+  const getDetailTable = async () => {
+    try {
+      const res = await getChartTableDetailData({
+        stockCode,
+        startDate: period.from.toISOString(),
+        endDate: period.to.toISOString(),
+      });
 
-  const columns: ColumnDef<StockRankingApiItem>[] = [
+      if (res) {
+        setTableData(res);
+      }
+    } catch (err) {
+      console.log(err);
+    }
+  };
+
+  useEffect(() => {
+    getDetailTable();
+  }, [period]);
+
+  const columns: ColumnDef<TableDetailItem>[] = [
     {
-      accessorKey: "exchange",
+      accessorKey: "time",
       header: () => <div>일자</div>,
-      cell: ({ row }) => <div className="text-slate-700">{row.getValue("exchange")}</div>,
+      cell: ({ row }) => <div className="text-slate-700">{row.getValue("time")}</div>,
     },
     {
-      accessorKey: "relativeStrengthScore",
+      accessorKey: "close",
       header: () => <div className="text-right">종가</div>,
-      cell: ({ row }) => <div className="text-right font-semibold text-slate-800">{row.getValue("relativeStrengthScore")}</div>,
+      cell: ({ row }) => <div className="text-right font-semibold text-slate-800">{(row.getValue("close") as number)?.toLocaleString()}</div>,
     },
     {
       accessorKey: "isHighPrice",
@@ -35,55 +55,50 @@ export default function DetailChart() {
       cell: ({ row }) => <div className="text-right">{row.getValue("isHighPrice")}</div>,
     },
     {
-      id: "investmentIndicatorsDtl",
+      accessorKey: "volume",
       header: () => <div className="text-right">거래량(주)</div>,
-      cell: ({ row }) => <div className="text-right">{row.getValue("investmentIndicatorsDtl")}</div>,
+      cell: ({ row }) => <div className="text-right">{(row.getValue("volume") as number)?.toLocaleString()}</div>,
     },
     {
-      accessorKey: "theme",
+      accessorKey: "volume",
       header: () => <div className="text-right">거래대금</div>,
-      cell: ({ row }) => <div className="text-right">{row.getValue("theme")}</div>,
+      cell: ({ row }) => <div className="text-right">{(row.getValue("volume") as number)?.toLocaleString()}</div>,
     },
     {
-      accessorKey: "theme",
+      accessorKey: "open",
       header: () => <div className="text-right">시가</div>,
-      cell: ({ row }) => <div className="text-right">{row.getValue("theme")}</div>,
+      cell: ({ row }) => <div className="text-right">{(row.getValue("open") as number)?.toLocaleString()}</div>,
     },
     {
-      accessorKey: "theme",
+      accessorKey: "high",
       header: () => <div className="text-right">고가</div>,
-      cell: ({ row }) => <div className="text-right">{row.getValue("theme")}</div>,
+      cell: ({ row }) => <div className="text-right">{(row.getValue("high") as number)?.toLocaleString()}</div>,
     },
     {
-      accessorKey: "theme",
+      accessorKey: "low",
       header: () => <div className="text-right">저가</div>,
-      cell: ({ row }) => <div className="text-right">{row.getValue("theme")}</div>,
+      cell: ({ row }) => <div className="text-right">{(row.getValue("low") as number)?.toLocaleString()}</div>,
     },
   ];
 
   const table = useReactTable({
-    data: tableData?.stocks ?? [],
-    manualPagination: true,
-    pageCount: tableData?.totalPages ?? -1,
+    data: tableData?.candles ?? [],
     columns,
-    state: {
+    initialState: {
       pagination: {
-        pageIndex: page - 1, // TanStack은 0-based
-        pageSize,
+        pageSize: 10,
       },
-    },
-    onPaginationChange: (updater) => {
-      const next = typeof updater === "function" ? updater({ pageIndex: page - 1, pageSize }) : updater;
-      setPage(next.pageIndex + 1);
-      setPageSize(next.pageSize);
     },
     getCoreRowModel: getCoreRowModel(),
     getSortedRowModel: getSortedRowModel(),
     getFilteredRowModel: getFilteredRowModel(),
+    getPaginationRowModel: getPaginationRowModel(),
   });
+
   return (
     <div className="flex flex-col gap-4">
       <div className="w-full h-[378.59px] rounded-md border">그래프 영역</div>
+
       <div className="py-2">
         <div className="flex justify-between items-center mb-4">
           <span className="text-foreground font-medium">시세 변동 현황</span>
@@ -95,9 +110,7 @@ export default function DetailChart() {
             {table.getHeaderGroups().map((hg) => (
               <TableRow key={hg.id}>
                 {hg.headers.map((header) => (
-                  <TableHead key={header.id} className={`text-muted-foreground!`}>
-                    {flexRender(header.column.columnDef.header, header.getContext())}
-                  </TableHead>
+                  <TableHead key={header.id}>{flexRender(header.column.columnDef.header, header.getContext())}</TableHead>
                 ))}
               </TableRow>
             ))}
@@ -108,9 +121,9 @@ export default function DetailChart() {
               ? null
               : table.getRowModel().rows.length
                 ? table.getRowModel().rows.map((row) => (
-                    <TableRow key={row.id} className="h-12.25">
+                    <TableRow key={row.id} className="h-12">
                       {row.getVisibleCells().map((cell) => (
-                        <TableCell key={cell.id} className="text-slate-700 text-sm">
+                        <TableCell key={cell.id} className="text-sm">
                           {flexRender(cell.column.columnDef.cell, cell.getContext())}
                         </TableCell>
                       ))}
@@ -119,6 +132,8 @@ export default function DetailChart() {
                 : null}
           </TableBody>
         </Table>
+
+        {table.getPageCount() > 1 && <TablePagination table={table} />}
       </div>
     </div>
   );
