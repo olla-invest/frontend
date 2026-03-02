@@ -8,6 +8,7 @@ import { DatePickerWithRange } from "@/components/DatePickerWithRange";
 import { subDays } from "date-fns";
 import { getChartTableDetailData } from "@/api/chartDetails";
 import { TablePagination } from "@/components/TablePagination";
+import DetailChartGraph from "./DetailChartGraph";
 
 export default function DetailChart({ stockCode }: { stockCode: string }) {
   const [tableData, setTableData] = useState<TableDetail | null>(null);
@@ -97,7 +98,9 @@ export default function DetailChart({ stockCode }: { stockCode: string }) {
 
   return (
     <div className="flex flex-col gap-4">
-      <div className="w-full h-[378.59px] rounded-md border">그래프 영역</div>
+      <div className="w-full h-[378.59px] rounded-md border p-2">
+        <DetailChartGraph />
+      </div>
 
       <div className="py-2">
         <div className="flex justify-between items-center mb-4">
