@@ -224,6 +224,11 @@ h1 {
   height: 24px;
   background-image: url("../src/assets/icons/star-four.svg");
 }
+.icon-star-four-color {
+  width: 20px;
+  height: 20px;
+  background-image: url("../src/assets/icons/star-four-color.svg");
+}
 
 .icon-info {
   width: 16px;

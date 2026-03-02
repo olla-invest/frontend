@@ -6,7 +6,7 @@ import { flexRender, getCoreRowModel, getFilteredRowModel, getSortedRowModel, ge
 import type { TableDetail, TableDetailItem } from "@/types/api/chartDetails";
 import { DatePickerWithRange } from "@/components/DatePickerWithRange";
 import { subDays } from "date-fns";
-import { getChartTableDetailData } from "@/api/ChartDetails";
+import { getChartTableDetailData } from "@/api/chartDetails";
 import { TablePagination } from "@/components/TablePagination";
 
 export default function DetailChart({ stockCode }: { stockCode: string }) {

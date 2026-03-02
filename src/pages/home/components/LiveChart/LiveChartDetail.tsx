@@ -3,6 +3,7 @@ import DraggableModal from "@/components/DraggableModal";
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
 import DetailChart from "./DetailChart";
 import DetailMarketStrength from "./DetailMarketStrength";
+import DetailStockInfo from "./DetailStockInfo";
 
 interface LiveChartDetailProps {
   onClose: () => void;
@@ -77,6 +78,9 @@ export default function LiveChartDetail(props: LiveChartDetailProps) {
           </TabsContent>
           <TabsContent value="marketStrength" className="h-full overflow-y-auto">
             <DetailMarketStrength />
+          </TabsContent>
+          <TabsContent value="stockInfo" className="h-full overflow-y-auto">
+            <DetailStockInfo />
           </TabsContent>
         </Tabs>
       </div>
