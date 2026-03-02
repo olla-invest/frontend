@@ -4,6 +4,7 @@ import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
 import DetailChart from "./DetailChart";
 import DetailMarketStrength from "./DetailMarketStrength";
 import DetailStockInfo from "./DetailStockInfo";
+import DetailIssue from "./DetailIssueAnalysis";
 
 interface LiveChartDetailProps {
   onClose: () => void;
@@ -64,23 +65,26 @@ export default function LiveChartDetail(props: LiveChartDetailProps) {
         </div>
       </div>
       {/* 컨텐츠 영역만 스크롤 하고싶을때  h-[calc(100%-80px)]추가*/}
-      <div className="py-2 px-6">
+      <div className="py-2">
         <Tabs defaultValue="chart" className="h-full">
-          <TabsList variant="line" className="justify-start border-b w-full p-0 pb-0.5 gap-4 mb-2">
+          <TabsList variant="line" className="justify-start border-b w-[calc(100%-48px)] p-0 pb-0.5 gap-4 mb-2 mx-6">
             {tabs.map((tab) => (
               <TabsTrigger key={tab.value} value={tab.value} className="grow-0 px-0 py-2 text-base">
                 {tab.name}
               </TabsTrigger>
             ))}
           </TabsList>
-          <TabsContent value="chart" className="h-full overflow-y-auto">
+          <TabsContent value="chart" className="h-full overflow-y-auto px-6">
             <DetailChart stockCode={props.detailInfo} />
           </TabsContent>
-          <TabsContent value="marketStrength" className="h-full overflow-y-auto">
+          <TabsContent value="marketStrength" className="h-full overflow-y-auto px-6">
             <DetailMarketStrength />
           </TabsContent>
-          <TabsContent value="stockInfo" className="h-full overflow-y-auto">
+          <TabsContent value="stockInfo" className="h-full overflow-y-auto px-6">
             <DetailStockInfo />
+          </TabsContent>
+          <TabsContent value="issueAnalysis" className="h-full overflow-y-auto">
+            <DetailIssue />
           </TabsContent>
         </Tabs>
       </div>
