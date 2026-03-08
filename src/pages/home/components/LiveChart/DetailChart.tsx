@@ -115,9 +115,9 @@ export default function DetailChart({ stockCode }: { stockCode: string }) {
       cell: ({ row }) => {
         const value = String(row.getValue("changeRate") ?? "");
         const isNegative = value.startsWith("-") && value.length >= 2;
-        const displayValue = value.length >= 2 && !isNegative ? `+${value}` : value;
+        const displayValue = value === "0.00" ? "0%" : value.length >= 2 && !isNegative ? `+${value}` : value;
 
-        return <div className={`text-right ${value !== "-" ? (isNegative ? "text-blue-500" : "text-rose-500") : ""}`}>{displayValue}</div>;
+        return <div className={`text-right ${value !== "-" && value !== "0.00" ? (isNegative ? "text-blue-500" : "text-rose-500") : ""}`}>{displayValue}</div>;
       },
     },
     {

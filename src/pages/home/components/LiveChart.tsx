@@ -212,7 +212,12 @@ export function LiveChart() {
 
   //상세 정보
   const [detailOpen, setDetailOpen] = useState(false);
-  const [selectRow, setSelectRow] = useState("");
+  const [selectRow, setSelectRow] = useState({
+    id: "",
+    companyName: "",
+    investmentIndicators: "",
+    currentPrice: 0,
+  });
 
   //페이지 네이션
   const [page, setPage] = useState(1); // 1-based
@@ -420,7 +425,12 @@ export function LiveChart() {
                         className="h-12.25"
                         onClick={() => {
                           setDetailOpen(true);
-                          setSelectRow(row.original.id);
+                          setSelectRow({
+                            id: row.original.id,
+                            companyName: row.original.companyName,
+                            investmentIndicators: row.original.investmentIndicators,
+                            currentPrice: row.original.currentPrice,
+                          });
                         }}
                       >
                         {row.getVisibleCells().map((cell) => (

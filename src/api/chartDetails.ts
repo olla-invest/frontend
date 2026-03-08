@@ -55,6 +55,11 @@ const transformGraphResponse = (response: ChartResponse): GraphDetail => {
   };
 };
 
+//종목 상세 - 기본 정보
+export const getStockBasicData = async (stockCode: string) => {
+  return api.get(`/real-time-chart/summary/${stockCode}`);
+};
+
 // 종목 상세 - 테이블
 export const getChartTableDetailData = async ({ stockCode, candleType = "day", startDate, endDate }: GetChartDetailParams): Promise<TableDetail> => {
   const res = await api.get<ChartResponse>(`/real-time-chart/stored/${stockCode}`, {

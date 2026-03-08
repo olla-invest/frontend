@@ -18,6 +18,20 @@ export interface ChartResponse {
   candles: CandleResponse[];
 }
 
+export interface StockBasicDataResponse {
+  changeRate: string;
+  currentPrice: number;
+  dayHigh: number;
+  dayLow: number;
+  prevDayCompare: number;
+  prevDayCompareSign: string;
+  stockCode: string;
+  tradingValue: string;
+  volume: string;
+  week52High: number;
+  week52Low: number;
+}
+
 // 테이블용
 export interface TableDetailItem {
   time: string;
