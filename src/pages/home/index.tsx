@@ -1,6 +1,7 @@
 import React from "react";
 import { LiveChart } from "./components/LiveChart";
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
+import { IssueTheme } from "./components/IssueTheme";
 
 type TabItem = {
   name: string;
@@ -30,11 +31,11 @@ const Home: React.FC = () => {
             <LiveChart />
           </TabsContent>
 
-          <TabsContent value="issueTheme">
-            <p>🔥 이슈 테마: 준비중 입니다</p>
+          <TabsContent value="issueTheme" className="h-full">
+            <IssueTheme />
           </TabsContent>
 
-          <TabsContent value="myWatch">
+          <TabsContent value="myWatch" className="h-full">
             <p>내 관심: 준비중 입니다</p>
           </TabsContent>
         </Tabs>
