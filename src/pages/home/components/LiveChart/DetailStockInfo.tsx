@@ -1,6 +1,32 @@
 import { DateYearSelect } from "@/components/DateYearSelect";
 import { Table, TableHeader, TableHead, TableBody, TableRow, TableCell } from "@/components/ui/table";
-export default function DetailStockInfo() {
+import { getDetailStockInfo } from "@/api/chartDetails";
+import type { StockDetailResponse } from "@/types/api/chartDetails";
+import { useEffect, useState } from "react";
+
+interface Props {
+  stockCode: string;
+}
+
+export default function DetailStockInfo({ stockCode }: Props) {
+  const currentYear = new Date().getFullYear().toString();
+  const [selectYear, setSelectYear] = useState(currentYear);
+  const [detailInfo, setDetailInfo] = useState<StockDetailResponse | null>(null);
+  const [aiInfo] = useState("");
+
+  useEffect(() => {
+    (async () => {
+      try {
+        const res = await getDetailStockInfo(stockCode, selectYear);
+        if (res.status === 200) {
+          setDetailInfo(res.data);
+        }
+      } catch (err) {
+        console.log(err);
+      }
+    })();
+  }, [stockCode, selectYear]);
+
   const sampleBasicInfo1 = [
     { title: "업종", content: "지주회사" },
     { title: "테마", content: "반도체 / ICT 투자" },
@@ -16,18 +42,25 @@ export default function DetailStockInfo() {
       {/* ai */}
       <section className="w-full py-2 flex flex-col gap-4">
         <div className="flex gap-2 items-center">
-          <h3 className="font-semibold text-xl">SK하이닉스</h3>
+          <h3 className="font-semibold text-xl">{detailInfo?.overview.corpName}</h3>
           <div className="flex gap-1 items-center text-muted-foreground text-sm">
-            <span>000660</span>
+            <span>{detailInfo?.stockCode}</span>
             <div className="size-0.5 bg-muted-foreground"></div>
-            <span>KOSPI</span>
+            <span>{detailInfo?.overview.corpClass === "Y" ? "KOSPI" : detailInfo?.overview.corpClass === "K" ? "KOSDAQ" : "KONEX"}</span>
           </div>
         </div>
         <div className="rounded-md p-4 bg-muted flex gap-1">
           <i className="icon icon-star-four-color" />
+          {}
           <div className="flex flex-col gap-1 text-sm">
-            <b className="font-semibold">AI 기업 요약으로 기업정보를 확인해보세요!</b>
-            <p className="text-slate-700 ">동사는 1949년 설립되어 경기도 이천시에 본사를 두고 4개의 생산기지와 3개의 연구개발법인 및 여러 해외 판매법인을 운영하는 글로벌 반도체 기업임.</p>
+            {aiInfo === "" ? (
+              <b className="font-semibold text-muted-foreground">AI 요약을 생성하지 못했습니다. 잠시 후 다시 시도해주세요. </b>
+            ) : (
+              <>
+                <b className="font-semibold">AI 기업 요약으로 기업정보를 확인해보세요!</b>
+                <p className="text-slate-700 ">동사는 1949년 설립되어 경기도 이천시에 본사를 두고 4개의 생산기지와 3개의 연구개발법인 및 여러 해외 판매법인을 운영하는 글로벌 반도체 기업임.</p>
+              </>
+            )}
           </div>
         </div>
       </section>
@@ -63,9 +96,10 @@ export default function DetailStockInfo() {
       <section className="w-full py-2 flex flex-col gap-4">
         <div className="flex justify-between items-center">
           <h3 className="font-semibold text-xl">재무 퀄리티</h3>
-          <DateYearSelect />
+          <DateYearSelect setSelectYear={setSelectYear} selectYear={selectYear} />
         </div>
 
+        {/* 손익 현황 */}
         <div className="flex flex-col gap-1">
           <span>손익 현황</span>
           <Table>
@@ -95,6 +129,116 @@ export default function DetailStockInfo() {
               </TableRow>
               <TableRow className="h-12.25">
                 <TableCell className="text-muted-foreground">당기순이익</TableCell>
+                <TableCell className="text-right">NNNN억</TableCell>
+                <TableCell className="text-right">NNNN억</TableCell>
+                <TableCell className="text-right">NNNN억</TableCell>
+                <TableCell className="text-right">NNNN억</TableCell>
+              </TableRow>
+            </TableBody>
+          </Table>
+        </div>
+
+        {/* 현금흐름 현황 */}
+        <div className="flex flex-col gap-1">
+          <span>현금흐름 현황</span>
+          <Table>
+            <TableHeader>
+              <TableRow>
+                <TableHead className="text-muted-foreground">구분</TableHead>
+                <TableHead className="text-muted-foreground text-right">1Q</TableHead>
+                <TableHead className="text-muted-foreground text-right">2Q</TableHead>
+                <TableHead className="text-muted-foreground text-right">3Q</TableHead>
+                <TableHead className="text-muted-foreground text-right">4Q</TableHead>
+              </TableRow>
+            </TableHeader>
+            <TableBody>
+              <TableRow className="h-12.25">
+                <TableCell className="text-muted-foreground">영업활동현금흐름</TableCell>
+                <TableCell className="text-right">NNNN억</TableCell>
+                <TableCell className="text-right">NNNN억</TableCell>
+                <TableCell className="text-right">NNNN억</TableCell>
+                <TableCell className="text-right">NNNN억</TableCell>
+              </TableRow>
+              <TableRow className="h-12.25">
+                <TableCell className="text-muted-foreground">투자활동현금흐름</TableCell>
+                <TableCell className="text-right">NNNN억</TableCell>
+                <TableCell className="text-right">NNNN억</TableCell>
+                <TableCell className="text-right">NNNN억</TableCell>
+                <TableCell className="text-right">NNNN억</TableCell>
+              </TableRow>
+              <TableRow className="h-12.25">
+                <TableCell className="text-muted-foreground">재무활동현금흐름</TableCell>
+                <TableCell className="text-right">NNNN억</TableCell>
+                <TableCell className="text-right">NNNN억</TableCell>
+                <TableCell className="text-right">NNNN억</TableCell>
+                <TableCell className="text-right">NNNN억</TableCell>
+              </TableRow>
+            </TableBody>
+          </Table>
+        </div>
+
+        {/* 수익성·효율 지표 */}
+        <div className="flex flex-col gap-1">
+          <span>수익성·효율 지표</span>
+          <Table>
+            <TableHeader>
+              <TableRow>
+                <TableHead className="text-muted-foreground">구분</TableHead>
+                <TableHead className="text-muted-foreground text-right">1Q</TableHead>
+                <TableHead className="text-muted-foreground text-right">2Q</TableHead>
+                <TableHead className="text-muted-foreground text-right">3Q</TableHead>
+                <TableHead className="text-muted-foreground text-right">4Q</TableHead>
+              </TableRow>
+            </TableHeader>
+            <TableBody>
+              <TableRow className="h-12.25">
+                <TableCell className="text-muted-foreground">영업이익률</TableCell>
+                <TableCell className="text-right">NN.N%</TableCell>
+                <TableCell className="text-right">NN.N%</TableCell>
+                <TableCell className="text-right">NN.N%</TableCell>
+                <TableCell className="text-right">NN.N%</TableCell>
+              </TableRow>
+              <TableRow className="h-12.25">
+                <TableCell className="text-muted-foreground">ROE</TableCell>
+                <TableCell className="text-right">NN.N%</TableCell>
+                <TableCell className="text-right">NN.N%</TableCell>
+                <TableCell className="text-right">NN.N%</TableCell>
+                <TableCell className="text-right">NN.N%</TableCell>
+              </TableRow>
+              <TableRow className="h-12.25">
+                <TableCell className="text-muted-foreground">ROA</TableCell>
+                <TableCell className="text-right">NN.N%</TableCell>
+                <TableCell className="text-right">NN.N%</TableCell>
+                <TableCell className="text-right">NN.N%</TableCell>
+                <TableCell className="text-right">NN.N%</TableCell>
+              </TableRow>
+            </TableBody>
+          </Table>
+        </div>
+
+        {/* 재무 안정성 지표 */}
+        <div className="flex flex-col gap-1">
+          <span>재무 안정성 지표</span>
+          <Table>
+            <TableHeader>
+              <TableRow>
+                <TableHead className="text-muted-foreground">구분</TableHead>
+                <TableHead className="text-muted-foreground text-right">1Q</TableHead>
+                <TableHead className="text-muted-foreground text-right">2Q</TableHead>
+                <TableHead className="text-muted-foreground text-right">3Q</TableHead>
+                <TableHead className="text-muted-foreground text-right">4Q</TableHead>
+              </TableRow>
+            </TableHeader>
+            <TableBody>
+              <TableRow className="h-12.25">
+                <TableCell className="text-muted-foreground">부채비율</TableCell>
+                <TableCell className="text-right">NNNN억</TableCell>
+                <TableCell className="text-right">NNNN억</TableCell>
+                <TableCell className="text-right">NNNN억</TableCell>
+                <TableCell className="text-right">NNNN억</TableCell>
+              </TableRow>
+              <TableRow className="h-12.25">
+                <TableCell className="text-muted-foreground">유동비율</TableCell>
                 <TableCell className="text-right">NNNN억</TableCell>
                 <TableCell className="text-right">NNNN억</TableCell>
                 <TableCell className="text-right">NNNN억</TableCell>

@@ -1,7 +1,7 @@
 import api from "@/lib/api";
 import type { UTCTimestamp } from "lightweight-charts";
 
-import type { ChartResponse, TableDetail, GraphDetail } from "@/types/api/chartDetails";
+import type { ChartResponse, TableDetail, GraphDetail, MarketStrengthGraph } from "@/types/api/chartDetails";
 
 interface GetChartDetailParams {
   stockCode: string;
@@ -16,6 +16,17 @@ interface ChartGraphParams {
   interval?: string;
   startDate?: string;
   endDate?: string;
+}
+
+interface MarketStrengthGraphParams {
+  stockCode: string;
+  startDate: string;
+  endDate?: string;
+  rsFilters?: {
+    rsStartDate: string;
+    rsEndDate: string;
+    strength: number;
+  }[];
 }
 
 // 테이블 변환
@@ -60,7 +71,7 @@ export const getStockBasicData = async (stockCode: string) => {
   return api.get(`/real-time-chart/summary/${stockCode}`);
 };
 
-// 종목 상세 - 테이블
+// 차트,시세 - 테이블
 export const getChartTableDetailData = async ({ stockCode, candleType = "day", startDate, endDate }: GetChartDetailParams): Promise<TableDetail> => {
   const res = await api.get<ChartResponse>(`/real-time-chart/stored/${stockCode}`, {
     params: {
@@ -73,11 +84,27 @@ export const getChartTableDetailData = async ({ stockCode, candleType = "day", s
   return transformChartResponse(res.data);
 };
 
-// 종목 상세 - 그래프
+// 차트,시세 - 그래프
 export const getChartGraphDetailData = async ({ stockCode, ...params }: ChartGraphParams): Promise<GraphDetail> => {
   const res = await api.get<ChartResponse>(`/real-time-chart/stored/${stockCode}`, {
     params,
   });
 
   return transformGraphResponse(res.data);
+};
+
+//시장 강도 분석 - 그래프
+export const postMarketStrengthGraphData = async ({ stockCode, ...params }: MarketStrengthGraphParams): Promise<MarketStrengthGraph> => {
+  const res = await api.post<MarketStrengthGraph>(`/real-time-chart/detail/rs-history/${stockCode}`, params);
+
+  return res.data;
+};
+
+//종목 정보
+export const getDetailStockInfo = async (stockCode: string, year: string) => {
+  return api.get(`/real-time-chart/detail/stock-info/${stockCode}`, {
+    params: {
+      year: year,
+    },
+  });
 };

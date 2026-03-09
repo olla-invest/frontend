@@ -141,10 +141,10 @@ export default function LiveChartDetail(props: LiveChartDetailProps) {
             <DetailChart stockCode={detailInfo.id} />
           </TabsContent>
           <TabsContent value="marketStrength" className="h-full overflow-y-auto px-6">
-            <DetailMarketStrength />
+            <DetailMarketStrength stockCode={detailInfo.id} />
           </TabsContent>
           <TabsContent value="stockInfo" className="h-full overflow-y-auto px-6">
-            <DetailStockInfo />
+            <DetailStockInfo stockCode={detailInfo.id} />
           </TabsContent>
           <TabsContent value="issueAnalysis" className="h-full overflow-y-auto">
             <DetailIssue />

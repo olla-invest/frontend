@@ -8,7 +8,7 @@ import { ChartContainer, ChartTooltip, ChartTooltipContent } from "@/components/
 
 interface RSChartPoint {
   date: string; // "YYYY-MM-DD"
-  rs: number;
+  rsRaw: number;
 }
 
 interface FilterValue {
