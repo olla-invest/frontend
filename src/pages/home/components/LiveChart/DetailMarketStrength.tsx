@@ -96,8 +96,8 @@ export default function DetailMarketStrength({ stockCode }: Props) {
           <ChartLineLinear
             data={graphData.data}
             filterValue={{
-              start: graphData.startDate,
-              end: graphData.endDate,
+              start: format(DEFAULT_RANGE.from!, "yyyyMMdd"),
+              end: format(DEFAULT_RANGE.to!, "yyyyMMdd"),
             }}
           />
         )}

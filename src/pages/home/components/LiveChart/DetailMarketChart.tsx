@@ -7,7 +7,7 @@ import { ChartContainer, ChartTooltip, ChartTooltipContent } from "@/components/
 /* -------------------- 타입 -------------------- */
 
 interface RSChartPoint {
-  date: string; // "YYYY-MM-DD"
+  date: string; // "YYYYMMDD"
   rsRaw: number;
 }
 
@@ -21,58 +21,34 @@ interface Props {
   filterValue: FilterValue;
 }
 
-/* -------------------- 7등분 Tick 생성 -------------------- */
-
-function get7Ticks(data: RSChartPoint[], filterValue: FilterValue): string[] {
-  if (!data.length) return [];
-
-  const filtered = data.filter((d) => d.date >= filterValue.start && d.date <= filterValue.end).sort((a, b) => new Date(a.date).getTime() - new Date(b.date).getTime());
-
-  if (!filtered.length) return [];
-
-  if (filtered.length <= 7) {
-    return filtered.map((d) => d.date);
-  }
-
-  const ticks: string[] = [];
-  for (let i = 0; i <= 6; i++) {
-    const index = Math.round((i * (filtered.length - 1)) / 6);
-    ticks.push(filtered[index].date);
-  }
-
-  return ticks;
-}
-
 /* -------------------- 차트 -------------------- */
 
 export function ChartLineLinear({ data, filterValue }: Props) {
   // 조회기간 반영 데이터
   const filteredData = data.filter((d) => d.date >= filterValue.start && d.date <= filterValue.end).sort((a, b) => new Date(a.date).getTime() - new Date(b.date).getTime());
 
-  const ticks = get7Ticks(filteredData, filterValue);
-
   return (
     <ChartContainer
       className="h-76.5 w-full"
       config={{
-        rs: {
+        rsRaw: {
           label: "RS",
           color: "var(--chart-1)",
         },
       }}
     >
-      <LineChart data={filteredData} margin={{ top: 10, left: 12, right: 24, bottom: 0 }}>
+      <LineChart data={filteredData} margin={{ top: 10, left: 35, right: 0, bottom: 0 }}>
         <CartesianGrid vertical={false} />
 
-        <XAxis dataKey="date" ticks={ticks} tickLine={false} axisLine={false} tickMargin={8} />
+        <XAxis dataKey="date" interval={Math.floor(data.length / 7)} tickFormatter={(v) => `${v.slice(0, 4)}-${v.slice(4, 6)}-${v.slice(6, 8)}`} tickLine={false} axisLine={false} tickMargin={8} />
         <YAxis orientation="right" tickFormatter={(value: number) => value.toFixed(2)} tickLine={false} axisLine={false} tickMargin={8} />
 
         {/* 기준선 1.0 고정 */}
         <ReferenceLine y={1} stroke="#CBD5E1" />
 
-        <ChartTooltip cursor={false} content={<ChartTooltipContent />} />
+        <ChartTooltip cursor={false} content={<ChartTooltipContent labelFormatter={(v) => `${v.slice(0, 4)}-${v.slice(4, 6)}-${v.slice(6, 8)}`} />} />
 
-        <Line dataKey="rs" type="linear" stroke="var(--color-rs)" strokeWidth={2} dot={false} />
+        <Line dataKey="rsRaw" type="linear" stroke="#4F46E5" strokeWidth={2} dot={false} />
       </LineChart>
     </ChartContainer>
   );
