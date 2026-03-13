@@ -25,15 +25,17 @@ import { Dialog, DialogContent, DialogTrigger } from "@/components/ui/dialog";
 import { DropdownMenu, DropdownMenuCheckboxItem, DropdownMenuContent, DropdownMenuGroup, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 
-import ChartFilter from "./liveChart/ChartFilter";
 import type { StockRankingApiResponse, StockRankingApiItem } from "@/types/api/stocks";
 import type { GetRealTimeChartRequest } from "@/api/stocks";
 import type { MetricsUpdatedPayload } from "@/soket/socketTypes";
-import InvestmentIndicatorGuide from "./liveChart/InvestmentIndicatorGuideDialog";
+
 import { format } from "date-fns";
 
 import { getRealTimeChart } from "@/api/stocks";
 import { LoadingUi } from "@/components/LoadingUi";
+
+import InvestmentIndicatorGuide from "./liveChart/InvestmentIndicatorGuideDialog";
+import ChartFilter from "./liveChart/ChartFilter";
 import LiveChartDetail from "./liveChart/LiveChartDetail";
 
 export const formatNumber = (value?: number | string) => (value == null ? "-" : Number(value).toLocaleString());
