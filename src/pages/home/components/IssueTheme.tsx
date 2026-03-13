@@ -5,6 +5,7 @@ import { Table, TableBody, TableCell, TableRow } from "@/components/ui/table";
 import { DropdownMenu, DropdownMenuCheckboxItem, DropdownMenuContent, DropdownMenuGroup, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
 import { getCoreRowModel, getFilteredRowModel, getSortedRowModel, getPaginationRowModel, useReactTable, flexRender, type ColumnDef } from "@tanstack/react-table";
 import { ChevronDown } from "lucide-react";
+import IssueDetailModal from "./issueTheme/IssueDetailModal";
 
 interface Invoice {
   invoice: boolean;
@@ -81,6 +82,8 @@ export function IssueTheme() {
   const [, setPage] = useState(1);
   const [pageSize, setPageSize] = useState(10);
   const [tableData] = useState();
+  const [detailOpen, setDetailOpen] = useState(false);
+  const [selectIssue, setSelectIssue] = useState<any>(null);
 
   const columns: ColumnDef<Invoice>[] = [
     {
@@ -184,7 +187,14 @@ export function IssueTheme() {
         <Table className="h-full">
           <TableBody className="w-[50%]">
             {table.getRowModel().rows.map((row) => (
-              <TableRow key={row.id} className="h-12.25">
+              <TableRow
+                key={row.id}
+                className="h-12.25"
+                onClick={() => {
+                  setDetailOpen(true);
+                  setSelectIssue(row.original);
+                }}
+              >
                 {row.getVisibleCells().map((cell) => (
                   <TableCell key={cell.id}>{flexRender(cell.column.columnDef.cell, cell.getContext())}</TableCell>
                 ))}
@@ -208,6 +218,7 @@ export function IssueTheme() {
         <p className="text-muted-foreground shrink-0 mt-4">이슈 테마에 포함된 종목은 실시간 차트에서 조회되는 종목에 한해 제공됩니다.</p>
         <TablePagination table={table} />
       </div>
+      {detailOpen && selectIssue && <IssueDetailModal onClose={() => setDetailOpen(false)} selectIssue={selectIssue} />}
     </div>
   );
 }

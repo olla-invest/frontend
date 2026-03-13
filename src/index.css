@@ -246,3 +246,15 @@ h1 {
   height: 24px;
   background-image: url("../src/assets/icons/star-fill.svg");
 }
+
+.icon-arrow-up {
+  width: 8px;
+  height: 8px;
+  background-image: url("../src/assets/icons/arrow-up.svg");
+}
+
+.icon-arrow-down {
+  width: 8px;
+  height: 8px;
+  background-image: url("../src/assets/icons/arrow-down.svg");
+}
