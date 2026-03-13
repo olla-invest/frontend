@@ -3,6 +3,7 @@ import DraggableModal from "@/components/DraggableModal";
 import { useState } from "react";
 interface ModalProps {
   onClose: () => void;
+  //임시
   selectIssue?: any;
 }
 export default function IssueDetailModal({ onClose, selectIssue }: ModalProps) {
