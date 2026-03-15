@@ -1,4 +1,4 @@
-import { Bage } from "@/components/Bage";
+import { Badge } from "@/components/ui/badge";
 import DraggableModal from "@/components/DraggableModal";
 import { useState } from "react";
 interface ModalProps {
@@ -20,10 +20,10 @@ export default function IssueDetailModal({ onClose, selectIssue }: ModalProps) {
             </button>
           </div>
           <div className="py-1 flex gap-1">
-            <Bage content="테마 내 상승종목 증가" />
-            <Bage content="거래대금 급증 종목 증가" />
-            <Bage content="평균 등락률 상승" />
-            <Bage content="상위 종목 급등" />
+            <Badge variant="outline">테마 내 상승종목 증가</Badge>
+            <Badge variant="outline">거래대금 급증 종목 증가</Badge>
+            <Badge variant="outline">평균 등락률 상승</Badge>
+            <Badge variant="outline">상위 종목 급등</Badge>
           </div>
         </div>
         <div className="flex gap-1 items-center">
