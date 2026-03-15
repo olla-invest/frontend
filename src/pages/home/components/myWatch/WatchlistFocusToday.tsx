@@ -43,7 +43,7 @@ export function ThemeFocus() {
 export function StockFocus() {
   return (
     <div className="border-b bg-white px-2 py-3 flex gap-2">
-      <div className="size-16 rounded-full bg-[#d9d9d9] shrink-0"></div>
+      <div className="size-12 rounded-full bg-[#d9d9d9] shrink-0"></div>
       <div className="flex flex-col gap-1">
         <span className="text-slate-800 font-semibold">금융</span>
         <div className="flex gap-1 items-center flex-wrap">
