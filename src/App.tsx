@@ -5,6 +5,9 @@ import MainLayout from "./layouts/MainLayout";
 import "./App.css";
 
 import { useChartSocket } from "./hooks/useChartSocket";
+import Login from "./pages/login";
+import SignUp from "./pages/signUp";
+import SocialSignUp from "./pages/signUp/SocialSignUp";
 
 const App: React.FC = () => {
   useChartSocket();
@@ -16,6 +19,9 @@ const App: React.FC = () => {
           <Route path="/" element={<Navigate to="/home" replace />} />
           <Route path="/home" element={<Home />} />
         </Route>
+        <Route path="/login" element={<Login />} />
+        <Route path="/signup" element={<SignUp />} />
+        <Route path="/social-signup" element={<SocialSignUp />} />
       </Routes>
     </Router>
   );
