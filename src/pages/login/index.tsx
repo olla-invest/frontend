@@ -11,6 +11,8 @@ import LogoImg from "@/assets/images/olla-logo.svg";
 import KakaoImg from "@/assets/images/kakao-login-icon.png";
 import NaverImg from "@/assets/images/naver-login-icon.png";
 import { useNavigate } from "react-router-dom";
+import FindIdModal from "./components/FindIdModal";
+import FindPwModal from "./components/FindPwModal";
 
 const Login: React.FC = () => {
   const navigate = useNavigate();
@@ -63,9 +65,9 @@ const Login: React.FC = () => {
           </button>
           {errorMsg !== "" ? <p className="mt-2 text-[#DC2626] text-center text-xs">{errorMsg}</p> : null}
           <div className="flex gap-2 items-center justify-center mt-4 text-sm text-muted-foreground">
-            <a href="#">ID찾기</a>
+            <FindIdModal />
             <div className="bg-[#E2E8F0] w-px h-3" />
-            <a href="#">비밀번호 찾기</a>
+            <FindPwModal />
             <div className="bg-[#E2E8F0] w-px h-3" />
             <a href="#" onClick={() => navigate("/signup")}>
               회원가입
