@@ -1,129 +1,106 @@
-import { useState } from "react";
-import { TablePagination } from "@/components/TablePagination";
+import { useEffect, useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Table, TableBody, TableCell, TableRow } from "@/components/ui/table";
 import { DropdownMenu, DropdownMenuCheckboxItem, DropdownMenuContent, DropdownMenuGroup, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
-import { getCoreRowModel, getFilteredRowModel, getSortedRowModel, getPaginationRowModel, useReactTable, flexRender, type ColumnDef } from "@tanstack/react-table";
+import { getCoreRowModel, useReactTable, flexRender, type ColumnDef } from "@tanstack/react-table";
 import { ChevronDown } from "lucide-react";
 import IssueDetailModal from "./issueTheme/IssueDetailModal";
+import { IssueThemePagination } from "./issueTheme/IssueThemePagination";
+import { format } from "date-fns";
 
-interface Invoice {
-  invoice: boolean;
-  paymentStatus: string;
-  totalAmount: string;
-  paymentMethod: number[];
+import { getIssueTheme } from "@/api/issueTheme";
+import type { IssueThemeApiResponse, IssueTheme } from "@/types/api/issueTheme";
+
+interface IssueThemeRow {
+  themeCode: number;
+  rank: string;
+  themeName: string;
+  stats: number[];
+  original: IssueTheme;
 }
-
-const invoices: Invoice[] = [
-  {
-    invoice: false,
-    paymentStatus: "1",
-    totalAmount: "테마명",
-    paymentMethod: [34, 28, 2, 4],
-  },
-  {
-    invoice: false,
-    paymentStatus: "1",
-    totalAmount: "테마명",
-    paymentMethod: [34, 28, 2, 4],
-  },
-  {
-    invoice: false,
-    paymentStatus: "1",
-    totalAmount: "테마명",
-    paymentMethod: [34, 28, 2, 4],
-  },
-  {
-    invoice: false,
-    paymentStatus: "1",
-    totalAmount: "테마명",
-    paymentMethod: [34, 28, 2, 4],
-  },
-  {
-    invoice: false,
-    paymentStatus: "1",
-    totalAmount: "테마명",
-    paymentMethod: [34, 28, 2, 4],
-  },
-  {
-    invoice: false,
-    paymentStatus: "1",
-    totalAmount: "테마명",
-    paymentMethod: [34, 28, 2, 4],
-  },
-  {
-    invoice: false,
-    paymentStatus: "1",
-    totalAmount: "테마명",
-    paymentMethod: [34, 28, 2, 4],
-  },
-  {
-    invoice: false,
-    paymentStatus: "1",
-    totalAmount: "온실가스(탄소배출권)/탄소 포집·활용·저장(CCUS)",
-    paymentMethod: [34, 28, 2, 4],
-  },
-  {
-    invoice: false,
-    paymentStatus: "1",
-    totalAmount: "스마트그리드(지능형전력망)",
-    paymentMethod: [34, 28, 2, 4],
-  },
-  {
-    invoice: false,
-    paymentStatus: "100",
-    totalAmount: "컴퓨터와 주변기기",
-    paymentMethod: [34, 28, 2, 4],
-  },
-];
 
 export function IssueTheme() {
   const [bookmarks, setBookmarks] = useState<Record<number, boolean>>({});
-  const [, setPage] = useState(1);
+  const [page, setPage] = useState(1);
   const [pageSize, setPageSize] = useState(10);
-  const [tableData] = useState();
+  const [basicData, setBasicData] = useState<IssueThemeApiResponse>();
+  const [leftRows, setLeftRows] = useState<IssueThemeRow[]>([]);
+  const [rightRows, setRightRows] = useState<IssueThemeRow[]>([]);
   const [detailOpen, setDetailOpen] = useState(false);
-  const [selectIssue, setSelectIssue] = useState<any>(null);
+  const [selectIssue, setSelectIssue] = useState<IssueTheme>();
 
-  const columns: ColumnDef<Invoice>[] = [
+  const getIssueData = async () => {
+    try {
+      const res = await getIssueTheme(pageSize * 2, page);
+
+      const mapped: IssueThemeRow[] = res.themes.map((item) => ({
+        themeCode: item.themeCode,
+        rank: String(item.rank),
+        themeName: item.themeName,
+        stats: [item.totalCount, item.risingCount, item.totalCount - item.risingCount, 0],
+        original: item,
+      }));
+
+      const left = mapped.slice(0, pageSize);
+      const right = mapped.slice(pageSize, pageSize * 2);
+
+      setLeftRows(left);
+      setRightRows(right);
+      setBasicData(res);
+    } catch (err) {
+      console.log(err);
+    }
+  };
+
+  useEffect(() => {
+    getIssueData();
+  }, [page, pageSize]);
+
+  const columns: ColumnDef<IssueThemeRow>[] = [
     {
-      accessorKey: "invoice",
-      header: "Invoice",
+      id: "bookmark",
+      header: "즐겨찾기",
       cell: ({ row }) => {
-        const id = row.index;
-        const isBookmarked = bookmarks[id];
+        const themeCode = row.original.themeCode;
+        const isBookmarked = bookmarks[themeCode];
 
         return (
-          <button
-            onClick={(e) => {
-              e.stopPropagation();
-              setBookmarks((prev) => ({
-                ...prev,
-                [id]: !prev[id],
-              }));
-            }}
-          >
-            <i className={`icon ${isBookmarked ? "icon-star-fill" : "icon-star"}`} />
-          </button>
+          <div className="w-8 flex justify-center">
+            <button
+              onClick={(e) => {
+                e.stopPropagation();
+                setBookmarks((prev) => ({
+                  ...prev,
+                  [themeCode]: !prev[themeCode],
+                }));
+              }}
+            >
+              <i className={`icon ${isBookmarked ? "icon-star-fill" : "icon-star"}`} />
+            </button>
+          </div>
         );
       },
     },
     {
-      accessorKey: "paymentStatus",
-      header: "Status",
-    },
-    {
-      accessorKey: "totalAmount",
-      header: "Amount",
-      cell: ({ row }) => <div className="truncate max-w-[288px] text-slate-800 font-semibold">{row.getValue("totalAmount")}</div>,
-    },
-    {
-      accessorKey: "paymentMethod",
-      header: "Method",
+      accessorKey: "rank",
+      header: "순위",
       cell: ({ row }) => {
-        const value = row.getValue("paymentMethod") as number[];
+        return <div className="w-8">{row.original.rank}</div>;
+      },
+    },
+    {
+      id: "themeName",
+      accessorKey: "themeName",
+      header: "테마명",
+      cell: ({ row }) => <div className="w-full truncate text-slate-800 font-semibold">{row.getValue("themeName")}</div>,
+    },
+    {
+      accessorKey: "stats",
+      header: "현황",
+      cell: ({ row }) => {
+        const value = row.getValue("stats") as number[];
         return (
-          <div className="flex items-center text-sm">
+          <div className="flex items-center text-sm min-w-50">
             {value[0]}개중
             <span className="text-red-500 ml-2">{value[1]}</span>상승
             <span className="text-muted-foreground ml-2">{value[2]}</span>보합
@@ -134,18 +111,16 @@ export function IssueTheme() {
     },
   ];
 
-  const table = useReactTable({
-    data: invoices,
+  const leftTable = useReactTable({
+    data: leftRows,
     columns,
-    initialState: {
-      pagination: {
-        pageSize: 10,
-      },
-    },
     getCoreRowModel: getCoreRowModel(),
-    getSortedRowModel: getSortedRowModel(),
-    getFilteredRowModel: getFilteredRowModel(),
-    getPaginationRowModel: getPaginationRowModel(),
+  });
+
+  const rightTable = useReactTable({
+    data: rightRows,
+    columns,
+    getCoreRowModel: getCoreRowModel(),
   });
 
   return (
@@ -153,15 +128,19 @@ export function IssueTheme() {
       <div className="flex justify-between gpa-4 mb-4">
         <div className="flex gap-2 items-center max-h-8 text-muted-foreground text-xs">
           <div className="bg-muted p-2 rounded-sm flex align-middle gap-1">
-            <span>조회기간:</span>
-            <span>dddd (업데이트)</span>
+            <span>조회기간: --</span>
+            <span>
+              ({basicData?.updatedAt ? format(new Date(basicData.updatedAt), "yyyy-MM-dd HH:mm:ss") : "-"}
+              업데이트)
+            </span>
           </div>
-          <span className="text-sm">전체 {tableData ?? 0}건</span>
+          <span className="text-sm">전체 {basicData?.total ?? 0}건</span>
         </div>
+
         <DropdownMenu>
           <DropdownMenuTrigger asChild>
             <Button variant="outline" size="sm">
-              {table.getState().pagination.pageSize}
+              {pageSize}
               <ChevronDown />
             </Button>
           </DropdownMenuTrigger>
@@ -184,40 +163,58 @@ export function IssueTheme() {
         </DropdownMenu>
       </div>
       <div className="flex overflow-x-auto">
-        <Table className="h-full">
-          <TableBody className="w-[50%]">
-            {table.getRowModel().rows.map((row) => (
-              <TableRow
-                key={row.id}
-                className="h-12.25"
-                onClick={() => {
-                  setDetailOpen(true);
-                  setSelectIssue(row.original);
-                }}
-              >
-                {row.getVisibleCells().map((cell) => (
-                  <TableCell key={cell.id}>{flexRender(cell.column.columnDef.cell, cell.getContext())}</TableCell>
-                ))}
-              </TableRow>
-            ))}
-          </TableBody>
-        </Table>
-        <Table className="h-full">
-          <TableBody className="w-[50%]">
-            {table.getRowModel().rows.map((row) => (
-              <TableRow key={row.id} className="h-12.25">
-                {row.getVisibleCells().map((cell) => (
-                  <TableCell key={cell.id}>{flexRender(cell.column.columnDef.cell, cell.getContext())}</TableCell>
-                ))}
-              </TableRow>
-            ))}
-          </TableBody>
-        </Table>
+        <div className="grid grid-cols-2 h-full w-full">
+          {/* 왼쪽 */}
+          <Table>
+            <TableBody>
+              {leftTable.getRowModel().rows.map((row) => (
+                <TableRow
+                  key={row.id}
+                  className="h-12.25 flex"
+                  onClick={() => {
+                    setDetailOpen(true);
+                    setSelectIssue(row.original.original);
+                  }}
+                >
+                  {row.getVisibleCells().map((cell) => (
+                    <TableCell key={cell.id} className={cell.column.id === "themeName" ? "w-full" : ""}>
+                      {flexRender(cell.column.columnDef.cell, cell.getContext())}
+                    </TableCell>
+                  ))}
+                </TableRow>
+              ))}
+            </TableBody>
+          </Table>
+
+          {/* 오른쪽 */}
+          <Table>
+            <TableBody>
+              {rightTable.getRowModel().rows.map((row) => (
+                <TableRow
+                  key={row.id}
+                  className="h-12.25 flex"
+                  onClick={() => {
+                    setDetailOpen(true);
+                    setSelectIssue(row.original.original);
+                  }}
+                >
+                  {row.getVisibleCells().map((cell) => (
+                    <TableCell key={cell.id} className={cell.column.id === "themeName" ? "w-full" : ""}>
+                      {flexRender(cell.column.columnDef.cell, cell.getContext())}
+                    </TableCell>
+                  ))}
+                </TableRow>
+              ))}
+            </TableBody>
+          </Table>
+        </div>
       </div>
+
       <div className="flex justify-between items-center">
         <p className="text-muted-foreground shrink-0 mt-4">이슈 테마에 포함된 종목은 실시간 차트에서 조회되는 종목에 한해 제공됩니다.</p>
-        <TablePagination table={table} />
+        <IssueThemePagination page={page} total={basicData?.total ?? 0} pageSize={pageSize} onChange={(next) => setPage(next)} />
       </div>
+
       {detailOpen && selectIssue && <IssueDetailModal onClose={() => setDetailOpen(false)} selectIssue={selectIssue} />}
     </div>
   );
