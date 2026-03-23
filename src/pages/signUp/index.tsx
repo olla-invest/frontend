@@ -5,9 +5,38 @@ import { useNavigate } from "react-router-dom";
 import SignUpStep1 from "./components/SignUpStep1";
 import SignUpStep2 from "./components/SignUpStep2";
 import SignUpComplete from "./components/SignUpComplete";
+import type { SignUpParams } from "@/api/auth";
+
+export type ErrorField = "username" | "password" | "email" | "name" | "phone" | "agreeService" | "agreePrivacy";
 
 const SignUp: React.FC = () => {
   const [signUpStep, setSignUpStep] = useState(1);
+  const [userData, setUserData] = useState<SignUpParams>({
+    username: "",
+    password: "",
+    email: "",
+    name: "",
+    phone: "",
+    agreeService: false,
+    agreePrivacy: false,
+    agreeMarketing: false,
+  });
+
+  const [errors, setErrors] = useState<Partial<Record<ErrorField, string>>>({});
+
+  const handleUserData = <K extends keyof SignUpParams>(key: K, value: SignUpParams[K]) => {
+    setUserData((prev) => ({
+      ...prev,
+      [key]: value,
+    }));
+
+    setErrors((prev) => {
+      const newErrors = { ...prev };
+      delete newErrors[key as ErrorField];
+      return newErrors;
+    });
+  };
+
   const navigate = useNavigate();
 
   return (
@@ -26,8 +55,8 @@ const SignUp: React.FC = () => {
           </div>
         )}
 
-        {signUpStep === 1 && <SignUpStep1 setSignUpStep={setSignUpStep} />}
-        {signUpStep === 2 && <SignUpStep2 setSignUpStep={setSignUpStep} />}
+        {signUpStep === 1 && <SignUpStep1 setSignUpStep={setSignUpStep} userData={userData} handleUserData={handleUserData} errors={errors} setErrors={setErrors} />}
+        {signUpStep === 2 && <SignUpStep2 setSignUpStep={setSignUpStep} userData={userData} handleUserData={handleUserData} errors={errors} setErrors={setErrors} />}
         {signUpStep === 3 && <SignUpComplete />}
       </div>
       {/* 로그인 구현 후 삭제 하기 */}
