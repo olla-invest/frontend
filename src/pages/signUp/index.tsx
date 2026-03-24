@@ -59,13 +59,6 @@ const SignUp: React.FC = () => {
         {signUpStep === 2 && <SignUpStep2 setSignUpStep={setSignUpStep} userData={userData} handleUserData={handleUserData} errors={errors} setErrors={setErrors} />}
         {signUpStep === 3 && <SignUpComplete />}
       </div>
-      {/* 로그인 구현 후 삭제 하기 */}
-      <div className="bg-gray-100 rounded-md p-3">
-        <span className="block mb-2 text-xs text-muted-foreground">*임시 버튼(기능 추가 후 삭제 예정)</span>
-        <button className="bg-gray-600 text-white w-full rounded-sm" onClick={() => navigate("/home")}>
-          홈이동
-        </button>
-      </div>
     </div>
   );
 };

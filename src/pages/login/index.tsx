@@ -1,6 +1,6 @@
 import React, { useState } from "react";
 
-import { Field, FieldLabel } from "@/components/ui/field";
+import { Field, FieldDescription, FieldLabel } from "@/components/ui/field";
 import { Input } from "@/components/ui/input";
 import { InputGroup, InputGroupAddon, InputGroupInput } from "@/components/ui/input-group";
 import { EyeOffIcon, EyeIcon } from "lucide-react";
@@ -13,32 +13,122 @@ import NaverImg from "@/assets/images/naver-login-icon.png";
 import { useNavigate } from "react-router-dom";
 import FindIdModal from "./components/FindIdModal";
 import FindPwModal from "./components/FindPwModal";
+import { postLogin, type LoginParams } from "@/api/auth";
+
+import axios from "axios";
+import { toast } from "sonner";
+
+//상태 관리
+import { useAuthStore } from "@/store/useAuthStore";
+
+interface ApiErrorResponse {
+  message: string;
+  error: string;
+  statusCode: number;
+}
 
 const Login: React.FC = () => {
   const navigate = useNavigate();
   const [showPw, setShowPw] = useState(false);
   const [errorMsg, setErrorMsg] = useState("");
+  const [errors, setErrors] = useState<Partial<Record<"username" | "password", string>>>({});
+  const [saveId, setSaveId] = useState(!!localStorage.getItem("saveId"));
+
+  const [loginData, setLoginData] = useState<LoginParams>({
+    username: localStorage.getItem("saveId") || "",
+    password: "",
+  });
+
+  const handleLoginData = <K extends keyof LoginParams>(key: K, value: LoginParams[K]) => {
+    setLoginData((prev) => ({
+      ...prev,
+      [key]: value,
+    }));
+
+    setErrors((prev) => {
+      const newErrors = { ...prev };
+      delete newErrors[key as "username" | "password"];
+      return newErrors;
+    });
+  };
+
+  const login = useAuthStore((state) => state.login);
+
+  const handleLogin = async () => {
+    setErrorMsg("");
+
+    const newErrors: Partial<Record<"username" | "password", string>> = {};
+
+    if (!loginData.username) {
+      newErrors.username = "아이디를 입력해 주세요";
+    }
+    if (!loginData.password) {
+      newErrors.password = "비밀번호를 입력해주세요.";
+    }
+
+    setErrors(newErrors);
+    if (Object.keys(newErrors).length > 0) return;
+
+    try {
+      const res = await postLogin(loginData);
+      if (saveId) {
+        localStorage.setItem("saveId", loginData.username);
+      } else {
+        localStorage.removeItem("saveId");
+      }
+      login({
+        accessToken: res.accessToken,
+        username: res.username,
+      });
+
+      toast.success("로그인에 성공했습니다", { position: "top-center" });
+      navigate("/home");
+    } catch (error) {
+      if (axios.isAxiosError<ApiErrorResponse>(error)) {
+        const message = error.response?.data?.message ?? "로그인 실패";
+        setErrorMsg(message);
+      } else {
+        setErrorMsg("잠시 후 다시 시도해주세요.");
+      }
+    }
+  };
+
   return (
     <div className="w-full max-w-[320px] mx-auto my-0">
       <div className="py-14">
-        <div className="flex justify-center mb-10">
-          <img src={LogoImg} alt="olla" className="w-22 aspect-auto" />
+        <div className="flex justify-center mb-10 cursor-pointer">
+          <img
+            src={LogoImg}
+            alt="olla"
+            className="w-22 aspect-auto"
+            onClick={() => {
+              navigate("/home");
+            }}
+          />
         </div>
         <form className="pb-6">
           <div className="flex flex-col gap-4 mb-6">
-            <Field>
+            <Field className="gap-1">
               <FieldLabel htmlFor="input-id" className="sr-only">
                 id
               </FieldLabel>
-              <Input id="input-id" type="text" placeholder="ID" />
+              <Input id="input-id" type="text" placeholder="ID" value={loginData.username} onChange={(e) => handleLoginData("username", e.target.value)} aria-invalid={!!errors.username} />
+              {errors.username && <FieldDescription className="text-red-500 text-xs">{errors.username}</FieldDescription>}
             </Field>
-            <Field>
+            <Field className="gap-1">
               <FieldLabel htmlFor="input-pw" className="sr-only">
                 비밀번호
               </FieldLabel>
 
               <InputGroup>
-                <InputGroupInput id="input-pw" type={showPw ? "text" : "password"} placeholder="비밀번호" />
+                <InputGroupInput
+                  id="input-pw"
+                  type={showPw ? "text" : "password"}
+                  placeholder="비밀번호"
+                  value={loginData.password}
+                  onChange={(e) => handleLoginData("password", e.target.value)}
+                  aria-invalid={!!errors.password}
+                />
 
                 <InputGroupAddon align="inline-end" className="mr-0!">
                   <button type="button" onClick={() => setShowPw((prev) => !prev)} className="cursor-pointer">
@@ -46,9 +136,10 @@ const Login: React.FC = () => {
                   </button>
                 </InputGroupAddon>
               </InputGroup>
+              {errors.password && <FieldDescription className="text-red-500 text-xs">{errors.password}</FieldDescription>}
             </Field>
             <div className="flex gap-2">
-              <Checkbox id="save-id" />
+              <Checkbox id="save-id" checked={saveId} onCheckedChange={(checked) => setSaveId(!!checked)} />
               <Label htmlFor="save-id" className="text-slate-800 font-normal">
                 ID 저장
               </Label>
@@ -58,7 +149,7 @@ const Login: React.FC = () => {
             type="button"
             className="bg-[#1E1B4B] text-white text-sm w-full h-10 rounded-md"
             onClick={() => {
-              setErrorMsg((prev) => (prev === "" ? "잠시 후 다시 시도해주세요." : ""));
+              handleLogin();
             }}
           >
             로그인
@@ -97,13 +188,6 @@ const Login: React.FC = () => {
             </a>
           </div>
         </div>
-      </div>
-      {/* 로그인 구현 후 삭제 하기 */}
-      <div className="bg-gray-100 rounded-md p-3">
-        <span className="block mb-2 text-xs text-muted-foreground">*임시 버튼(기능 추가 후 삭제 예정)</span>
-        <button className="bg-gray-600 text-white w-full rounded-sm" onClick={() => navigate("/home")}>
-          홈이동
-        </button>
       </div>
     </div>
   );

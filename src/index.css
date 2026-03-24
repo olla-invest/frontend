@@ -258,3 +258,9 @@ h1 {
   height: 8px;
   background-image: url("../src/assets/icons/arrow-down.svg");
 }
+
+.icon-bell {
+  width: 24px;
+  height: 24px;
+  background-image: url("../src/assets/icons/bell.svg");
+}

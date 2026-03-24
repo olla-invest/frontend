@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useEffect } from "react";
 import { BrowserRouter as Router, Routes, Route, Navigate } from "react-router-dom";
 import Home from "./pages/home";
 import MainLayout from "./layouts/MainLayout";
@@ -8,9 +8,13 @@ import { useChartSocket } from "./hooks/useChartSocket";
 import Login from "./pages/login";
 import SignUp from "./pages/signUp";
 import SocialSignUp from "./pages/signUp/SocialSignUp";
+import { initAuth } from "./store/initAuth";
 
 const App: React.FC = () => {
   useChartSocket();
+  useEffect(() => {
+    initAuth();
+  }, []);
   return (
     <Router>
       <Routes>

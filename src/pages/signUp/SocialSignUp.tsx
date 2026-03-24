@@ -4,10 +4,10 @@ import { Input } from "@/components/ui/input";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Label } from "@/components/ui/label";
 import LogoImg from "@/assets/images/olla-logo.svg";
-import { useNavigate } from "react-router-dom";
+// import { useNavigate } from "react-router-dom";
 
 const SocialSignUp: React.FC = () => {
-  const navigate = useNavigate();
+  // const navigate = useNavigate();
   const [agreements, setAgreements] = useState({
     termsOfService: false,
     privacyPolicy: false,
@@ -96,13 +96,6 @@ const SocialSignUp: React.FC = () => {
             가입하기
           </button>
         </form>
-      </div>
-      {/* 로그인 구현 후 삭제 하기 */}
-      <div className="bg-gray-100 rounded-md p-3">
-        <span className="block mb-2 text-xs text-muted-foreground">*임시 버튼(기능 추가 후 삭제 예정)</span>
-        <button className="bg-gray-600 text-white w-full rounded-sm" onClick={() => navigate("/home")}>
-          홈이동
-        </button>
       </div>
     </div>
   );
