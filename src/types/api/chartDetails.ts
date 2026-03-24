@@ -76,6 +76,12 @@ export interface MarketStrengthGraph {
 }
 
 //종목 상세
+export interface QuarterlyValue {
+  q1: number | null;
+  q2: number | null;
+  q3: number | null;
+  q4: number | null;
+}
 export interface StockDetailResponse {
   stockCode: string;
   overview: Overview;
@@ -98,11 +104,12 @@ export interface Overview {
 }
 
 export interface Income {
+  stockCode: string;
   year: string;
-  fsDiv: "CFS" | "OFS"; // 연결 / 개별
-  revenue: FinancialValue;
-  operatingIncome: FinancialValue;
-  netIncome: FinancialValue;
+  fsDiv: "CFS" | "OFS";
+  revenue: QuarterlyValue;
+  operatingIncome: QuarterlyValue;
+  netIncome: QuarterlyValue;
 }
 
 export interface FinancialValue {
@@ -112,15 +119,22 @@ export interface FinancialValue {
 }
 
 export interface CashFlow {
+  stockCode: string;
   year: string;
-  operatingCashFlow: number;
-  investingCashFlow: number;
-  financingCashFlow: number;
+  operatingCashFlow: QuarterlyValue;
+  investingCashFlow: QuarterlyValue;
+  financingCashFlow: QuarterlyValue;
 }
 
-export interface Indicators {
-  year: string;
-  profitability: Record<string, string>;
-  stability: Record<string, string>;
-  activity: Record<string, string>;
+export type Quarter = "q1" | "q2" | "q3" | "q4";
+
+export interface IndicatorDetail {
+  profitability: Record<string, number | null>;
+  stability: Record<string, number | null>;
+  activity: Record<string, number | null>;
 }
+
+export type Indicators = {
+  stockCode: string;
+  year: string;
+} & Record<Quarter, IndicatorDetail>;
