@@ -5,6 +5,7 @@ import { Label } from "@/components/ui/label";
 import { postSignUp, type SignUpParams } from "@/api/auth";
 import type { ErrorField } from "..";
 import { toast } from "sonner";
+import axios from "axios";
 
 interface Props {
   setSignUpStep: (step: number) => void;
@@ -12,6 +13,12 @@ interface Props {
   handleUserData: <K extends keyof SignUpParams>(key: K, value: SignUpParams[K]) => void;
   errors: Partial<Record<ErrorField, string>>;
   setErrors: React.Dispatch<React.SetStateAction<Partial<Record<ErrorField, string>>>>;
+}
+
+interface ApiErrorResponse {
+  message: string;
+  error: string;
+  statusCode: number;
 }
 
 export default function SignUpStep2({ setSignUpStep, userData, handleUserData, errors, setErrors }: Props) {
@@ -54,15 +61,21 @@ export default function SignUpStep2({ setSignUpStep, userData, handleUserData, e
 
   const handleSubmit = async () => {
     const isValid = validateStep2();
-
     if (!isValid) return;
 
     try {
       await postSignUp(userData);
       setSignUpStep(3);
     } catch (error) {
-      toast.error("회원가입에 실패 했습니다", { position: "top-center" });
-      console.error("회원가입 실패:", error);
+      if (axios.isAxiosError<ApiErrorResponse>(error)) {
+        const message = error.response?.data?.message ?? "회원가입에 실패했습니다.";
+
+        toast.error(message, { position: "top-center" });
+        console.error("회원가입 실패:", error);
+      } else {
+        toast.error("알 수 없는 오류가 발생했습니다.");
+        console.error("예상치 못한 에러:", error);
+      }
     }
   };
 

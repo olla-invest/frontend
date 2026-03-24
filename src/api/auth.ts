@@ -12,8 +12,6 @@ export interface SignUpParams {
 }
 
 export const postSignUp = async (signUpParams: SignUpParams) => {
-  const res = await api.post("/auth/register", {
-    params: { ...signUpParams },
-  });
+  const res = await api.post("/auth/register", signUpParams);
   return res.data;
 };
