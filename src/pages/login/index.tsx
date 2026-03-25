@@ -20,12 +20,7 @@ import { toast } from "sonner";
 
 //상태 관리
 import { useAuthStore } from "@/store/useAuthStore";
-
-interface ApiErrorResponse {
-  message: string;
-  error: string;
-  statusCode: number;
-}
+import type { AuthErrorResponse } from "@/types/api/auth";
 
 const Login: React.FC = () => {
   const navigate = useNavigate();
@@ -33,6 +28,7 @@ const Login: React.FC = () => {
   const [errorMsg, setErrorMsg] = useState("");
   const [errors, setErrors] = useState<Partial<Record<"username" | "password", string>>>({});
   const [saveId, setSaveId] = useState(!!localStorage.getItem("saveId"));
+  const [modal, setModal] = useState<"findId" | "findPw" | null>(null);
 
   const [loginData, setLoginData] = useState<LoginParams>({
     username: localStorage.getItem("saveId") || "",
@@ -84,7 +80,7 @@ const Login: React.FC = () => {
       toast.success("로그인에 성공했습니다", { position: "top-center" });
       navigate("/home");
     } catch (error) {
-      if (axios.isAxiosError<ApiErrorResponse>(error)) {
+      if (axios.isAxiosError<AuthErrorResponse>(error)) {
         const message = error.response?.data?.message ?? "로그인 실패";
         setErrorMsg(message);
       } else {
@@ -156,13 +152,25 @@ const Login: React.FC = () => {
           </button>
           {errorMsg !== "" ? <p className="mt-2 text-[#DC2626] text-center text-xs">{errorMsg}</p> : null}
           <div className="flex gap-2 items-center justify-center mt-4 text-sm text-muted-foreground">
-            <FindIdModal />
+            <a onClick={() => setModal("findId")} className="cursor-pointer">
+              ID 찾기
+            </a>
+
             <div className="bg-[#E2E8F0] w-px h-3" />
-            <FindPwModal />
+
+            <a onClick={() => setModal("findPw")} className="cursor-pointer">
+              비밀번호 찾기
+            </a>
+
             <div className="bg-[#E2E8F0] w-px h-3" />
+
             <a href="#" onClick={() => navigate("/signup")}>
               회원가입
             </a>
+
+            <FindIdModal open={modal === "findId"} onClose={() => setModal(null)} onOpenFindPw={() => setModal("findPw")} />
+
+            <FindPwModal open={modal === "findPw"} onClose={() => setModal(null)} />
           </div>
         </form>
         <div className="pt-6 border-t text-center">
