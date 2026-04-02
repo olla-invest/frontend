@@ -7,6 +7,8 @@ import DetailStockInfo from "./DetailStockInfo";
 import DetailIssue from "./DetailIssueAnalysis";
 import { getStockBasicData } from "@/api/chartDetails";
 import type { StockBasicDataResponse } from "@/types/api/chartDetails";
+import { isInWatchList, toggleWatchStockList } from "@/hooks/useToggleWatchList";
+import { useWatchStockListStore } from "@/store/WatchListStore";
 
 interface LiveChartDetailProps {
   onClose: () => void;
@@ -31,9 +33,10 @@ const tabs: TabItem[] = [
 ];
 
 export default function LiveChartDetail(props: LiveChartDetailProps) {
+  const { stockList } = useWatchStockListStore();
   const onClose = props.onClose;
   const detailInfo = props.detailInfo;
-  const [isBookmark, setIsBookmark] = useState(false);
+  const [isBookmark, setIsBookmark] = useState(isInWatchList(stockList ?? [], detailInfo.id));
 
   const [basicData, setBasicData] = useState<StockBasicDataResponse | null>();
 
@@ -99,7 +102,15 @@ export default function LiveChartDetail(props: LiveChartDetailProps) {
           <div>
             <div>
               <span className="font-bold">{detailInfo.companyName}</span>
-              <button onClick={() => setIsBookmark((prev) => !prev)}>
+              <button
+                onClick={async () => {
+                  const success = await toggleWatchStockList(detailInfo.id);
+
+                  if (success) {
+                    setIsBookmark((prev) => !prev);
+                  }
+                }}
+              >
                 <i className={`icon ${isBookmark ? "icon-star-fill" : "icon-star"}`} />
               </button>
             </div>

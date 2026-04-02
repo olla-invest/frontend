@@ -1,4 +1,6 @@
 import { create } from "zustand";
+import { persist, createJSONStorage } from "zustand/middleware";
+import { useWatchStockListStore, useWatchThemeStore } from "@/store/WatchListStore";
 
 interface User {
   username: string;
@@ -13,31 +15,36 @@ interface AuthState {
   logout: () => void;
 }
 
-export const useAuthStore = create<AuthState>((set) => ({
-  user: null,
-  accessToken: null,
-  isLoggedIn: false,
-
-  login: ({ accessToken, username }) => {
-    // sessionStorage 저장
-    sessionStorage.setItem("token", accessToken);
-    sessionStorage.setItem("username", username);
-
-    set({
-      accessToken,
-      user: { username },
-      isLoggedIn: true,
-    });
-  },
-
-  logout: () => {
-    sessionStorage.removeItem("token");
-    sessionStorage.removeItem("username");
-
-    set({
-      accessToken: null,
+export const useAuthStore = create<AuthState>()(
+  persist(
+    (set) => ({
       user: null,
+      accessToken: null,
       isLoggedIn: false,
-    });
-  },
-}));
+
+      login: ({ accessToken, username }) => {
+        set({
+          accessToken,
+          user: { username },
+          isLoggedIn: true,
+        });
+      },
+
+      logout: () => {
+        useWatchStockListStore.getState().clearWatchStockList();
+        useWatchThemeStore.getState().clearWatchThemeList();
+        set({
+          accessToken: null,
+          user: null,
+          isLoggedIn: false,
+        });
+        sessionStorage.removeItem("auth-storage");
+        window.location.reload();
+      },
+    }),
+    {
+      name: "auth-storage",
+      storage: createJSONStorage(() => sessionStorage),
+    },
+  ),
+);

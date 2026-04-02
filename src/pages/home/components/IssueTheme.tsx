@@ -11,6 +11,8 @@ import { format } from "date-fns";
 import { getIssueTheme } from "@/api/issueTheme";
 import type { IssueThemeApiResponse, IssueTheme } from "@/types/api/issueTheme";
 
+import { useWatchThemeStore } from "@/store/WatchListStore";
+import { toggleWatchThemeList, isInWatchThemeList } from "@/hooks/useToggleWatchList";
 interface IssueThemeRow {
   themeCode: number;
   rank: string;
@@ -20,7 +22,7 @@ interface IssueThemeRow {
 }
 
 export function IssueTheme() {
-  const [bookmarks, setBookmarks] = useState<Record<number, boolean>>({});
+  const themeList = useWatchThemeStore((state) => state.themeList);
   const [page, setPage] = useState(1);
   const [pageSize, setPageSize] = useState(10);
   const [basicData, setBasicData] = useState<IssueThemeApiResponse>();
@@ -62,17 +64,19 @@ export function IssueTheme() {
       header: "즐겨찾기",
       cell: ({ row }) => {
         const themeCode = row.original.themeCode;
-        const isBookmarked = bookmarks[themeCode];
+
+        const isBookmarked = themeList && isInWatchThemeList(themeList, themeCode);
 
         return (
           <div className="w-8 flex justify-center">
             <button
-              onClick={(e) => {
+              onClick={async (e) => {
                 e.stopPropagation();
-                setBookmarks((prev) => ({
-                  ...prev,
-                  [themeCode]: !prev[themeCode],
-                }));
+
+                const success = await toggleWatchThemeList(themeCode);
+
+                // 👉 성공했을 때만 UI 반영 (사실 store로 자동 반영됨)
+                if (!success) return;
               }}
             >
               <i className={`icon ${isBookmarked ? "icon-star-fill" : "icon-star"}`} />

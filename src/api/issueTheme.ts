@@ -8,7 +8,18 @@ export const getIssueTheme = async (display?: number, page?: number) => {
   return res.data;
 };
 
+import { useAuthStore } from "@/store/useAuthStore";
+
 export const getIssueThemeDetail = async (themeCode: number) => {
-  const res = await api.get<IssueThemeDetailApiResponse>(`/issue-theme/${themeCode}`);
+  const { accessToken } = useAuthStore.getState();
+
+  const res = await api.get<IssueThemeDetailApiResponse>(`/issue-theme/${themeCode}`, {
+    headers: accessToken
+      ? {
+          Authorization: `Bearer ${accessToken}`,
+        }
+      : undefined,
+  });
+
   return res.data;
 };
