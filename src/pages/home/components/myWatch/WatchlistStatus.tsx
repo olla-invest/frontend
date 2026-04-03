@@ -231,8 +231,24 @@ export default function WatchlistStatus({ themeList, stockList }: WatchlistStatu
           <TabsTrigger value="stock">종목</TabsTrigger>
           <TabsTrigger value="theme">테마</TabsTrigger>
         </TabsList>
-        <TabsContent value="stock">{renderTable(stockTable)}</TabsContent>
-        <TabsContent value="theme">{renderTable(themeTable)}</TabsContent>
+        <TabsContent value="stock">
+          {stockList?.length === 0 ? (
+            <div className="bg-blue-50 text-secondary-foreground w-full h-50 rounded-xl flex justify-center items-center">
+              <span className="text-sm">관심 종목이 없습니다</span>
+            </div>
+          ) : (
+            renderTable(stockTable)
+          )}
+        </TabsContent>
+        <TabsContent value="theme">
+          {themeList?.length === 0 ? (
+            <div className="bg-blue-50 text-secondary-foreground w-full h-50 rounded-xl flex justify-center items-center">
+              <span className="text-sm">관심 테마가 없습니다</span>
+            </div>
+          ) : (
+            renderTable(themeTable)
+          )}
+        </TabsContent>
       </Tabs>
     </div>
   );

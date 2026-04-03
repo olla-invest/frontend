@@ -114,6 +114,11 @@ export default function MyWatch() {
                   {themeList?.slice(0, 2).map((theme) => (
                     <ThemeFocus key={theme.themeCode} theme={theme} handleThemeModal={handleThemeModal} />
                   ))}
+                  {themeList?.length === 0 && (
+                    <div className="bg-blue-50 text-secondary-foreground w-full h-50 rounded-xl flex justify-center items-center">
+                      <span className="text-sm">관심 태마가 없습니다</span>
+                    </div>
+                  )}
                 </div>
 
                 {/* 종목 */}
@@ -121,6 +126,11 @@ export default function MyWatch() {
                   {stockList?.slice(0, 3).map((stock) => (
                     <StockFocus key={stock.stockCode} stock={stock} handleStockModal={handleStockModal} />
                   ))}
+                  {themeList?.length === 0 && (
+                    <div className="bg-blue-50 text-secondary-foreground w-full h-50 rounded-xl flex justify-center items-center">
+                      <span className="text-sm">관심 종목이 없습니다</span>
+                    </div>
+                  )}
                 </div>
               </div>
             </div>
@@ -147,7 +157,7 @@ export default function MyWatch() {
                 {sumWatchList && sumWatchList.length > 0 ? (
                   sumWatchList.map((item, i) => <MyWatchlist key={i} item={item} bookmarks={bookmarks} />)
                 ) : (
-                  <li className="text-center text-sm text-muted-foreground py-10">관심 종목이 없습니다.</li>
+                  <li className="text-center text-sm text-muted-foreground py-10">관심 항목이 없습니다.</li>
                 )}
               </ul>
             </div>
