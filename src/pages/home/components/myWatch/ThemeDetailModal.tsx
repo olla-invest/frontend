@@ -6,19 +6,19 @@ import DraggableModal from "@/components/DraggableModal";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 
 import { getIssueThemeDetail } from "@/api/issueTheme";
-import type { IssueTheme, IssueThemeDetailApiResponse } from "@/types/api/issueTheme";
+import type { IssueThemeDetailApiResponse } from "@/types/api/issueTheme";
+import type { WatchListTheme } from "@/types/api/watchList";
 import { useWatchThemeStore } from "@/store/WatchListStore";
 import { isInWatchThemeList, toggleWatchThemeList } from "@/hooks/useToggleWatchList";
 
 interface ModalProps {
   onClose: () => void;
-  selectIssue: IssueTheme;
+  selectIssue: WatchListTheme;
 }
-export default function IssueDetailModal({ onClose, selectIssue }: ModalProps) {
+export default function ThemeDetailModal({ onClose, selectIssue }: ModalProps) {
   const [detailData, setDetailData] = useState<IssueThemeDetailApiResponse>();
   const { themeList } = useWatchThemeStore();
   const [isBookmark, setIsBookmark] = useState(isInWatchThemeList(themeList ?? [], selectIssue.themeCode));
-
   useEffect(() => {
     const getIssueDetailData = async () => {
       try {
@@ -31,6 +31,7 @@ export default function IssueDetailModal({ onClose, selectIssue }: ModalProps) {
     getIssueDetailData();
   }, []);
 
+  const rankChange = selectIssue.prevRank - selectIssue.rank;
   return (
     <DraggableModal onClose={onClose}>
       <div className="flex flex-col gap-1 px-6 py-2">
@@ -40,6 +41,7 @@ export default function IssueDetailModal({ onClose, selectIssue }: ModalProps) {
             <button
               onClick={async () => {
                 const success = await toggleWatchThemeList(selectIssue.themeCode);
+
                 if (success) {
                   setIsBookmark((prev) => !prev);
                 }
@@ -62,11 +64,11 @@ export default function IssueDetailModal({ onClose, selectIssue }: ModalProps) {
           <div className="flex gap-1 text-sm">
             <span className="text-muted-foreground">순위변동</span>
             <span>{selectIssue?.rank}위</span>
-            {selectIssue?.rankChange && (
-              <div className={`flex items-center gap-0.5 ${selectIssue.rankChange > 0 ? "text-rose-500" : selectIssue.rankChange < 0 ? "text-blue-500" : "text-gray-400"}`}>
-                {selectIssue.rankChange > 0 && <i className="icon icon-arrow-up" />}
-                {selectIssue.rankChange < 0 && <i className="icon icon-arrow-down" />}
-                {Math.abs(selectIssue.rankChange)}
+            {rankChange && (
+              <div className={`flex items-center gap-0.5 ${rankChange > 0 ? "text-rose-500" : rankChange < 0 ? "text-blue-500" : "text-gray-400"}`}>
+                {rankChange > 0 && <i className="icon icon-arrow-up" />}
+                {rankChange < 0 && <i className="icon icon-arrow-down" />}
+                {Math.abs(rankChange)}
               </div>
             )}
           </div>

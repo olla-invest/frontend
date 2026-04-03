@@ -48,9 +48,12 @@ export interface RecommendedTheme {
   themeName: string;
   imageUrl: string | null;
   rank: number;
-  prevRank?: number;
+  prevRank: number;
   risingCount: number;
   totalCount: number;
+  upCount?: number;
+  flatCount?: number;
+  downCount?: number;
 }
 
 export interface RecommendedStock {
@@ -61,6 +64,8 @@ export interface RecommendedStock {
   companyName: string;
   marketType: "KOSPI" | "KOSDAQ" | string;
   rank: number;
+  prevRank: number;
+  events: StockEventType[];
   closePrice: number;
   priceChangeRate1d: number;
   relativeStrengthScore: number;

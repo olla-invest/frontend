@@ -4,10 +4,12 @@ import type { StockEventType, WatchListStock, WatchListTheme } from "@/types/api
 
 interface ThemeFocusProps {
   theme: WatchListTheme;
+  handleThemeModal: (theme: WatchListTheme) => void;
 }
 
 interface StockFocusProps {
   stock: WatchListStock;
+  handleStockModal: (stock: WatchListStock) => void;
 }
 
 type EventMeta = {
@@ -37,7 +39,7 @@ const EVENT_META: Record<StockEventType, EventMeta> = {
   },
 };
 
-export function ThemeFocus({ theme }: ThemeFocusProps) {
+export function ThemeFocus({ theme, handleThemeModal }: ThemeFocusProps) {
   const rankStatus = theme.prevRank === theme.rank ? "same" : theme.prevRank > theme.rank ? "up" : "down";
   const diff = Math.abs(theme.prevRank - theme.rank);
 
@@ -62,7 +64,12 @@ export function ThemeFocus({ theme }: ThemeFocusProps) {
   const rankMeta = RANK_META[rankStatus];
 
   return (
-    <div className="bg-slate-50 rounded-md p-4 flex-1">
+    <div
+      className="bg-slate-50 rounded-md p-4 flex-1"
+      onClick={() => {
+        handleThemeModal(theme);
+      }}
+    >
       <div className="flex flex-col gap-4 h-full">
         <div className="flex flex-col gap-2 h-full">
           <div className="flex flex-col gap-1">
@@ -112,7 +119,7 @@ export function ThemeFocus({ theme }: ThemeFocusProps) {
   );
 }
 
-export function StockFocus({ stock }: StockFocusProps) {
+export function StockFocus({ stock, handleStockModal }: StockFocusProps) {
   const rankStatus = stock.prevRank === stock.rank ? "same" : stock.prevRank > stock.rank ? "up" : "down";
   const diff = Math.abs(stock.prevRank - stock.rank);
 
@@ -137,7 +144,12 @@ export function StockFocus({ stock }: StockFocusProps) {
   const rankMeta = RANK_META[rankStatus];
 
   return (
-    <div className="border-b bg-white px-2 py-3 flex gap-2">
+    <div
+      className="border-b bg-white px-2 py-3 flex gap-2"
+      onClick={() => {
+        handleStockModal(stock);
+      }}
+    >
       <div className="size-12 rounded-full bg-[#d9d9d9] shrink-0"></div>
       <div className="flex flex-col gap-1">
         <span className="text-slate-800 font-semibold">{stock.companyName}</span>

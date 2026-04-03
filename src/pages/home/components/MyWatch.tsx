@@ -6,7 +6,16 @@ import { StockFocus, ThemeFocus } from "./myWatch/WatchlistFocusToday";
 import { useWatchStockListStore, useWatchThemeStore } from "@/store/WatchListStore";
 import { LoadingUi } from "@/components/LoadingUi";
 import { getRecommend } from "@/api/watchList";
-import type { RecommendationResponse } from "@/types/api/watchList";
+import type { WatchListTheme, WatchListStock, RecommendationResponse } from "@/types/api/watchList";
+import ThemeDetailModal from "./myWatch/ThemeDetailModal";
+import LiveChartDetail from "./liveChart/LiveChartDetail";
+
+export interface StockdetailInfo {
+  id: string;
+  companyName: string;
+  investmentIndicators: string;
+  currentPrice: number;
+}
 
 export default function MyWatch() {
   //store에서 가져오기
@@ -15,6 +24,11 @@ export default function MyWatch() {
   const [recommend, setRecommend] = useState<RecommendationResponse>();
 
   const [isLoading, setIsLoading] = useState(false);
+
+  const [stockModalOpen, setStockModalOpen] = useState(false);
+  const [selectStock, setSelectStock] = useState<StockdetailInfo>();
+  const [themeModalOpen, setThemeMoadlOpen] = useState(false);
+  const [selectTheme, setSelectTheme] = useState<WatchListTheme>();
 
   const sumWatchList = useMemo(() => {
     const stocks = (stockList ?? []).map((item) => ({
@@ -52,6 +66,21 @@ export default function MyWatch() {
     return { ...stockMap, ...themeMap };
   }, [stockList, themeList]);
 
+  const handleStockModal = (stockItem: WatchListStock) => {
+    setSelectStock({
+      id: stockItem.stockCode,
+      companyName: stockItem.companyName,
+      investmentIndicators: "",
+      currentPrice: stockItem.closePrice,
+    });
+    setStockModalOpen(true);
+  };
+
+  const handleThemeModal = (themeItem: WatchListTheme) => {
+    setSelectTheme(themeItem);
+    setThemeMoadlOpen(true);
+  };
+
   useEffect(() => {
     setIsLoading(true);
     const getRecommendData = async () => {
@@ -83,14 +112,14 @@ export default function MyWatch() {
                 {/* 테마 */}
                 <div className="flex gap-4 w-full">
                   {themeList?.slice(0, 2).map((theme) => (
-                    <ThemeFocus key={theme.themeCode} theme={theme} />
+                    <ThemeFocus key={theme.themeCode} theme={theme} handleThemeModal={handleThemeModal} />
                   ))}
                 </div>
 
                 {/* 종목 */}
                 <div className="flex flex-col">
                   {stockList?.slice(0, 3).map((stock) => (
-                    <StockFocus key={stock.stockCode} stock={stock} />
+                    <StockFocus key={stock.stockCode} stock={stock} handleStockModal={handleStockModal} />
                   ))}
                 </div>
               </div>
@@ -99,7 +128,7 @@ export default function MyWatch() {
             {/* 내 관심 현황 */}
             <div className="flex flex-col gap-4 py-2">
               <h4 className="text-xl text-foreground font-semibold">내 관심 현황</h4>
-              <WatchlistStatus />
+              <WatchlistStatus themeList={themeList} stockList={stockList} />
             </div>
 
             {/* 추천 영역 */}
@@ -125,6 +154,8 @@ export default function MyWatch() {
           </div>
         </div>
       )}
+      {selectTheme && themeModalOpen && <ThemeDetailModal onClose={() => setThemeMoadlOpen(false)} selectIssue={selectTheme} />}
+      {selectStock && stockModalOpen && <LiveChartDetail onClose={() => setStockModalOpen(false)} detailInfo={selectStock} />}
     </>
   );
 }
