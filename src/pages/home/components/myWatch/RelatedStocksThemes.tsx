@@ -1,10 +1,12 @@
 import { Badge } from "@/components/ui/badge";
 import { CircleCheckIcon } from "lucide-react";
-import type { RecommendationResponse } from "@/types/api/watchList";
-import type { StockEventType } from "@/types/api/watchList";
+import type { RecommendationResponse, RecommendedStock, RecommendedTheme } from "@/types/api/watchList";
+import type { WatchListTheme, WatchListStock, StockEventType } from "@/types/api/watchList";
 
 interface RelatedStocksThemesProps {
   recommendData: RecommendationResponse;
+  handleStockModal: (stock: WatchListStock | RecommendedStock) => void;
+  handleThemeModal: (stock: WatchListTheme | RecommendedTheme) => void;
 }
 
 type EventMeta = {
@@ -34,7 +36,7 @@ const EVENT_META: Record<StockEventType, EventMeta> = {
   },
 };
 
-export default function RelatedStocksThemes({ recommendData }: RelatedStocksThemesProps) {
+export default function RelatedStocksThemes({ recommendData, handleStockModal, handleThemeModal }: RelatedStocksThemesProps) {
   const themeRankStatus =
     recommendData.recommendedTheme.prevRank === recommendData.recommendedTheme.rank ? "same" : recommendData.recommendedTheme.prevRank > recommendData.recommendedTheme.rank ? "up" : "down";
   const themeDiff = Math.abs(recommendData.recommendedTheme.prevRank - recommendData.recommendedTheme.rank);
@@ -63,9 +65,18 @@ export default function RelatedStocksThemes({ recommendData }: RelatedStocksThem
 
   const ThemeRankMeta = RANK_META[themeRankStatus];
   const stockRankMeta = RANK_META[stockRankStatus];
+
+  const recommendedTheme: RecommendedTheme = recommendData.recommendedTheme;
+  const recommendedStcok: RecommendedStock = recommendData.recommendedStock;
+
   return (
     <div className="w-full grid grid-cols-2 gap-4">
-      <div className="border rounded-lg bg-white p-4 flex gap-2 items-center">
+      <div
+        className="border rounded-lg bg-white p-4 flex gap-2 items-center"
+        onClick={() => {
+          handleThemeModal(recommendedTheme);
+        }}
+      >
         <div className="size-12 rounded-md bg-[#d9d9d9] shrink-0"></div>
         <div className="flex flex-col gap-1">
           <span className="text-slate-800 font-semibold">{recommendData.recommendedTheme.themeName}</span>
@@ -102,7 +113,12 @@ export default function RelatedStocksThemes({ recommendData }: RelatedStocksThem
           </div>
         </div>
       </div>
-      <div className="border rounded-lg bg-white p-4 flex gap-2 items-center">
+      <div
+        className="border rounded-lg bg-white p-4 flex gap-2 items-center"
+        onClick={() => {
+          handleStockModal(recommendedStcok);
+        }}
+      >
         <div className="size-12 rounded-full bg-[#d9d9d9] shrink-0"></div>
         <div className="flex flex-col gap-1">
           <span className="text-slate-800 font-semibold">{recommendData.recommendedStock.companyName}</span>

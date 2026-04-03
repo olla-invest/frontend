@@ -8,6 +8,8 @@ import { CircleCheckIcon } from "lucide-react";
 interface WatchlistStatusProps {
   themeList: WatchListTheme[] | null;
   stockList: WatchListStock[] | null;
+  handleStockModal: (stock: WatchListStock) => void;
+  handleThemeModal: (stock: WatchListTheme) => void;
 }
 
 type EventMeta = {
@@ -55,7 +57,7 @@ const RANK_META = {
   },
 } as const;
 
-export default function WatchlistStatus({ themeList, stockList }: WatchlistStatusProps) {
+export default function WatchlistStatus({ themeList, stockList, handleThemeModal, handleStockModal }: WatchlistStatusProps) {
   const stockColumns: ColumnDef<WatchListStock>[] = [
     {
       accessorKey: "companyName",
@@ -198,7 +200,7 @@ export default function WatchlistStatus({ themeList, stockList }: WatchlistStatu
     getCoreRowModel: getCoreRowModel(),
   });
 
-  function renderTable<T>(table: ReactTable<T>) {
+  function renderTable<T extends WatchListStock | WatchListTheme>(table: ReactTable<T>, type: "stock" | "theme") {
     return (
       <UiTable className="min-w-max">
         <TableHeader className="sticky top-0 bg-white">
@@ -213,7 +215,7 @@ export default function WatchlistStatus({ themeList, stockList }: WatchlistStatu
 
         <TableBody>
           {table.getRowModel().rows.map((row) => (
-            <TableRow key={row.id}>
+            <TableRow key={row.id} onClick={() => (type === "stock" ? handleStockModal(row.original as WatchListStock) : handleThemeModal(row.original as WatchListTheme))}>
               {row.getVisibleCells().map((cell) => (
                 <TableCell key={cell.id}>{flexRender(cell.column.columnDef.cell, cell.getContext())}</TableCell>
               ))}
@@ -237,7 +239,7 @@ export default function WatchlistStatus({ themeList, stockList }: WatchlistStatu
               <span className="text-sm">관심 종목이 없습니다</span>
             </div>
           ) : (
-            renderTable(stockTable)
+            renderTable(stockTable, "stock")
           )}
         </TabsContent>
         <TabsContent value="theme">
@@ -246,7 +248,7 @@ export default function WatchlistStatus({ themeList, stockList }: WatchlistStatu
               <span className="text-sm">관심 테마가 없습니다</span>
             </div>
           ) : (
-            renderTable(themeTable)
+            renderTable(themeTable, "theme")
           )}
         </TabsContent>
       </Tabs>

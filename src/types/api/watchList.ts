@@ -54,6 +54,8 @@ export interface RecommendedTheme {
   upCount?: number;
   flatCount?: number;
   downCount?: number;
+  addedDate: string;
+  event: string;
 }
 
 export interface RecommendedStock {

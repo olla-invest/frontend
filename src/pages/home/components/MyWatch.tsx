@@ -6,7 +6,7 @@ import { StockFocus, ThemeFocus } from "./myWatch/WatchlistFocusToday";
 import { useWatchStockListStore, useWatchThemeStore } from "@/store/WatchListStore";
 import { LoadingUi } from "@/components/LoadingUi";
 import { getRecommend } from "@/api/watchList";
-import type { WatchListTheme, WatchListStock, RecommendationResponse } from "@/types/api/watchList";
+import type { WatchListTheme, WatchListStock, RecommendationResponse, RecommendedStock, RecommendedTheme } from "@/types/api/watchList";
 import ThemeDetailModal from "./myWatch/ThemeDetailModal";
 import LiveChartDetail from "./liveChart/LiveChartDetail";
 
@@ -66,7 +66,7 @@ export default function MyWatch() {
     return { ...stockMap, ...themeMap };
   }, [stockList, themeList]);
 
-  const handleStockModal = (stockItem: WatchListStock) => {
+  const handleStockModal = (stockItem: WatchListStock | RecommendedStock) => {
     setSelectStock({
       id: stockItem.stockCode,
       companyName: stockItem.companyName,
@@ -76,8 +76,21 @@ export default function MyWatch() {
     setStockModalOpen(true);
   };
 
-  const handleThemeModal = (themeItem: WatchListTheme) => {
-    setSelectTheme(themeItem);
+  const handleThemeModal = (themeItem: WatchListTheme | RecommendedTheme) => {
+    setSelectTheme({
+      themeCode: themeItem.themeCode,
+      themeName: themeItem.themeName,
+      imageUrl: themeItem.imageUrl,
+      addedDate: ("addedDate" in themeItem ? themeItem.addedDate : "") ?? "",
+      rank: themeItem.rank,
+      prevRank: themeItem.prevRank,
+      risingCount: themeItem.risingCount,
+      totalCount: themeItem.totalCount,
+      event: "event" in themeItem ? themeItem.event : "",
+      upCount: themeItem.upCount,
+      flatCount: themeItem.flatCount,
+      downCount: themeItem.downCount,
+    });
     setThemeMoadlOpen(true);
   };
 
@@ -138,13 +151,13 @@ export default function MyWatch() {
             {/* 내 관심 현황 */}
             <div className="flex flex-col gap-4 py-2">
               <h4 className="text-xl text-foreground font-semibold">내 관심 현황</h4>
-              <WatchlistStatus themeList={themeList} stockList={stockList} />
+              <WatchlistStatus themeList={themeList} stockList={stockList} handleThemeModal={handleThemeModal} handleStockModal={handleStockModal} />
             </div>
 
             {/* 추천 영역 */}
             <div className="flex flex-col gap-4 py-2">
               <h4 className="text-xl text-foreground font-semibold">함께 보면 좋을 만한 종목·테마</h4>
-              {recommend && <RelatedStocksThemes recommendData={recommend} />}
+              {recommend && <RelatedStocksThemes recommendData={recommend} handleThemeModal={handleThemeModal} handleStockModal={handleStockModal} />}
             </div>
           </div>
 
