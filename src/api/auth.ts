@@ -1,4 +1,5 @@
 import api from "@/lib/api";
+import authApi from "@/lib/authApi";
 
 export interface SignUpParams {
   username: string;
@@ -52,6 +53,6 @@ export const postFindPw = async (findPwParams: FindPwParams) => {
 };
 
 export const patchChangePw = async (changePwParams: ChangePwParams) => {
-  const res = await api.patch("/auth/change-password", changePwParams);
+  const res = await authApi.patch("/auth/change-password", changePwParams);
   return res.data;
 };

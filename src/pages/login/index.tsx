@@ -28,7 +28,7 @@ import { getWatchStockList, getWatchThemeList } from "@/api/watchList";
 
 const Login: React.FC = () => {
   const navigate = useNavigate();
-
+  const BASE_URL = "https://subtetanic-hypostatically-roland.ngrok-free.dev";
   const [showPw, setShowPw] = useState(false);
   const [errorMsg, setErrorMsg] = useState("");
   const [errors, setErrors] = useState<Partial<Record<"username" | "password", string>>>({});
@@ -90,8 +90,12 @@ const Login: React.FC = () => {
       useWatchStockListStore.getState().setWatchStockList(watchList.stocks);
       useWatchThemeStore.getState().setWatchThemeList(themeList.themes);
 
-      toast.success("로그인에 성공했습니다", { position: "top-center" });
-      navigate("/home");
+      if (res.user.isTempPassword) {
+        navigate("/change-pw");
+      } else {
+        toast.success("로그인에 성공했습니다", { position: "top-center" });
+        navigate("/home");
+      }
     } catch (error) {
       if (axios.isAxiosError<AuthErrorResponse>(error)) {
         const message = error.response?.data?.message ?? "로그인 실패";
@@ -192,10 +196,10 @@ const Login: React.FC = () => {
           <span className="block text-xs text-muted-foreground mb-4">SNS로 로그인/회원가입</span>
 
           <div className="flex items-center justify-center gap-4">
-            <a className="size-12" onClick={() => navigate("/social-signup")}>
+            <a className="size-12" onClick={() => (window.location.href = `${BASE_URL}/auth/naver`)}>
               <img src={NaverImg} alt="네이버 로그인" />
             </a>
-            <a className="size-12" onClick={() => navigate("/social-signup")}>
+            <a className="size-12" onClick={() => (window.location.href = `${BASE_URL}/auth/kakao`)}>
               <img src={KakaoImg} alt="카카오 로그인" />
             </a>
           </div>
