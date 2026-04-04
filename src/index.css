@@ -88,6 +88,16 @@ input:-webkit-autofill {
   -webkit-text-fill-color: #000 !important;
 }
 
+/* 스크롤 숨기기 */
+.no-scrollbar {
+  -ms-overflow-style: none; /* IE, Edge */
+  scrollbar-width: none; /* Firefox */
+}
+
+.no-scrollbar::-webkit-scrollbar {
+  display: none; /* Chrome, Safari */
+}
+
 /* button {
   border-radius: 8px;
   border: 1px solid transparent;

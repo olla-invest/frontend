@@ -5,3 +5,21 @@ header .logo {
   height: 24px;
   background-size: contain;
 }
+
+.policiesWrap {
+  padding: 24px 24px 56px 24px;
+}
+.policiesBox ol {
+  list-style: decimal;
+  padding-left: 20px;
+}
+.policiesBox .innerList > li::before {
+  content: "";
+  display: inline-block;
+  border-radius: 100%;
+  margin-right: 6px;
+  vertical-align: 0.25rem;
+  width: 3px;
+  height: 3px;
+  background-color: #334155;
+}

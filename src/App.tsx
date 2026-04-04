@@ -10,6 +10,10 @@ import SignUp from "./pages/signUp";
 import SocialSignUp from "./pages/signUp/SocialSignUp";
 import { initAuth } from "./store/initAuth";
 import ChangePw from "./pages/login/ChangePw";
+import SubLayout from "./layouts/SubLayout";
+import Privacy from "./pages/policies/Privacy";
+import Marketing from "./pages/policies/Marketing";
+import Terms from "./pages/policies/Terms";
 
 const App: React.FC = () => {
   useChartSocket();
@@ -28,6 +32,11 @@ const App: React.FC = () => {
         <Route path="/signup" element={<SignUp />} />
         <Route path="/change-pw" element={<ChangePw />} />
         <Route path="/social-signup" element={<SocialSignUp />} />
+        <Route element={<SubLayout />}>
+          <Route path="/policies/privacy" element={<Privacy />} />
+          <Route path="/policies/terms" element={<Terms />} />
+          <Route path="/policies/marketing" element={<Marketing />} />
+        </Route>
       </Routes>
     </Router>
   );
