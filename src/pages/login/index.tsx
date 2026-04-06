@@ -28,7 +28,7 @@ import { getWatchStockList, getWatchThemeList } from "@/api/watchList";
 
 const Login: React.FC = () => {
   const navigate = useNavigate();
-  const BASE_URL = "https://subtetanic-hypostatically-roland.ngrok-free.dev";
+  const BASE_URL = "https://timing-feel-intent-robin.trycloudflare.com";
   const [showPw, setShowPw] = useState(false);
   const [errorMsg, setErrorMsg] = useState("");
   const [errors, setErrors] = useState<Partial<Record<"username" | "password", string>>>({});

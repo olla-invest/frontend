@@ -1,31 +1,27 @@
 import React, { useState } from "react";
 import { Field, FieldLabel, FieldDescription } from "@/components/ui/field";
 import { Input } from "@/components/ui/input";
-import { Checkbox } from "@/components/ui/checkbox";
-import { Label } from "@/components/ui/label";
 import LogoImg from "@/assets/images/olla-logo.svg";
 import { useNavigate } from "react-router-dom";
 import { isAxiosError } from "axios";
-
+import AgreementSection from "./components/AgreementSection";
 const SocialSignUp: React.FC = () => {
   const navigate = useNavigate();
 
   const [agreements, setAgreements] = useState({
-    termsOfService: false,
-    privacyPolicy: false,
-    marketing: false,
+    agreeService: false,
+    agreePrivacy: false,
+    agreeMarketing: false,
   });
 
   const [error, setError] = useState<string | null>(null);
 
-  const allChecked = agreements.termsOfService && agreements.privacyPolicy && agreements.marketing;
-
   // 전체 선택
   const handleAllChange = (checked: boolean) => {
     setAgreements({
-      termsOfService: checked,
-      privacyPolicy: checked,
-      marketing: checked,
+      agreeService: checked,
+      agreePrivacy: checked,
+      agreeMarketing: checked,
     });
   };
 
@@ -41,13 +37,13 @@ const SocialSignUp: React.FC = () => {
     setError(null);
 
     // 필수 약관 체크
-    if (!agreements.termsOfService || !agreements.privacyPolicy) {
+    if (!agreements.agreeService || !agreements.agreePrivacy) {
       setError("필수 약관에 동의해주세요.");
       return;
     }
 
     try {
-      // 🔥 실제 API 붙일 자리
+      // 실제 API 붙일 자리
       // await api.socialSignup(...)
 
       // 현재는 토큰 이미 callback에서 저장된 상태라고 가정
@@ -101,41 +97,14 @@ const SocialSignUp: React.FC = () => {
               <Input id="input-sign-up-email" type="text" placeholder="이메일" />
             </Field>
 
-            <div className="p-3 border rounded-md mt-2">
-              {/* 전체 선택 */}
-              <div className="pb-2.5 mb-2.5 border-b">
-                <div className="flex gap-2">
-                  <Checkbox id="allAgreed" checked={allChecked} onCheckedChange={(checked) => handleAllChange(!!checked)} />
-                  <Label htmlFor="allAgreed" className="text-sm font-medium">
-                    약관에 모두 동의
-                  </Label>
-                </div>
-              </div>
-
-              {/* 개별 항목 */}
-              <div className="flex flex-col gap-2.5">
-                <div className="flex gap-2 text-sm">
-                  <Checkbox id="termsOfServiceAgreed" checked={agreements.termsOfService} onCheckedChange={(checked) => handleChange("termsOfService", !!checked)} />
-                  <Label htmlFor="termsOfServiceAgreed" className="font-normal">
-                    (필수) 서비스 이용약관 동의
-                  </Label>
-                </div>
-
-                <div className="flex gap-2 text-sm">
-                  <Checkbox id="privacyPolicyAgreed" checked={agreements.privacyPolicy} onCheckedChange={(checked) => handleChange("privacyPolicy", !!checked)} />
-                  <Label htmlFor="privacyPolicyAgreed" className="font-normal">
-                    (필수) 개인정보 수집·이용 동의
-                  </Label>
-                </div>
-
-                <div className="flex gap-2 text-sm">
-                  <Checkbox id="marketingConsentAgreed" checked={agreements.marketing} onCheckedChange={(checked) => handleChange("marketing", !!checked)} />
-                  <Label htmlFor="marketingConsentAgreed" className="font-normal">
-                    (선택) 마케팅 정보 수신 동의
-                  </Label>
-                </div>
-              </div>
-            </div>
+            <AgreementSection
+              agreeService={!!agreements.agreeService}
+              agreePrivacy={!!agreements.agreePrivacy}
+              agreeMarketing={!!agreements.agreeMarketing}
+              error={error || ""}
+              onAllChange={handleAllChange}
+              onChange={handleChange}
+            />
           </div>
 
           <button type="submit" className="bg-[#1E1B4B] text-white text-sm w-full h-10 rounded-md">
