@@ -99,9 +99,14 @@ export default function SignUpStep2({ setSignUpStep, userData, handleUserData, e
           onChange={handleChange}
         />
       </div>
-      <button type="button" className="bg-[#1E1B4B] text-white text-sm w-full h-10 rounded-md" onClick={() => handleSubmit()}>
-        가입하기
-      </button>
+      <div className="flex gap-2">
+        <button type="button" className="flex-1 bg-white border text-foreground text-sm w-full h-10 rounded-md" onClick={() => setSignUpStep(1)}>
+          이전으로
+        </button>
+        <button type="button" className="flex-1 bg-[#1E1B4B] text-white text-sm w-full h-10 rounded-md" onClick={() => handleSubmit()}>
+          가입하기
+        </button>
+      </div>
     </form>
   );
 }

@@ -30,7 +30,7 @@ export default function ConfirmModal({ open, onOpenChange, title, description, o
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="w-[384px]">
         <DialogHeader>
-          <DialogTitle className="h-7">{title}</DialogTitle>
+          <DialogTitle className="h-7 text-center text-md text-foreground font-semiBold">{title}</DialogTitle>
           {description && <DialogDescription className="text-center text-sm text-foreground font-medium pb-6">{description}</DialogDescription>}
         </DialogHeader>
 
