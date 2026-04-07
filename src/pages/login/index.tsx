@@ -80,7 +80,10 @@ const Login: React.FC = () => {
       // 로그인 상태 저장
       login({
         accessToken: res.accessToken,
-        username: res.username,
+        username: res.user.username,
+        name: res.user.name,
+        email: res.user.email,
+        userId: res.user.userId,
       });
 
       // 관심종목 + 테마 병렬 조회

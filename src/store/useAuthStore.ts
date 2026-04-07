@@ -4,6 +4,9 @@ import { useWatchStockListStore, useWatchThemeStore } from "@/store/WatchListSto
 
 interface User {
   username: string;
+  name: string;
+  email: string;
+  userId: string;
 }
 
 interface AuthState {
@@ -11,7 +14,7 @@ interface AuthState {
   accessToken: string | null;
   isLoggedIn: boolean;
 
-  login: (data: { accessToken: string; username: string }) => void;
+  login: (data: { accessToken: string; username: string; name: string; email: string; userId: string }) => void;
   logout: () => void;
 }
 
@@ -22,10 +25,10 @@ export const useAuthStore = create<AuthState>()(
       accessToken: null,
       isLoggedIn: false,
 
-      login: ({ accessToken, username }) => {
+      login: ({ accessToken, username, name, email, userId }) => {
         set({
           accessToken,
-          user: { username },
+          user: { username, name, email, userId },
           isLoggedIn: true,
         });
       },
