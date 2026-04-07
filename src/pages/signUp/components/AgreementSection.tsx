@@ -2,7 +2,6 @@
 import { Checkbox } from "@/components/ui/checkbox";
 import { Label } from "@/components/ui/label";
 import { ChevronRight } from "lucide-react";
-import { useNavigate } from "react-router-dom";
 
 interface Props {
   agreeService: boolean;
@@ -16,7 +15,7 @@ interface Props {
 
 export default function AgreementSection({ agreeService, agreePrivacy, agreeMarketing, error, onAllChange, onChange }: Props) {
   const allChecked = agreeService && agreePrivacy && agreeMarketing;
-  const navigation = useNavigate();
+  const baseURL = window.location.origin;
 
   return (
     <div className="mt-2">
@@ -38,7 +37,7 @@ export default function AgreementSection({ agreeService, agreePrivacy, agreeMark
             <Label htmlFor="termsOfServiceAgreed" className="font-normal">
               (필수) 서비스 이용약관 동의
             </Label>
-            <ChevronRight strokeWidth={1} className="ml-auto cursor-pointer" onClick={() => navigation("/policies/terms")} />
+            <ChevronRight strokeWidth={1} className="ml-auto cursor-pointer" onClick={() => window.open(`${baseURL}/policies/terms`)} />
           </div>
 
           <div className="flex gap-2 text-sm items-center">
@@ -46,7 +45,7 @@ export default function AgreementSection({ agreeService, agreePrivacy, agreeMark
             <Label htmlFor="privacyPolicyAgreed" className="font-normal">
               (필수) 개인정보 수집·이용 동의
             </Label>
-            <ChevronRight strokeWidth={1} className="ml-auto cursor-pointer" onClick={() => navigation("/policies/privacy")} />
+            <ChevronRight strokeWidth={1} className="ml-auto cursor-pointer" onClick={() => window.open(`${baseURL}/policies/privacy`)} />
           </div>
 
           <div className="flex gap-2 text-sm items-center">
@@ -54,7 +53,7 @@ export default function AgreementSection({ agreeService, agreePrivacy, agreeMark
             <Label htmlFor="marketingConsentAgreed" className="font-normal">
               (선택) 마케팅 정보 수신 동의
             </Label>
-            <ChevronRight strokeWidth={1} className="ml-auto cursor-pointer" onClick={() => navigation("/policies/marketing")} />
+            <ChevronRight strokeWidth={1} className="ml-auto cursor-pointer" onClick={() => window.open(`${baseURL}/policies/marketing`)} />
           </div>
         </div>
       </div>
