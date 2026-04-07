@@ -26,11 +26,15 @@ export interface StockRankingApiItem {
   investmentIndicatorsDtl: string;
   theme: string;
   upName: string;
-  rrankHistory: {
+  rankHistory: {
     oneDayAgo: number | null;
     today: number | null;
     twoDaysAgo: number | null;
   };
+  //투자 중요지표
+  isVolatilityContraction: boolean;
+  isPriceCompression: boolean;
+  strengthContinuationDays: number | null;
 }
 
 export interface StockRankingApiStatus {

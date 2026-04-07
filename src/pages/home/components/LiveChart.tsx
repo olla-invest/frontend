@@ -10,6 +10,7 @@ import {
   getFilteredRowModel,
   getSortedRowModel,
   useReactTable,
+  type Row,
   type ColumnDef,
   type ColumnFiltersState,
   type SortingState,
@@ -115,6 +116,28 @@ function LivePriceCell({ stockCode, basePrice, baseRate }: LivePriceCellProps) {
   );
 }
 
+const renderIndicators = (row: Row<StockRankingApiItem>) => {
+  const { isVolatilityContraction, strengthContinuationDays, isPriceCompression } = row.original;
+
+  const hasAny = isVolatilityContraction || isPriceCompression;
+
+  return (
+    <div className="flex flex-col items-end text-xs text-slate-700">
+      <div>
+        {hasAny ? (
+          <>
+            {isVolatilityContraction && <div>변동성 축소</div>}
+            {isPriceCompression && <div>가격 압축</div>}
+          </>
+        ) : (
+          "-"
+        )}
+      </div>
+      <div>{strengthContinuationDays !== null ? `강도 지속(${strengthContinuationDays}/10)` : ""}</div>
+    </div>
+  );
+};
+
 const columns: ColumnDef<StockRankingApiItem>[] = [
   {
     accessorKey: "rank",
@@ -165,7 +188,7 @@ const columns: ColumnDef<StockRankingApiItem>[] = [
   {
     id: "investmentIndicatorsDtl",
     header: () => <div className="text-right min-w-32">투자 중요지표</div>,
-    cell: ({ row }) => <div className="text-right">{row.getValue("investmentIndicatorsDtl")}</div>,
+    cell: ({ row }) => <div className="text-right">{renderIndicators(row)}</div>,
   },
   {
     accessorKey: "theme",
