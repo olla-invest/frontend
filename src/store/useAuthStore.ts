@@ -4,9 +4,9 @@ import { useWatchStockListStore, useWatchThemeStore } from "@/store/WatchListSto
 
 interface User {
   username: string;
-  name: string;
-  email: string;
-  userId: string;
+  name?: string;
+  email?: string;
+  userId?: string;
 }
 
 interface AuthState {
