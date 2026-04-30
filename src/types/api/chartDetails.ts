@@ -138,3 +138,19 @@ export type Indicators = {
   stockCode: string;
   year: string;
 } & Record<Quarter, IndicatorDetail>;
+
+//이슈분석
+export interface StockNews {
+  companyName: string;
+  stockCode: string;
+  total: number;
+  items: NewsItem[];
+}
+export type NewsList = NewsItem[];
+export interface NewsItem {
+  title: string;
+  originallink: string;
+  link: string;
+  description: string;
+  pubDate: string; // 필요하면 Date로 변환해서 써도 됨
+}

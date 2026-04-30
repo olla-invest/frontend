@@ -1,7 +1,7 @@
 import api from "@/lib/api";
 import type { UTCTimestamp } from "lightweight-charts";
 
-import type { ChartResponse, TableDetail, GraphDetail, MarketStrengthGraph } from "@/types/api/chartDetails";
+import type { ChartResponse, TableDetail, GraphDetail, MarketStrengthGraph, StockNews } from "@/types/api/chartDetails";
 
 interface GetChartDetailParams {
   stockCode: string;
@@ -107,4 +107,10 @@ export const getDetailStockInfo = async (stockCode: string, year: string) => {
       year: year,
     },
   });
+};
+
+//이슈분석
+export const getStockNews = async (stockCode: string): Promise<StockNews> => {
+  const res = await api.get<StockNews>(`/stock-info/${stockCode}/news`);
+  return res.data;
 };

@@ -28,7 +28,7 @@ import { getWatchStockList, getWatchThemeList } from "@/api/watchList";
 
 const Login: React.FC = () => {
   const navigate = useNavigate();
-  const BASE_URL = "https://timing-feel-intent-robin.trycloudflare.com";
+  const BASE_URL = import.meta.env.VITE_API_BASE_URL;
   const [showPw, setShowPw] = useState(false);
   const [errorMsg, setErrorMsg] = useState("");
   const [errors, setErrors] = useState<Partial<Record<"username" | "password", string>>>({});

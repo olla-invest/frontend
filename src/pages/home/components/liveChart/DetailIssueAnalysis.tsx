@@ -1,12 +1,64 @@
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import SampleImg from "@/assets/images/issueAnalysis-sample-img.png";
-import { useState } from "react";
-export default function DetailIssueAnalysis() {
+// import SampleImg from "@/assets/images/issueAnalysis-sample-img.png";
+import { useEffect, useState } from "react";
+import { getStockNews } from "@/api/chartDetails";
+import type { StockNews } from "@/types/api/chartDetails";
+
+import DOMPurify from "dompurify";
+interface Props {
+  stockCode: string;
+}
+export default function DetailIssueAnalysis({ stockCode }: Props) {
   const [sortType, setSortType] = useState("latest");
+  const [newsData, setNewsData] = useState<StockNews | null>(null);
+
+  const renderTitle = (html: string) => {
+    const clean = DOMPurify.sanitize(html, {
+      ALLOWED_TAGS: ["b"],
+      ALLOWED_ATTR: [],
+    });
+
+    return <b dangerouslySetInnerHTML={{ __html: clean }} />;
+  };
+
+  const renderDescription = (html: string) => {
+    const clean = DOMPurify.sanitize(html, {
+      ALLOWED_TAGS: ["b"],
+      ALLOWED_ATTR: [],
+    });
+
+    return <p className="text-slate-700 text-sm line-clamp-2" dangerouslySetInnerHTML={{ __html: clean }} />;
+  };
+
+  const formatDate = (dateStr: string) => {
+    const date = new Date(dateStr);
+
+    return date.toLocaleString("ko-KR", {
+      year: "numeric",
+      month: "2-digit",
+      day: "2-digit",
+      hour: "2-digit",
+      minute: "2-digit",
+    });
+  };
+
+  useEffect(() => {
+    const fetchNews = async () => {
+      try {
+        const res = await getStockNews(stockCode);
+        setNewsData(res);
+      } catch (err) {
+        console.error("이슈분석 호출 에러", err);
+      }
+    };
+
+    fetchNews();
+  }, [stockCode]);
+
   return (
     <div className="flex flex-col gap-4">
       {/* ai */}
-      <section className="w-full py-2 px-6">
+      {/* <section className="w-full py-2 px-6">
         <div className="rounded-md p-4 bg-muted flex gap-1">
           <i className="icon icon-star-four-color shrink-0" />
           <div className="flex flex-col gap-1 text-sm">
@@ -18,12 +70,12 @@ export default function DetailIssueAnalysis() {
             </p>
           </div>
         </div>
-      </section>
+      </section> */}
       <section className="w-full py-2 flex flex-col gap-4">
         <div className="flex items-center justify-between px-6">
           <h3 className="font-semibold text-xl">기본 정보</h3>
           <div className="flex items-center gap-2.5">
-            <span className="text-muted-foreground text-xs">업데이트 일시 : yyyy-mm-dd hh:mm:ss</span>
+            <span className="text-muted-foreground text-xs">업데이트 일시 : {formatDate(Date())}</span>
             <Tabs defaultValue={sortType} onValueChange={(value) => setSortType(value)}>
               <TabsList className="p-0.75">
                 <TabsTrigger value="latest">최신순</TabsTrigger>
@@ -33,52 +85,31 @@ export default function DetailIssueAnalysis() {
           </div>
         </div>
         <ul className="flex gap-6 flex-col">
-          {/* 이미지 있는경우 */}
-          <li className="w-full">
-            <a className="block px-6">
-              <div className="flex gap-6">
-                {/* 본문 */}
-                <div className="flex flex-col gap-2">
-                  <b>[사설] HBM 기밀에다 석탄 수입 요구, 또 터진 트럼프發 돌발변수</b>
-                  <p className="text-slate-700 text-sm line-clamp-2">
-                    도널드 트럼프 미국 행정부의 한국에 대한 무리한 요구가 한도 끝도 없다. 서울경제신문 취재에 따르면 미 국제무역위원회(ITC)는 삼성전자가 미국 특허관리전문회사(NPE)인 넷리스트의 반도체
-                    특허를 침해했는지 여부를 확인하겠다며 SK하이닉스에 고대역폭메모리(HBM) 관련 기밀 정보들을 요구한 것으로 드러났다. ‘특허 괴물’로 불리는 자국 기업의 이익을 위해 특허 소송 당사자도
-                    아닌 SK하이닉스를 끌어들여 HBM의 설계 방식
-                  </p>
-                  <div className="flex gap-1 items-center text-muted-foreground text-xs">
-                    <span>서울경제</span>
-                    <div className="size-0.5 bg-muted-foreground"></div>
-                    <span>1시간 전</span>
+          {newsData?.items.map((e, i) => {
+            return (
+              <li className="w-full" key={i}>
+                <a className="block px-6" href={e.originallink} target="blank">
+                  <div className="flex gap-6">
+                    {/* 본문 */}
+                    <div className="flex flex-col gap-2">
+                      {renderTitle(e.title)}
+                      {renderDescription(e.description)}
+                      <div className="flex gap-1 items-center text-muted-foreground text-xs">
+                        <span>-</span>
+                        {/* <span>서울경제</span> */}
+                        <div className="size-0.5 bg-muted-foreground"></div>
+                        <span>{formatDate(e.pubDate)}</span>
+                      </div>
+                    </div>
+                    {/* 이미지 */}
+                    {/* <div className="border w-40 shrink-0 rounded-md overflow-hidden">
+                      <img src={SampleImg} alt="예시 이미지" className="w-full" />
+                    </div> */}
                   </div>
-                </div>
-                {/* 이미지 */}
-                <div className="border w-40 shrink-0 rounded-md overflow-hidden">
-                  <img src={SampleImg} alt="예시 이미지" className="w-full" />
-                </div>
-              </div>
-            </a>
-          </li>
-
-          <li className="w-full">
-            <a className="block px-6">
-              <div className="flex gap-6">
-                {/* 본문 */}
-                <div className="flex flex-col gap-2">
-                  <b>[사설] HBM 기밀에다 석탄 수입 요구, 또 터진 트럼프發 돌발변수</b>
-                  <p className="text-slate-700 text-sm line-clamp-2">
-                    도널드 트럼프 미국 행정부의 한국에 대한 무리한 요구가 한도 끝도 없다. 서울경제신문 취재에 따르면 미 국제무역위원회(ITC)는 삼성전자가 미국 특허관리전문회사(NPE)인 넷리스트의 반도체
-                    특허를 침해했는지 여부를 확인하겠다며 SK하이닉스에 고대역폭메모리(HBM) 관련 기밀 정보들을 요구한 것으로 드러났다. ‘특허 괴물’로 불리는 자국 기업의 이익을 위해 특허 소송 당사자도
-                    아닌 SK하이닉스를 끌어들여 HBM의 설계 방식
-                  </p>
-                  <div className="flex gap-1 items-center text-muted-foreground text-xs">
-                    <span>서울경제</span>
-                    <div className="size-0.5 bg-muted-foreground"></div>
-                    <span>1시간 전</span>
-                  </div>
-                </div>
-              </div>
-            </a>
-          </li>
+                </a>
+              </li>
+            );
+          })}
         </ul>
       </section>
     </div>
