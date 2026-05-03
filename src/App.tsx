@@ -14,6 +14,7 @@ import SubLayout from "./layouts/SubLayout";
 import Privacy from "./pages/policies/Privacy";
 import Marketing from "./pages/policies/Marketing";
 import Terms from "./pages/policies/Terms";
+import PlanChange from "./pages/plan";
 
 const App: React.FC = () => {
   useChartSocket();
@@ -27,6 +28,7 @@ const App: React.FC = () => {
         <Route element={<MainLayout />}>
           <Route path="/" element={<Navigate to="/home" replace />} />
           <Route path="/home" element={<Home />} />
+          <Route path="/plan" element={<PlanChange />} />
         </Route>
         <Route path="/login" element={<Login />} />
         <Route path="/signup" element={<SignUp />} />

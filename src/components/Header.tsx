@@ -31,7 +31,13 @@ export function Header() {
           <span className="sr-only">olla</span>
         </h1>
         <div className="flex gap-2 items-center">
-          <Button>olla 플랜 업그레이드하기</Button>
+          <Button
+            onClick={() => {
+              navigate("/plan");
+            }}
+          >
+            olla 플랜 업그레이드하기
+          </Button>
           {isLoggedIn ? (
             <div className="flex gap-2 items-center">
               <button className="size-8">

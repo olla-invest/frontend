@@ -10,7 +10,7 @@ export default function MainLayout() {
       <MainSidebar />
       <SidebarInset className="max-w-468 my-0 mx-auto">
         <Header />
-        <Outlet /> {/* 🔥 children 대신 Outlet */}
+        <Outlet /> {/* children 대신 Outlet */}
         <Footer />
       </SidebarInset>
     </SidebarProvider>
