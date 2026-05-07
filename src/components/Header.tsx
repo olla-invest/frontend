@@ -60,7 +60,7 @@ export function Header() {
         </div>
       </div>
       {showUserMenu && user && (
-        <div className="w-56 absolute right-6 mt-1 rounded-sm bg-white shadow-md border">
+        <div className="w-56 absolute right-6 mt-1 rounded-sm bg-white shadow-md border z-20">
           <div className="p-1">
             <div className="flex py-1.5 px-2 gap-2">
               <img src={UserBtnImg} alt={user + "정보"} className="size-8" />
