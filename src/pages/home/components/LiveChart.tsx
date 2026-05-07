@@ -146,7 +146,7 @@ const columns: ColumnDef<StockRankingApiItem>[] = [
   },
   {
     accessorKey: "companyName",
-    header: () => <div className="min-w-40">기업</div>,
+    header: () => <div className="min-w-40">종목명</div>,
     cell: ({ row }) => (
       <div className="flex gap-2 items-center">
         <div className="size-8 bg-[#D9D9D9] rounded-full" />

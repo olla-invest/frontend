@@ -26,7 +26,7 @@ export default function DetailStockInfo({ stockCode }: Props) {
   const currentYear = new Date().getFullYear().toString();
   const [selectYear, setSelectYear] = useState(currentYear);
   const [detailInfo, setDetailInfo] = useState<StockDetailResponse | null>(null);
-  const [aiInfo] = useState("");
+  // const [aiInfo] = useState("");
 
   useEffect(() => {
     (async () => {
@@ -75,7 +75,7 @@ export default function DetailStockInfo({ stockCode }: Props) {
           </div>
         </div>
 
-        <div className="rounded-md p-4 bg-muted flex gap-1">
+        {/* <div className="rounded-md p-4 bg-muted flex gap-1">
           <i className="icon icon-star-four-color" />
           <div className="flex flex-col gap-1 text-sm">
             {aiInfo === "" ? (
@@ -87,7 +87,7 @@ export default function DetailStockInfo({ stockCode }: Props) {
               </>
             )}
           </div>
-        </div>
+        </div> */}
       </section>
 
       {/* 기본정보 */}
