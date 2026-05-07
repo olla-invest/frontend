@@ -132,11 +132,7 @@ export function IssueTheme() {
       <div className="flex justify-between gpa-4 mb-4">
         <div className="flex gap-2 items-center max-h-8 text-muted-foreground text-xs">
           <div className="bg-muted p-2 rounded-sm flex align-middle gap-1">
-            <span>조회기간: --</span>
-            <span>
-              ({basicData?.updatedAt ? format(new Date(basicData.updatedAt), "yyyy-MM-dd HH:mm:ss") : "-"}
-              업데이트)
-            </span>
+            <span>업데이트 일시 {basicData?.updatedAt ? format(new Date(basicData.updatedAt), "yyyy-MM-dd HH:mm:ss") : "-"}</span>
           </div>
           <span className="text-sm">전체 {basicData?.total ?? 0}건</span>
         </div>
