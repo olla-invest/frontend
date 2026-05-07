@@ -37,7 +37,7 @@ function getThemeLabel(themes: ({ code: number; name: string } | null)[]) {
 }
 
 function getHighPriceLabel(value: { value: string; name: string } | null) {
-  if (!value) return "전체기간";
+  if (!value) return "전체";
   return value.name;
 }
 
