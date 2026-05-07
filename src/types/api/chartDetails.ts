@@ -91,16 +91,23 @@ export interface StockDetailResponse {
 }
 
 export interface Overview {
+  address: string;
+  businessInfo: string[];
+  ceoName: string;
+  corpClass: string;
+  corpCode: string;
   corpName: string;
   corpNameEng: string;
-  ceoName: string;
-  corpClass: "Y" | "K" | "N"; // Y:유가, K:코스닥, N:코넥스
-  industryCode: string;
-  establishedDate: string; // YYYYMMDD
-  settlementMonth: string; // MM
-  address: string;
+  establishedDate: string;
   homepage: string;
+  industryCode: string;
+  industryName: string;
+  listedShares: number | null;
+  marketCap: number | null;
   phone: string;
+  settlementMonth: string;
+  stockCode: string;
+  theme: string;
 }
 
 export interface Income {

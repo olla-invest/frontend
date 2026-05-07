@@ -45,16 +45,21 @@ export default function DetailStockInfo({ stockCode }: Props) {
 
   const getStability = (q: Quarter, key: string) => detailInfo?.indicators?.[q]?.stability?.[key] ?? null;
 
+  const formatDate = (date: string | undefined) => {
+    if (!date) return;
+    return `${date.slice(0, 4)}-${date.slice(4, 6)}-${date.slice(6, 8)}`;
+  };
+
   const sampleBasicInfo1 = [
-    { title: "업종", content: "-" },
-    { title: "테마", content: "-" },
-    { title: "상장일", content: "-" },
+    { title: "업종", content: detailInfo?.overview.industryName },
+    { title: "테마", content: detailInfo?.overview.theme },
+    { title: "상장일", content: formatDate(detailInfo?.overview.establishedDate) },
     { title: "시가총액", content: "-" },
   ];
 
   const sampleBasicInfo2 = [
     { title: "실제 기업가치", content: "-" },
-    { title: "주요사업", content: "-" },
+    { title: "주요사업", content: detailInfo?.overview.businessInfo.join(", ") },
   ];
 
   return (
