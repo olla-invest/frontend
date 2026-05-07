@@ -301,7 +301,7 @@ export function LiveChart() {
 
       setTableData(res.data);
       setUpdateTime(format(new Date(res.data.meta.lastUpdatedAt), "yyyy-MM-dd HH:mm:ss"));
-      setDataDate(res.data.meta.dataDate);
+      setDataDate(`${res.data.meta.queryStartDate}  ~  ${res.data.meta.queryEndDate}`);
       setIsError(false);
     } catch (error) {
       setIsError(true);

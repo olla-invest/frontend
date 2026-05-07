@@ -9,6 +9,8 @@ export interface StockRankingApiResponse {
     dataDate: string;
     lastUpdatedAt: string;
     isInitialized: boolean;
+    queryEndDate: string;
+    queryStartDate: string;
   };
   stocks: StockRankingApiItem[];
 }
