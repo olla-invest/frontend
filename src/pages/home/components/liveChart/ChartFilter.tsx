@@ -155,7 +155,7 @@ export default function ChartFilter(props: ChartFilterProps) {
             >
               <div className="px-2 py-1.5 flex flex-col gap-1">
                 {/* 전체 */}
-                <DropdownMenuRadioItem value="all">전체기간</DropdownMenuRadioItem>
+                <DropdownMenuRadioItem value="all">전체</DropdownMenuRadioItem>
 
                 {HIGH_PRICE_OPTIONS.map((option) => (
                   <DropdownMenuRadioItem key={option.value} value={option.value}>
