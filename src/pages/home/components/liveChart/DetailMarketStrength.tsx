@@ -1,10 +1,10 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import type { DateRange } from "react-day-picker";
 import type { RSPeriod } from "@/components/RSSettingDropdownContent";
 import RSSettingDropdown from "@/components/RSSettingDropdown";
-import { subDays, format } from "date-fns";
+import { getDefaultRSRange } from "@/utils/tradingDay";
+import { format } from "date-fns";
 import { v4 as uuid } from "uuid";
 import { ChartLineLinear } from "./DetailMarketChart";
 import { postMarketStrengthGraphData } from "@/api/chartDetails";
@@ -17,15 +17,12 @@ interface Props {
 export default function DetailMarketStrength({ stockCode }: Props) {
   const [graphData, setGraphData] = useState<MarketStrengthGraph | null>(null);
 
-  const DEFAULT_RANGE: DateRange = {
-    from: subDays(new Date(), 62),
-    to: new Date(),
-  };
+  const defaultRSRange = getDefaultRSRange(63);
 
   const [rsPeriods, setRsPeriods] = useState<RSPeriod[]>([
     {
       id: uuid(),
-      date: DEFAULT_RANGE,
+      date: defaultRSRange,
       ratio: 100,
     },
   ]);
@@ -35,8 +32,8 @@ export default function DetailMarketStrength({ stockCode }: Props) {
   }>({
     rs: [
       {
-        from: format(DEFAULT_RANGE.from!, "yyyyMMdd"),
-        to: format(DEFAULT_RANGE.to!, "yyyyMMdd"),
+        from: format(defaultRSRange.from!, "yyyyMMdd"),
+        to: format(defaultRSRange.to!, "yyyyMMdd"),
         ratio: 100,
       },
     ],
@@ -47,8 +44,8 @@ export default function DetailMarketStrength({ stockCode }: Props) {
       try {
         const res = await postMarketStrengthGraphData({
           stockCode,
-          startDate: format(DEFAULT_RANGE.from!, "yyyyMMdd"),
-          endDate: format(DEFAULT_RANGE.to!, "yyyyMMdd"),
+          startDate: format(defaultRSRange.from!, "yyyyMMdd"),
+          endDate: format(defaultRSRange.to!, "yyyyMMdd"),
           rsFilters: filterValue.rs?.map((v) => ({
             rsStartDate: v.from,
             rsEndDate: v.to,
@@ -96,8 +93,8 @@ export default function DetailMarketStrength({ stockCode }: Props) {
           <ChartLineLinear
             data={graphData.data}
             filterValue={{
-              start: format(DEFAULT_RANGE.from!, "yyyyMMdd"),
-              end: format(DEFAULT_RANGE.to!, "yyyyMMdd"),
+              start: format(defaultRSRange.from!, "yyyyMMdd"),
+              end: format(defaultRSRange.to!, "yyyyMMdd"),
             }}
           />
         )}
