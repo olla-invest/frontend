@@ -1,4 +1,7 @@
+import { useState } from "react";
 import PlanCard, { type PlanCardProps } from "./components/PlanCard";
+import SelectPlanModal from "./components/SelectPlanModal";
+import ChangePlanModal from "./components/ChangePlanModal";
 
 const PlanChange: React.FC = () => {
   const demoPlan: PlanCardProps[] = [
@@ -40,6 +43,9 @@ const PlanChange: React.FC = () => {
       ],
     },
   ];
+
+  const [modal, setModal] = useState("");
+
   return (
     <div className="py-2 px-6 w-full h-[calc(100vh-120px)] overflow-y-auto">
       <div className="mx-auto max-w-312 py-2">
@@ -63,9 +69,11 @@ const PlanChange: React.FC = () => {
           {/* 컨텐츠 영역 */}
           <div className="grid grid-cols-3 gap-4">
             {demoPlan.map((plan, i) => (
-              <PlanCard key={i} {...plan} />
+              <PlanCard key={i} {...plan} setModal={setModal} />
             ))}
           </div>
+          <SelectPlanModal open={modal === "default"} onClose={() => setModal("")} setModal={setModal} />
+          <ChangePlanModal open={modal === "upgrade" || modal === "downgrade"} onClose={() => setModal("")} type={modal} />
         </div>
       </div>
     </div>
