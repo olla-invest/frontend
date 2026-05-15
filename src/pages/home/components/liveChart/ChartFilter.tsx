@@ -18,6 +18,8 @@ import RSSetting from "../../../../components/RSSettingDropdownContent";
 import type { ChartFilterState } from "@/pages/home/components/LiveChart";
 import type { RSPeriod } from "@/components/RSSettingDropdownContent";
 import { v4 as uuid } from "uuid";
+
+import Holidays from "date-holidays";
 import { format, subDays } from "date-fns";
 import type { DateRange } from "react-day-picker";
 import { THEME_CODES } from "@/constants/theme";
@@ -55,10 +57,50 @@ export default function ChartFilter(props: ChartFilterProps) {
   const [priceChange, setPriceChange] = useState(false);
   const [rsOpen, setRsOpen] = useState(false);
   /** 기본 기간: 오늘 기준 최근 63일 */
-  const DEFAULT_RANGE: DateRange = {
-    from: subDays(new Date(), 62),
-    to: new Date(),
+
+  const hd = new Holidays("KR");
+
+  const isTradingDay = (date: Date) => {
+    const day = date.getDay();
+
+    const isWeekend = day === 0 || day === 6;
+    const isHoliday = !!hd.isHoliday(date);
+
+    return !isWeekend && !isHoliday;
   };
+
+  const getLatestTradingDay = (baseDate: Date = new Date()) => {
+    let date = new Date(baseDate);
+
+    while (!isTradingDay(date)) {
+      date = subDays(date, 1);
+    }
+
+    return date;
+  };
+
+  const getPreviousTradingDay = (tradingDays: number, baseDate: Date = new Date()) => {
+    let date = new Date(baseDate);
+    let count = 0;
+
+    while (count < tradingDays) {
+      date = subDays(date, 1);
+
+      if (isTradingDay(date)) {
+        count++;
+      }
+    }
+
+    return date;
+  };
+
+  const latestTradingDay = getLatestTradingDay();
+
+  const DEFAULT_RANGE: DateRange = {
+    from: getPreviousTradingDay(63, latestTradingDay),
+    to: latestTradingDay,
+  };
+
   const [rsPeriods, setRsPeriods] = useState<RSPeriod[]>([
     {
       id: uuid(),
