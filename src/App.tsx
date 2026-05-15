@@ -15,6 +15,7 @@ import Privacy from "./pages/policies/Privacy";
 import Marketing from "./pages/policies/Marketing";
 import Terms from "./pages/policies/Terms";
 import PlanChange from "./pages/plan";
+import InvestmentNotice from "./pages/policies/InvestmentNotice";
 
 const App: React.FC = () => {
   useChartSocket();
@@ -37,6 +38,7 @@ const App: React.FC = () => {
         <Route element={<SubLayout />}>
           <Route path="/policies/privacy" element={<Privacy />} />
           <Route path="/policies/terms" element={<Terms />} />
+          <Route path="/policies/investmentNotice" element={<InvestmentNotice />} />
           <Route path="/policies/marketing" element={<Marketing />} />
         </Route>
       </Routes>

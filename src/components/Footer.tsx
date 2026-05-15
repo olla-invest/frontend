@@ -29,7 +29,14 @@ export function Footer({ isHideBottomMenu = false }: FooterProps) {
               개인정보 처리방침
             </a>
             <div className="w-px h-3 bg-slate-300" />
-            <a className="hover:font-semibold">투자주의사항</a>
+            <a
+              onClick={() => {
+                window.open(`${baseURL}/policies/investmentNotice`);
+              }}
+              className="hover:font-semibold"
+            >
+              투자주의사항
+            </a>
           </div>
         )}
         <span className="ml-auto">ⓒ2026 olla invest Co., Ltd All Rights Reserved.</span>
