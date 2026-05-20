@@ -84,6 +84,7 @@ const Login: React.FC = () => {
         name: res.user.name,
         email: res.user.email,
         userId: res.user.userId,
+        pw: loginData.password,
       });
 
       // 관심종목 + 테마 병렬 조회

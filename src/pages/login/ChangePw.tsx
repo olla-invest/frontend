@@ -4,18 +4,22 @@ import { InputGroup, InputGroupAddon, InputGroupInput } from "@/components/ui/in
 import { EyeOffIcon, EyeIcon } from "lucide-react";
 import { patchChangePw } from "@/api/auth";
 import { useNavigate } from "react-router-dom";
+import { useAuthStore } from "@/store/useAuthStore";
 
 interface PwData {
+  currentPassword: string;
   newPassword: string;
   confirmPassword: string;
 }
 
 export default function ChangePw() {
+  const { user } = useAuthStore();
   const navigate = useNavigate();
   const [showPw, setShowPw] = useState(false);
   const [showCheckPw, setShowCheckPw] = useState(false);
 
   const [pwData, setPwData] = useState<PwData>({
+    currentPassword: user?.pw || "",
     newPassword: "",
     confirmPassword: "",
   });

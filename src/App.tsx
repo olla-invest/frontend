@@ -107,14 +107,7 @@ const App: React.FC = () => {
           }
         />
 
-        <Route
-          path="/change-pw"
-          element={
-            <PublicRoute>
-              <ChangePw />
-            </PublicRoute>
-          }
-        />
+        <Route path="/change-pw" element={<ChangePw />} />
 
         <Route
           path="/social-signup"

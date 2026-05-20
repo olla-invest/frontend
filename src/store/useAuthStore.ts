@@ -7,6 +7,7 @@ interface User {
   name?: string;
   email?: string;
   userId?: string;
+  pw?: string;
 }
 
 interface AuthState {
@@ -14,7 +15,7 @@ interface AuthState {
   accessToken: string | null;
   isLoggedIn: boolean;
 
-  login: (data: { accessToken: string; username: string; name: string; email: string; userId: string }) => void;
+  login: (data: { accessToken: string; username: string; name: string; email: string; userId: string; pw: string }) => void;
   logout: () => void;
 }
 
@@ -25,10 +26,10 @@ export const useAuthStore = create<AuthState>()(
       accessToken: null,
       isLoggedIn: false,
 
-      login: ({ accessToken, username, name, email, userId }) => {
+      login: ({ accessToken, username, name, email, userId, pw }) => {
         set({
           accessToken,
-          user: { username, name, email, userId },
+          user: { username, name, email, userId, pw },
           isLoggedIn: true,
         });
       },
