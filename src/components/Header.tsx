@@ -35,14 +35,12 @@ export function Header() {
             onClick={() => {
               navigate("/plan");
             }}
+            className="hidden md:block"
           >
             olla 플랜 업그레이드하기
           </Button>
           {isLoggedIn ? (
             <div className="flex gap-2 items-center">
-              <button className="size-8">
-                <i className="icon icon-bell" />
-              </button>
               <button
                 className="size-8"
                 onClick={() => {

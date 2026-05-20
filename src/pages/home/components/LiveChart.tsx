@@ -378,7 +378,7 @@ export function LiveChart() {
       <div className="w-full flex flex-col h-full">
         <ChartFilter filter={filter} setFilter={setFilter} onSearch={handleSearch} />
 
-        <div className="flex justify-between items-center py-4">
+        <div className="justify-between items-center py-4 hidden md:flex">
           <div className="flex gap-2 items-center max-h-8 text-muted-foreground text-xs">
             <div className="bg-muted p-2 rounded-sm flex align-middle gap-1">
               <span>조회기간:</span>

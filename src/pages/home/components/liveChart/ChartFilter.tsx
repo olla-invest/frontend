@@ -67,7 +67,7 @@ export default function ChartFilter(props: ChartFilterProps) {
 
   return (
     <div className="mt-2 pb-4 border-b">
-      <form className="flex gap-2">
+      <form className="flex gap-2 flex-col md:flex-row">
         <Tabs
           value={filterValue.market}
           onValueChange={(value) =>
@@ -76,172 +76,175 @@ export default function ChartFilter(props: ChartFilterProps) {
               market: value,
             }))
           }
+          className="w-full md:w-fit flex-1"
         >
-          <TabsList className="p-0.75">
+          <TabsList className="p-0.75 w-full md:w-fit">
             <TabsTrigger value="all">전체</TabsTrigger>
             <TabsTrigger value="0">코스피</TabsTrigger>
             <TabsTrigger value="10">코스닥</TabsTrigger>
           </TabsList>
         </Tabs>
-        <DropdownMenu open={rsOpen} onOpenChange={setRsOpen}>
-          <DropdownMenuTrigger asChild>
-            <Button variant="outline" className={`${filterValue.rs && "border-muted-foreground!"}`}>
-              RS 상세설정 <ChevronDown />
-            </Button>
-          </DropdownMenuTrigger>
-          <DropdownMenuContent className="w-93.75 p-0" align="start">
-            <DropdownMenuGroup>
-              <DropdownMenuLabel className="border-b p-4">
-                <div className="text-base font-medium mb-2">RS 상세 설정</div>
-                <div className="text-sm text-muted-foreground">시장 대비 강도 기간 및 비중을 설정할 수 있습니다.</div>
+        <div className="flex gap-2 overflow-x-auto">
+          <DropdownMenu open={rsOpen} onOpenChange={setRsOpen}>
+            <DropdownMenuTrigger asChild>
+              <Button variant="outline" className={`${filterValue.rs && "border-muted-foreground!"}`}>
+                RS 상세설정 <ChevronDown />
+              </Button>
+            </DropdownMenuTrigger>
+            <DropdownMenuContent className="w-93.75 p-0" align="start">
+              <DropdownMenuGroup>
+                <DropdownMenuLabel className="border-b p-4">
+                  <div className="text-base font-medium mb-2">RS 상세 설정</div>
+                  <div className="text-sm text-muted-foreground">시장 대비 강도 기간 및 비중을 설정할 수 있습니다.</div>
+                </DropdownMenuLabel>
+
+                <RSSetting value={rsPeriods} onChange={setRsPeriods} />
+                <div className="p-4 text-right">
+                  <Button
+                    onClick={() => {
+                      filterSetter((prev) => ({
+                        ...prev,
+                        rs: rsPeriods
+                          .filter((p) => p.date?.from && p.date?.to)
+                          .map((p) => ({
+                            from: format(p.date!.from!, "yyyy-MM-dd"),
+                            to: format(p.date!.to!, "yyyy-MM-dd"),
+                            ratio: p.ratio,
+                          })),
+                      }));
+                      setRsOpen(false);
+                    }}
+                  >
+                    적용
+                  </Button>
+                </div>
+              </DropdownMenuGroup>
+            </DropdownMenuContent>
+          </DropdownMenu>
+          <DropdownMenu>
+            <DropdownMenuTrigger asChild>
+              <Button variant="outline" className={`${filterValue.isHighPrice && "border-muted-foreground!"}`}>
+                신고가 여부 <div className="size-0.5 bg-muted-foreground rounded-full" />
+                <span className="text-primary">{getHighPriceLabel(filterValue.isHighPrice)}</span> <ChevronDown />
+              </Button>
+            </DropdownMenuTrigger>
+
+            <DropdownMenuContent className="w-52 p-0" align="start">
+              <DropdownMenuLabel className="border-b p-1">
+                <div className="px-2 py-1.5">신고가 여부</div>
               </DropdownMenuLabel>
 
-              <RSSetting value={rsPeriods} onChange={setRsPeriods} />
-              <div className="p-4 text-right">
-                <Button
-                  onClick={() => {
+              <DropdownMenuRadioGroup
+                value={filterValue.isHighPrice?.value ?? "all"}
+                onValueChange={(value) => {
+                  if (value === "all") {
                     filterSetter((prev) => ({
                       ...prev,
-                      rs: rsPeriods
-                        .filter((p) => p.date?.from && p.date?.to)
-                        .map((p) => ({
-                          from: format(p.date!.from!, "yyyy-MM-dd"),
-                          to: format(p.date!.to!, "yyyy-MM-dd"),
-                          ratio: p.ratio,
-                        })),
+                      isHighPrice: null,
                     }));
-                    setRsOpen(false);
-                  }}
-                >
-                  적용
-                </Button>
-              </div>
-            </DropdownMenuGroup>
-          </DropdownMenuContent>
-        </DropdownMenu>
-        <DropdownMenu>
-          <DropdownMenuTrigger asChild>
-            <Button variant="outline" className={`${filterValue.isHighPrice && "border-muted-foreground!"}`}>
-              신고가 여부 <div className="size-0.5 bg-muted-foreground rounded-full" />
-              <span className="text-primary">{getHighPriceLabel(filterValue.isHighPrice)}</span> <ChevronDown />
-            </Button>
-          </DropdownMenuTrigger>
+                    return;
+                  }
 
-          <DropdownMenuContent className="w-52 p-0" align="start">
-            <DropdownMenuLabel className="border-b p-1">
-              <div className="px-2 py-1.5">신고가 여부</div>
-            </DropdownMenuLabel>
+                  const selected = HIGH_PRICE_OPTIONS.find((o) => o.value === value);
 
-            <DropdownMenuRadioGroup
-              value={filterValue.isHighPrice?.value ?? "all"}
-              onValueChange={(value) => {
-                if (value === "all") {
                   filterSetter((prev) => ({
                     ...prev,
-                    isHighPrice: null,
+                    isHighPrice: selected ?? null,
                   }));
-                  return;
-                }
+                }}
+              >
+                <div className="px-2 py-1.5 flex flex-col gap-1">
+                  {/* 전체 */}
+                  <DropdownMenuRadioItem value="all">전체</DropdownMenuRadioItem>
 
-                const selected = HIGH_PRICE_OPTIONS.find((o) => o.value === value);
+                  {HIGH_PRICE_OPTIONS.map((option) => (
+                    <DropdownMenuRadioItem key={option.value} value={option.value}>
+                      {option.name}
+                    </DropdownMenuRadioItem>
+                  ))}
+                </div>
+              </DropdownMenuRadioGroup>
+            </DropdownMenuContent>
+          </DropdownMenu>
 
+          <DropdownMenu>
+            <DropdownMenuTrigger asChild>
+              <Button variant="outline" className={`${filterValue.theme.length !== 0 && "border-muted-foreground!"}`}>
+                테마
+                <div className="size-0.5 bg-muted-foreground rounded-full" />
+                <span className="text-primary">{getThemeLabel(filterValue.theme)}</span> <ChevronDown />
+              </Button>
+            </DropdownMenuTrigger>
+
+            <DropdownMenuContent className="w-52 p-0" align="start">
+              <DropdownMenuGroup>
+                <DropdownMenuLabel className="border-b p-1">
+                  <div className="px-2 py-1.5">테마</div>
+                </DropdownMenuLabel>
+
+                <div className="px-2 py-1.5 flex flex-col gap-1 max-h-62.5 overflow-y-auto">
+                  {/* 전체 */}
+                  <DropdownMenuCheckboxItem
+                    checked={filterValue.theme.length === 0}
+                    onCheckedChange={() => {
+                      filterSetter((prev) => ({
+                        ...prev,
+                        theme: [],
+                      }));
+                    }}
+                  >
+                    전체
+                  </DropdownMenuCheckboxItem>
+
+                  {THEME_CODES?.map((theme) => {
+                    const checked = filterValue.theme.some((t) => t?.code === theme.code);
+
+                    return (
+                      <DropdownMenuCheckboxItem
+                        key={theme.code}
+                        checked={checked}
+                        onCheckedChange={(isChecked) => {
+                          filterSetter((prev) => ({
+                            ...prev,
+                            theme: isChecked ? [...prev.theme, theme] : prev.theme.filter((t) => t?.code !== theme.code),
+                          }));
+                        }}
+                      >
+                        {theme.name}
+                      </DropdownMenuCheckboxItem>
+                    );
+                  })}
+                </div>
+              </DropdownMenuGroup>
+            </DropdownMenuContent>
+          </DropdownMenu>
+
+          <ButtonGroup>
+            <ButtonGroupText className="bg-white text-foreground shrink-0">거래대금</ButtonGroupText>
+            <Input
+              className={`${priceChange ? "text-foreground" : "text-muted-foreground"} text-right min-w-35 shrink-0`}
+              placeholder="금액을 입력해 주세요"
+              inputMode="numeric"
+              pattern="[0-9]*"
+              value={priceInput}
+              onChange={(e) => {
+                setPriceChange(true);
+                const raw = e.target.value.replace(/[^0-9]/g, "");
+                const formatted = formatWithComma(raw);
+                setPriceInput(formatted);
                 filterSetter((prev) => ({
                   ...prev,
-                  isHighPrice: selected ?? null,
+                  price: raw === "" ? null : Number(raw),
                 }));
               }}
-            >
-              <div className="px-2 py-1.5 flex flex-col gap-1">
-                {/* 전체 */}
-                <DropdownMenuRadioItem value="all">전체</DropdownMenuRadioItem>
+            />
 
-                {HIGH_PRICE_OPTIONS.map((option) => (
-                  <DropdownMenuRadioItem key={option.value} value={option.value}>
-                    {option.name}
-                  </DropdownMenuRadioItem>
-                ))}
-              </div>
-            </DropdownMenuRadioGroup>
-          </DropdownMenuContent>
-        </DropdownMenu>
-
-        <DropdownMenu>
-          <DropdownMenuTrigger asChild>
-            <Button variant="outline" className={`${filterValue.theme.length !== 0 && "border-muted-foreground!"}`}>
-              테마
-              <div className="size-0.5 bg-muted-foreground rounded-full" />
-              <span className="text-primary">{getThemeLabel(filterValue.theme)}</span> <ChevronDown />
-            </Button>
-          </DropdownMenuTrigger>
-
-          <DropdownMenuContent className="w-52 p-0" align="start">
-            <DropdownMenuGroup>
-              <DropdownMenuLabel className="border-b p-1">
-                <div className="px-2 py-1.5">테마</div>
-              </DropdownMenuLabel>
-
-              <div className="px-2 py-1.5 flex flex-col gap-1 max-h-62.5 overflow-y-auto">
-                {/* 전체 */}
-                <DropdownMenuCheckboxItem
-                  checked={filterValue.theme.length === 0}
-                  onCheckedChange={() => {
-                    filterSetter((prev) => ({
-                      ...prev,
-                      theme: [],
-                    }));
-                  }}
-                >
-                  전체
-                </DropdownMenuCheckboxItem>
-
-                {THEME_CODES?.map((theme) => {
-                  const checked = filterValue.theme.some((t) => t?.code === theme.code);
-
-                  return (
-                    <DropdownMenuCheckboxItem
-                      key={theme.code}
-                      checked={checked}
-                      onCheckedChange={(isChecked) => {
-                        filterSetter((prev) => ({
-                          ...prev,
-                          theme: isChecked ? [...prev.theme, theme] : prev.theme.filter((t) => t?.code !== theme.code),
-                        }));
-                      }}
-                    >
-                      {theme.name}
-                    </DropdownMenuCheckboxItem>
-                  );
-                })}
-              </div>
-            </DropdownMenuGroup>
-          </DropdownMenuContent>
-        </DropdownMenu>
-
-        <ButtonGroup>
-          <ButtonGroupText className="bg-white text-foreground">거래대금</ButtonGroupText>
-          <Input
-            className={`${priceChange ? "text-foreground" : "text-muted-foreground"} text-right`}
-            placeholder="금액을 입력해 주세요"
-            inputMode="numeric"
-            pattern="[0-9]*"
-            value={priceInput}
-            onChange={(e) => {
-              setPriceChange(true);
-              const raw = e.target.value.replace(/[^0-9]/g, "");
-              const formatted = formatWithComma(raw);
-              setPriceInput(formatted);
-              filterSetter((prev) => ({
-                ...prev,
-                price: raw === "" ? null : Number(raw),
-              }));
-            }}
-          />
-
-          <ButtonGroupText className="bg-white text-foreground">원</ButtonGroupText>
-        </ButtonGroup>
-        <Button type="button" variant="outline" className="text-primary" onClick={() => props.onSearch(filterValue)}>
-          조회
-        </Button>
+            <ButtonGroupText className="bg-white text-foreground">원</ButtonGroupText>
+          </ButtonGroup>
+          <Button type="button" variant="outline" className="text-primary hidden md:block" onClick={() => props.onSearch(filterValue)}>
+            조회
+          </Button>
+        </div>
       </form>
     </div>
   );

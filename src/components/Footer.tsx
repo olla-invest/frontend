@@ -5,8 +5,8 @@ interface FooterProps {
 export function Footer({ isHideBottomMenu = false }: FooterProps) {
   const baseURL = window.location.origin;
   return (
-    <footer className="absolute bottom-0 left-0 h-17 p-6 border-t w-full">
-      <div className="flex items-center justify-between text-sm text-muted-foreground">
+    <footer className="absolute bottom-0 left-0 md:h-17 md:p-6 pt-12 pb-16 border-t w-full">
+      <div className="flex items-center justify-between text-sm text-muted-foreground flex-col gap-4 md:flex-row">
         {!isHideBottomMenu && (
           <div className="flex gap-2 items-center cursor-pointer transition-all">
             <a
@@ -39,7 +39,7 @@ export function Footer({ isHideBottomMenu = false }: FooterProps) {
             </a>
           </div>
         )}
-        <span className="ml-auto">ⓒ2026 olla invest Co., Ltd All Rights Reserved.</span>
+        <span className="md:ml-auto">ⓒ2026 olla invest Co., Ltd All Rights Reserved.</span>
       </div>
     </footer>
   );
