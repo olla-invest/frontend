@@ -12,8 +12,8 @@ export default function AuthCallback() {
     const userId = params.get("userId");
 
     if (token) {
-      sessionStorage.setItem("accessToken", token);
-      sessionStorage.setItem("socialUserId", userId ?? "");
+      localStorage.setItem("accessToken", token);
+      localStorage.setItem("socialUserId", userId ?? "");
 
       navigate("/social-signup", { replace: true });
     } else {

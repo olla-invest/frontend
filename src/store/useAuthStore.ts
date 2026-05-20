@@ -41,13 +41,13 @@ export const useAuthStore = create<AuthState>()(
           user: null,
           isLoggedIn: false,
         });
-        sessionStorage.removeItem("auth-storage");
+        localStorage.removeItem("auth-storage");
         window.location.reload();
       },
     }),
     {
       name: "auth-storage",
-      storage: createJSONStorage(() => sessionStorage),
+      storage: createJSONStorage(() => localStorage),
     },
   ),
 );

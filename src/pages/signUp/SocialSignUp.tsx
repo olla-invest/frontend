@@ -47,7 +47,7 @@ const SocialSignUp: React.FC = () => {
       // await api.socialSignup(...)
 
       // 현재는 토큰 이미 callback에서 저장된 상태라고 가정
-      const token = sessionStorage.getItem("accessToken");
+      const token = localStorage.getItem("accessToken");
 
       if (!token) {
         throw new Error("인증 정보가 없습니다.");
