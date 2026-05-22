@@ -23,10 +23,7 @@ export default function LiveChartDetailPage() {
         setLoading(true);
         setIsError(false);
 
-        const [basicRes, newsRes] = await Promise.all([
-          getStockBasicData(stockCode),
-          getStockNews(stockCode).catch(() => null),
-        ]);
+        const [basicRes, newsRes] = await Promise.all([getStockBasicData(stockCode), getStockNews(stockCode).catch(() => null)]);
 
         const basicData = basicRes.data;
 
@@ -48,7 +45,11 @@ export default function LiveChartDetailPage() {
   }, [stockCode]);
 
   if (loading) {
-    return <LoadingUi message="종목 정보를 불러오는 중입니다" />;
+    return (
+      <div className="absolute top-0 left-0 w-full h-full flex flex-col items-center justify-center">
+        <LoadingUi message="종목 정보를 불러오는 중입니다" />
+      </div>
+    );
   }
 
   if (isError || !detailInfo) {
