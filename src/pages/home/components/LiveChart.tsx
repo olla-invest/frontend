@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState, useCallback, useRef } from "react";
+import { useEffect, useState, useCallback, useRef, useMemo } from "react";
 import { useNavigate } from "react-router-dom";
 import { useChartSocket } from "@/hooks/useChartSocket";
 import { useLiveStore } from "@/store/liveChartStore";
@@ -46,6 +46,11 @@ import { useIsMobile } from "@/hooks/use-mobile";
 const STOCK_DETAIL_OPEN_MODE: StockDetailOpenMode = "page";
 /** page 모드일 때 새 탭 또는 이동 방식 */
 const STOCK_DETAIL_PAGE_TARGET: StockDetailPageTarget = "auto";
+
+const DESKTOP_DEFAULT_PAGE_SIZE = 10;
+const MOBILE_PAGE_SIZE = 50;
+
+const MOBILE_COLUMN_KEYS = new Set(["rank", "companyName", "currentPrice", "relativeStrengthScore"]);
 
 const BASE_URL = import.meta.env.VITE_API_BASE_URL;
 
@@ -119,11 +124,14 @@ function LivePriceCell({ stockCode, basePrice, baseRate }: LivePriceCellProps) {
 
   return (
     <div
-      className={`flex gap-1 items-end min-w-40 justify-end
+      className={`flex gap-1 items-end min-w-0 justify-end flex-col md:min-w-40 md:flex-row
       transition-colors duration-300
       ${highlight === "up" ? "bg-rose-100" : highlight === "down" ? "bg-blue-100" : ""}`}
     >
-      <div>{formatNumber(displayPrice)}</div>
+      <div>
+        {formatNumber(displayPrice)}
+        <span className="md:hidden inline">원</span>
+      </div>
 
       <div className={`w-14 shrink-0 text-sm text-right ${rate?.startsWith("+") ? "text-rose-500" : rate?.startsWith("-") ? "text-blue-500" : "text-muted-foreground"}`}>{rate}</div>
     </div>
@@ -155,24 +163,25 @@ const renderIndicators = (row: Row<StockRankingApiItem>) => {
 const columns: ColumnDef<StockRankingApiItem>[] = [
   {
     accessorKey: "rank",
-    header: () => <div className="text-left w-16">순위</div>,
+    header: () => <div className="text-left md:w-16">순위</div>,
     cell: ({ row }) => <div>{row.getValue("rank")}</div>,
   },
   {
     accessorKey: "companyName",
-    header: () => <div className="min-w-40">종목명</div>,
+    header: () => <div className="md:min-w-40">종목명</div>,
     cell: ({ row }) => (
-      <div className="flex gap-2 items-center">
-        <div className="size-8 bg-[#D9D9D9] rounded-full overflow-hidden text-center">
+      <div className="flex gap-2 items-center min-w-0">
+        <div className="size-8 shrink-0 bg-[#D9D9D9] rounded-full overflow-hidden hidden md:block">
           <img src={getStockImageUrl(row.original.id)} alt={row.original.companyName} className="w-full h-full object-cover" />
         </div>
-        <span className="font-semibold text-slate-800">{row.getValue("companyName")}</span>
+
+        <div className="min-w-0 w-[80px] font-semibold text-slate-800 line-clamp-2 truncate">{row.getValue("companyName")}</div>
       </div>
     ),
   },
   {
     accessorKey: "currentPrice",
-    header: () => <div className="text-right min-w-40">현재가</div>,
+    header: () => <div className="text-right md:min-w-40">현재가</div>,
     cell: ({ row }) => <LivePriceCell stockCode={row.original.id} basePrice={row.getValue<number>("currentPrice")} baseRate={row.original.investmentIndicators} />,
   },
   {
@@ -182,7 +191,13 @@ const columns: ColumnDef<StockRankingApiItem>[] = [
   },
   {
     accessorKey: "relativeStrengthScore",
-    header: () => <div className="text-right min-w-32">시장대비강도 점수</div>,
+    header: () => (
+      <div className="text-right md:min-w-32">
+        시장대비
+        <br />
+        강도 점수
+      </div>
+    ),
     cell: ({ row }) => <div className="text-right">{row.getValue("relativeStrengthScore")}</div>,
   },
   {
@@ -289,12 +304,13 @@ export function LiveChart() {
     openStockDetailInNewTab(row.id);
   };
 
-  //페이지 네이션
+  //페이지 네이션 (데스크톱)
   const [page, setPage] = useState(1); // 1-based
-  const [pageSize, setPageSize] = useState(10);
+  const [pageSize, setPageSize] = useState(DESKTOP_DEFAULT_PAGE_SIZE);
 
   //로딩 상태관리
   const [loading, setLoading] = useState(true);
+  const [loadingMore, setLoadingMore] = useState(false);
   const [updateTime, setUpdateTime] = useState("- -:-:-");
   const [dataDate, setDataDate] = useState("- ~ - ");
   const [isError, setIsError] = useState(false);
@@ -309,13 +325,31 @@ export function LiveChart() {
   });
   const [appliedFilter, setAppliedFilter] = useState<ChartFilterState>(filter);
 
+  const effectivePageSize = isMobile ? MOBILE_PAGE_SIZE : pageSize;
+
+  const getColumnKey = (col: ColumnDef<StockRankingApiItem>) => {
+    if ("accessorKey" in col && col.accessorKey != null) return String(col.accessorKey);
+    if ("id" in col && col.id) return col.id;
+    return undefined;
+  };
+
+  const activeColumns = useMemo(
+    () =>
+      columns.filter((col) => {
+        if (!isMobile) return true;
+        const key = getColumnKey(col);
+        return key != null && MOBILE_COLUMN_KEYS.has(key);
+      }),
+    [isMobile],
+  );
+
   const buildRequest = (filter: ChartFilterState, targetPage: number): GetRealTimeChartRequest => {
     const themes = filter.theme.map((t) => t?.code).filter((v): v is number => Boolean(v));
 
     return {
       marketType: filter.market === "0" ? "0" : filter.market,
       page: targetPage,
-      pageSize,
+      pageSize: effectivePageSize,
 
       filters:
         filter.isHighPrice !== null || themes.length > 0 || filter.price !== null
@@ -336,39 +370,71 @@ export function LiveChart() {
     };
   };
 
-  const fetchData = async (targetFilter: ChartFilterState, targetPage: number) => {
+  const fetchData = async (targetFilter: ChartFilterState, targetPage: number, options?: { append?: boolean }) => {
+    const append = Boolean(options?.append && isMobile);
+
     try {
-      setLoading(true);
+      if (append) {
+        setLoadingMore(true);
+      } else {
+        setLoading(true);
+      }
 
       const requestBody = buildRequest(targetFilter, targetPage);
 
       const res = await getRealTimeChart(requestBody);
 
-      setTableData(res.data);
+      setTableData((prev) => {
+        if (append && prev) {
+          return {
+            ...res.data,
+            stocks: [...prev.stocks, ...res.data.stocks],
+          };
+        }
+        return res.data;
+      });
       setUpdateTime(format(new Date(res.data.meta.lastUpdatedAt), "yyyy-MM-dd HH:mm:ss"));
       setDataDate(`${res.data.meta.queryStartDate}  ~  ${res.data.meta.queryEndDate}`);
       setIsError(false);
     } catch (error) {
-      setIsError(true);
+      if (!append) {
+        setIsError(true);
+      }
       console.error("API 실패:", error);
     } finally {
       setLoading(false);
+      setLoadingMore(false);
     }
   };
 
-  const handleSearch = async () => {
-    const nextFilter = { ...filter };
+  const handleLoadMore = async () => {
+    if (!tableData || loadingMore || loading) return;
 
+    const nextPage = tableData.page + 1;
+    if (nextPage > tableData.totalPages) return;
+
+    await fetchData(appliedFilter, nextPage, { append: true });
+  };
+
+  const hasMoreMobile = Boolean(isMobile && tableData && tableData.page < tableData.totalPages);
+
+  const handleSearch = async (searchFilter?: ChartFilterState) => {
+    const nextFilter = searchFilter ?? filter;
+
+    setFilter(nextFilter);
     setAppliedFilter(nextFilter);
     setPage(1);
 
-    await fetchData(nextFilter, 1);
+    // 모바일은 appliedFilter 변경 시 useEffect에서 조회
+    if (!isMobile) {
+      await fetchData(nextFilter, 1);
+    }
   };
 
   const refetch = useCallback(async () => {
-    if (loading) return; // 중복 방지
-    await fetchData(appliedFilter, page);
-  }, [appliedFilter, page, loading]);
+    if (loading || loadingMore) return;
+    await fetchData(appliedFilter, isMobile ? 1 : page);
+  }, [appliedFilter, page, loading, loadingMore, isMobile]);
 
   const lastReloadRef = useRef<string | null>(null);
 
@@ -386,14 +452,20 @@ export function LiveChart() {
   useChartSocket(handleMetricsUpdated);
 
   useEffect(() => {
+    if (isMobile) return;
     fetchData(appliedFilter, page);
-  }, [page, pageSize, appliedFilter]);
+  }, [page, pageSize, appliedFilter, isMobile]);
+
+  useEffect(() => {
+    if (!isMobile) return;
+    fetchData(appliedFilter, 1);
+  }, [appliedFilter, isMobile]);
 
   const table = useReactTable({
     data: tableData?.stocks ?? [],
     manualPagination: true,
     pageCount: tableData?.totalPages ?? -1,
-    columns,
+    columns: activeColumns,
     state: {
       sorting,
       columnFilters,
@@ -471,8 +543,8 @@ export function LiveChart() {
             </DropdownMenu>
           </div>
         </div>
-        <div className="flex flex-col gap-4 max-h-[calc(100%-172px)] flex-1 justify-between overflow-x-auto">
-          <Table className="h-full min-w-max">
+        <div className="flex flex-col gap-4 md:max-h-[calc(100%-172px)] flex-1 justify-between overflow-visible">
+          <Table className={`h-full ${isMobile ? "w-full" : "min-w-max"}`}>
             <TableHeader className="sticky top-0 left-0 bg-white shadow-[0_1px_0_0_rgba(0,0,0,0.1)] shrink-0">
               {table.getHeaderGroups().map((hg) => (
                 <TableRow key={hg.id}>
@@ -508,7 +580,7 @@ export function LiveChart() {
               {isError ? (
                 <div className="flex flex-col gap-2 items-center">
                   <span className="text-center text-sm text-muted-foreground">조회중 오류가 발생했습니다</span>
-                  <Button onClick={() => fetchData(appliedFilter, page)} className="w-fit">
+                  <Button onClick={() => fetchData(appliedFilter, isMobile ? 1 : page)} className="w-fit">
                     재조회
                   </Button>
                 </div>
@@ -519,8 +591,15 @@ export function LiveChart() {
               )}
             </div>
           )}
-          {!loading && tableData?.totalCount && tableData?.totalCount > 0 ? (
-            <Pagination className="justify-end">
+          {isMobile && hasMoreMobile ? (
+            <div className="flex justify-center py-2">
+              <Button type="button" variant="secondary" className="w-full" disabled={loadingMore} onClick={handleLoadMore}>
+                {loadingMore ? "불러오는 중..." : "더보기"}
+              </Button>
+            </div>
+          ) : null}
+          {!isMobile && !loading && tableData?.totalCount && tableData?.totalCount > 0 ? (
+            <Pagination className="justify-end hidden md:flex">
               <PaginationContent>
                 {/* 이전 */}
                 <PaginationItem>

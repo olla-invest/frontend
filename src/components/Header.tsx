@@ -5,6 +5,7 @@ import UserBtnImg from "@/assets/images/user-info.png";
 import { useState } from "react";
 import { toast } from "sonner";
 import ConfirmModal from "./confirmModal";
+import { useIsMobile } from "@/hooks/use-mobile";
 
 export function Header() {
   const navigate = useNavigate();
@@ -18,6 +19,8 @@ export function Header() {
     setShowUserMenu(false);
     toast.success("로그아웃 되었습니다", { position: "top-center" });
   };
+
+  const isMobile = useIsMobile();
 
   return (
     <header className="h-13 py-2 px-6">
@@ -69,26 +72,30 @@ export function Header() {
             </div>
           </div>
           <ul className="flex flex-col gap-2 p-1 text-sm text-popover-foreground font-normal border-t">
-            <li>
-              <button
-                className="w-full px-2 py-1.5 cursor-pointer text-left"
-                onClick={() => {
-                  toast.success("준비중 입니다", { position: "top-center" });
-                }}
-              >
-                플랜 업그레이드 하기
-              </button>
-            </li>
-            <li>
-              <button
-                className="w-full px-2 py-1.5 cursor-pointer text-left"
-                onClick={() => {
-                  toast.success("준비중 입니다", { position: "top-center" });
-                }}
-              >
-                설정
-              </button>
-            </li>
+            {!isMobile && (
+              <>
+                <li>
+                  <button
+                    className="w-full px-2 py-1.5 cursor-pointer text-left"
+                    onClick={() => {
+                      toast.success("준비중 입니다", { position: "top-center" });
+                    }}
+                  >
+                    플랜 업그레이드 하기
+                  </button>
+                </li>
+                <li>
+                  <button
+                    className="w-full px-2 py-1.5 cursor-pointer text-left"
+                    onClick={() => {
+                      toast.success("준비중 입니다", { position: "top-center" });
+                    }}
+                  >
+                    설정
+                  </button>
+                </li>
+              </>
+            )}
             <li>
               <button
                 className="w-full px-2 py-1.5 cursor-pointer text-left"

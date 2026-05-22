@@ -44,7 +44,7 @@
   --popover-foreground: oklch(0.145 0 0);
   --primary: #6366f1;
   --primary-foreground: oklch(0.985 0 0);
-  --secondary: oklch(0.97 0 0);
+  --secondary: rgba(241, 245, 249, 1);
   --secondary-foreground: oklch(0.205 0 0);
   --muted: #f1f5f9;
   --muted-foreground: #64748b;
@@ -77,6 +77,11 @@ body {
   margin: 0;
   width: 100%;
   min-height: 100vh;
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+}
+::-webkit-scrollbar {
+  display: none;
 }
 
 h1 {

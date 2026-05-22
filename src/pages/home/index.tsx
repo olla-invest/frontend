@@ -57,7 +57,7 @@ const Home: React.FC = () => {
   };
 
   return (
-    <div className="h-[calc(100vh-120px)]">
+    <div className="md:h-[calc(100vh-120px)]">
       <div className="pt-2 pb-14 px-6 h-full overflow-hidden">
         <Tabs value={activeTab} onValueChange={handleTabChange} className="w-full h-full gap-0">
           <TabsList variant="line" className="justify-start border-b w-full p-0 pb-0.5 gap-4">

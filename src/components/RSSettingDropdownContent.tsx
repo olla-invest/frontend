@@ -7,6 +7,7 @@ import { CalendarDays, Trash2 } from "lucide-react";
 import { format } from "date-fns";
 import { v4 as uuid } from "uuid";
 import type { DateRange } from "react-day-picker";
+import { useIsMobile } from "@/hooks/use-mobile";
 
 export interface RSPeriod {
   id: string;
@@ -43,6 +44,9 @@ function normalize(periods: RSPeriod[]): RSPeriod[] {
 }
 
 export default function RSSetting({ value, onChange, isOnModal }: RSSettingProps) {
+  const isMobile = useIsMobile();
+  const calendarMonths = isMobile ? 1 : 2;
+
   const updatePeriods = (updater: (prev: RSPeriod[]) => RSPeriod[]) => {
     const next = normalize(updater(value));
     onChange(next);
@@ -110,8 +114,13 @@ export default function RSSetting({ value, onChange, isOnModal }: RSSettingProps
                   </Button>
                 </PopoverTrigger>
 
-                <PopoverContent className={`w-auto p-0 ${isOnModal ? "z-1001" : null}`} align="start">
-                  <Calendar mode="range" selected={period.date} disabled={{ after: new Date() }} onSelect={(date) => updateDate(period.id, date)} numberOfMonths={2} />
+                <PopoverContent
+                  className={`w-auto p-0 ${isOnModal ? "z-1100 max-w-[calc(100vw-2rem)]" : ""}`}
+                  align={isMobile ? "center" : "start"}
+                  side={isMobile ? "top" : "bottom"}
+                  collisionPadding={16}
+                >
+                  <Calendar mode="range" selected={period.date} disabled={{ after: new Date() }} onSelect={(date) => updateDate(period.id, date)} numberOfMonths={calendarMonths} />
                 </PopoverContent>
               </Popover>
 
