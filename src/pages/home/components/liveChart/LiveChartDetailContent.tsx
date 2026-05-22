@@ -10,6 +10,12 @@ import { isInWatchList, toggleWatchStockList } from "@/hooks/useToggleWatchList"
 import { useWatchStockListStore } from "@/store/WatchListStore";
 import type { StockDetailInfo } from "./stockDetailTypes";
 
+const BASE_URL = import.meta.env.VITE_API_BASE_URL;
+
+const getStockImageUrl = (stockCode: string) => {
+  return `${BASE_URL}/stock-image/${stockCode}.png`;
+};
+
 type TabItem = {
   name: string;
   value: string;
@@ -94,7 +100,9 @@ export default function LiveChartDetailContent({ detailInfo, variant = "modal" }
     <div className={isPage ? "py-4" : undefined}>
       <div className={`py-2 ${horizontalPadding} flex w-full flex-col gap-4 lg:flex-row lg:justify-between`}>
         <div className="flex gap-2.5">
-          <div className="size-16 rounded-full bg-[#D9D9D9] overflow-hidden text-center">이미지</div>
+          <div className="size-16 rounded-full bg-[#D9D9D9] overflow-hidden text-center">
+            <img src={getStockImageUrl(detailInfo.id)} alt={detailInfo.companyName} className="w-full h-full object-cover" />
+          </div>
           <div>
             <div>
               <span className="font-bold">{detailInfo.companyName}</span>

@@ -47,6 +47,12 @@ const STOCK_DETAIL_OPEN_MODE: StockDetailOpenMode = "page";
 /** page 모드일 때 새 탭 또는 이동 방식 */
 const STOCK_DETAIL_PAGE_TARGET: StockDetailPageTarget = "auto";
 
+const BASE_URL = import.meta.env.VITE_API_BASE_URL;
+
+const getStockImageUrl = (stockCode: string) => {
+  return `${BASE_URL}/stock-image/${stockCode}.png`;
+};
+
 export const formatNumber = (value?: number | string) => (value == null ? "-" : Number(value).toLocaleString());
 
 /* =========================
@@ -157,7 +163,9 @@ const columns: ColumnDef<StockRankingApiItem>[] = [
     header: () => <div className="min-w-40">종목명</div>,
     cell: ({ row }) => (
       <div className="flex gap-2 items-center">
-        <div className="size-8 bg-[#D9D9D9] rounded-full" />
+        <div className="size-8 bg-[#D9D9D9] rounded-full overflow-hidden text-center">
+          <img src={getStockImageUrl(row.original.id)} alt={row.original.companyName} className="w-full h-full object-cover" />
+        </div>
         <span className="font-semibold text-slate-800">{row.getValue("companyName")}</span>
       </div>
     ),
