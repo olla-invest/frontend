@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useState, useCallback, useRef } from "react";
+import { useNavigate } from "react-router-dom";
 import { useChartSocket } from "@/hooks/useChartSocket";
 import { useLiveStore } from "@/store/liveChartStore";
 
@@ -38,6 +39,13 @@ import { LoadingUi } from "@/components/LoadingUi";
 import InvestmentIndicatorGuide from "./liveChart/InvestmentIndicatorGuideDialog";
 import ChartFilter from "./liveChart/ChartFilter";
 import LiveChartDetail from "./liveChart/LiveChartDetail";
+import { getStockDetailUrl, openStockDetailInNewTab, resolveStockDetailPageTarget, type StockDetailOpenMode, type StockDetailPageTarget } from "./liveChart/stockDetailTypes";
+import { useIsMobile } from "@/hooks/use-mobile";
+
+/* page: 상세 정보 페이지 모드 | modal: 상세 정보 모달 모드 */
+const STOCK_DETAIL_OPEN_MODE: StockDetailOpenMode = "page";
+/** page 모드일 때 새 탭 또는 이동 방식 */
+const STOCK_DETAIL_PAGE_TARGET: StockDetailPageTarget = "auto";
 
 export const formatNumber = (value?: number | string) => (value == null ? "-" : Number(value).toLocaleString());
 
@@ -229,13 +237,16 @@ const columns: ColumnDef<StockRankingApiItem>[] = [
 ];
 
 export function LiveChart() {
+  const navigate = useNavigate();
+  const isMobile = useIsMobile();
+
   const [tableData, setTableData] = useState<StockRankingApiResponse | null>(null);
   const [sorting, setSorting] = useState<SortingState>([]);
   const [columnFilters, setColumnFilters] = useState<ColumnFiltersState>([]);
   const [columnVisibility, setColumnVisibility] = useState<VisibilityState>({});
   const [rowSelection, setRowSelection] = useState({});
 
-  //상세 정보
+  // 상세 정보 (모달 — 추후 재사용 시 openStockDetailModal 호출)
   const [detailOpen, setDetailOpen] = useState(false);
   const [selectRow, setSelectRow] = useState({
     id: "",
@@ -243,6 +254,32 @@ export function LiveChart() {
     investmentIndicators: "",
     currentPrice: 0,
   });
+
+  const openStockDetailModal = (row: StockRankingApiItem) => {
+    setSelectRow({
+      id: row.id,
+      companyName: row.companyName,
+      investmentIndicators: row.investmentIndicators,
+      currentPrice: row.currentPrice,
+    });
+    setDetailOpen(true);
+  };
+
+  const openStockDetail = (row: StockRankingApiItem) => {
+    if (STOCK_DETAIL_OPEN_MODE === "modal") {
+      openStockDetailModal(row);
+      return;
+    }
+
+    const pageTarget = resolveStockDetailPageTarget(STOCK_DETAIL_PAGE_TARGET, isMobile);
+
+    if (pageTarget === "navigate") {
+      navigate(getStockDetailUrl(row.id));
+      return;
+    }
+
+    openStockDetailInNewTab(row.id);
+  };
 
   //페이지 네이션
   const [page, setPage] = useState(1); // 1-based
@@ -445,19 +482,7 @@ export function LiveChart() {
                 ? null
                 : table.getRowModel().rows.length
                   ? table.getRowModel().rows.map((row) => (
-                      <TableRow
-                        key={row.id}
-                        className="h-12.25"
-                        onClick={() => {
-                          setDetailOpen(true);
-                          setSelectRow({
-                            id: row.original.id,
-                            companyName: row.original.companyName,
-                            investmentIndicators: row.original.investmentIndicators,
-                            currentPrice: row.original.currentPrice,
-                          });
-                        }}
-                      >
+                      <TableRow key={row.id} className="h-12.25" onClick={() => openStockDetail(row.original)}>
                         {row.getVisibleCells().map((cell) => (
                           <TableCell key={cell.id}>{flexRender(cell.column.columnDef.cell, cell.getContext())}</TableCell>
                         ))}

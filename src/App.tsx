@@ -15,6 +15,7 @@ import Privacy from "./pages/policies/Privacy";
 import Marketing from "./pages/policies/Marketing";
 import Terms from "./pages/policies/Terms";
 import InvestmentNotice from "./pages/policies/InvestmentNotice";
+import LiveChartDetailPage from "./pages/home/components/liveChart/LiveChartDetailPage";
 
 import MainLayout from "./layouts/MainLayout";
 import SubLayout from "./layouts/SubLayout";
@@ -121,6 +122,7 @@ const App: React.FC = () => {
 
         {/* Policy Pages */}
         <Route element={<SubLayout />}>
+          <Route path="/detail/:stockCode" element={<LiveChartDetailPage />} />
           <Route path="/policies/privacy" element={<Privacy />} />
           <Route path="/policies/terms" element={<Terms />} />
           <Route path="/policies/investmentNotice" element={<InvestmentNotice />} />
