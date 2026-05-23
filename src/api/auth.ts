@@ -56,3 +56,8 @@ export const patchChangePw = async (changePwParams: ChangePwParams) => {
   const res = await authApi.patch("/auth/change-password", changePwParams);
   return res.data;
 };
+
+export const getMe = async () => {
+  const res = await authApi.get("/auth/me");
+  return res.data;
+};

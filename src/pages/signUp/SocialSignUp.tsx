@@ -1,17 +1,31 @@
 import React, { useState } from "react";
+import { useNavigate } from "react-router-dom";
+import { isAxiosError } from "axios";
+
 import { Field, FieldLabel, FieldDescription } from "@/components/ui/field";
 import { Input } from "@/components/ui/input";
 import LogoImg from "@/assets/images/olla-logo.svg";
-import { useNavigate } from "react-router-dom";
-import { isAxiosError } from "axios";
 import AgreementSection from "./components/AgreementSection";
+
+import { useAuthStore } from "@/store/useAuthStore";
+import SignUp from ".";
+
 const SocialSignUp: React.FC = () => {
   const navigate = useNavigate();
+
+  // store에서 사용자 정보 가져오기
+  const user = useAuthStore((state) => state.user);
 
   const [agreements, setAgreements] = useState({
     agreeService: false,
     agreePrivacy: false,
     agreeMarketing: false,
+  });
+
+  const [userInfo, setUserInfo] = useState({
+    name: user?.name ?? "",
+    email: user?.email ?? "",
+    phone: "",
   });
 
   const [error, setError] = useState<string | null>(null);
@@ -43,19 +57,28 @@ const SocialSignUp: React.FC = () => {
     }
 
     try {
-      // 실제 API 붙일 자리
-      // await api.socialSignup(...)
-
-      // 현재는 토큰 이미 callback에서 저장된 상태라고 가정
+      // callback에서 이미 저장된 토큰 사용
       const token = localStorage.getItem("accessToken");
 
       if (!token) {
         throw new Error("인증 정보가 없습니다.");
       }
 
-      // 홈 이동
-      navigate("/");
+      // 실제 회원가입 API 연결 예정
+      await SignUp({
+        name: userInfo.name,
+        email: userInfo.email,
+        phone: userInfo.phone,
+        agreeService: agreements.agreeService,
+        agreePrivacy: agreements.agreePrivacy,
+        agreeMarketing: agreements.agreeMarketing,
+      });
+
+      // 회원가입 완료 후 이동
+      navigate("/home", { replace: true });
     } catch (e: unknown) {
+      console.error(e);
+
       if (isAxiosError(e) && e.response?.data?.message?.includes("이미 해당 이메일")) {
         setError("이미 해당 이메일로 가입된 계정이 있습니다. 일반 로그인을 이용해주세요.");
       } else {
@@ -83,18 +106,55 @@ const SocialSignUp: React.FC = () => {
               <FieldLabel htmlFor="input-sign-up-name" className="mb-1">
                 이름
               </FieldLabel>
-              <Input id="input-sign-up-name" type="text" placeholder="이름" />
+
+              <Input
+                id="input-sign-up-name"
+                type="text"
+                placeholder="이름"
+                value={userInfo.name}
+                onChange={(e) =>
+                  setUserInfo((prev) => ({
+                    ...prev,
+                    name: e.target.value,
+                  }))
+                }
+              />
+
               {error && <FieldDescription className="text-[#DC2626] text-xs">{error}</FieldDescription>}
             </Field>
 
             <Field>
               <FieldLabel htmlFor="input-sign-up-phone">휴대폰번호</FieldLabel>
-              <Input id="input-sign-up-phone" type="text" placeholder="휴대폰번호" />
+
+              <Input
+                id="input-sign-up-phone"
+                type="text"
+                placeholder="휴대폰번호"
+                value={userInfo.phone}
+                onChange={(e) =>
+                  setUserInfo((prev) => ({
+                    ...prev,
+                    phone: e.target.value,
+                  }))
+                }
+              />
             </Field>
 
             <Field>
               <FieldLabel htmlFor="input-sign-up-email">이메일</FieldLabel>
-              <Input id="input-sign-up-email" type="text" placeholder="이메일" />
+
+              <Input
+                id="input-sign-up-email"
+                type="text"
+                placeholder="이메일"
+                value={userInfo.email}
+                onChange={(e) =>
+                  setUserInfo((prev) => ({
+                    ...prev,
+                    email: e.target.value,
+                  }))
+                }
+              />
             </Field>
 
             <AgreementSection

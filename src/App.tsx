@@ -10,6 +10,7 @@ import SignUp from "./pages/signUp";
 import SocialSignUp from "./pages/signUp/SocialSignUp";
 import ChangePw from "./pages/login/ChangePw";
 import PlanChange from "./pages/plan";
+import AuthCallback from "./pages/AuthCallback";
 
 import Privacy from "./pages/policies/Privacy";
 import Marketing from "./pages/policies/Marketing";
@@ -111,14 +112,8 @@ const App: React.FC = () => {
 
         <Route path="/change-pw" element={<ChangePw />} />
 
-        <Route
-          path="/social-signup"
-          element={
-            <PublicRoute>
-              <SocialSignUp />
-            </PublicRoute>
-          }
-        />
+        <Route path="/auth/callback" element={<AuthCallback />} />
+        <Route path="/social-signup" element={<SocialSignUp />} />
 
         {/* Policy Pages */}
         <Route element={<SubLayout />}>
