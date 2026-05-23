@@ -8,7 +8,7 @@ import LogoImg from "@/assets/images/olla-logo.svg";
 import AgreementSection from "./components/AgreementSection";
 
 import { useAuthStore } from "@/store/useAuthStore";
-import SignUp from ".";
+import { postSignUp } from "@/api/auth";
 
 const SocialSignUp: React.FC = () => {
   const navigate = useNavigate();
@@ -65,7 +65,7 @@ const SocialSignUp: React.FC = () => {
       }
 
       // 실제 회원가입 API 연결 예정
-      await SignUp({
+      await postSignUp({
         name: userInfo.name,
         email: userInfo.email,
         phone: userInfo.phone,
