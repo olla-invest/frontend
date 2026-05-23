@@ -33,7 +33,7 @@ export default function AuthCallback() {
         });
 
         // 2. 유저 정보 조회
-        const { data } = await getMe();
+        const data = await getMe();
 
         // 3. 로그인 상태 저장
         useAuthStore.getState().login({
@@ -46,7 +46,7 @@ export default function AuthCallback() {
         });
 
         // 4. 이동
-        if (!data.username) {
+        if (data.name === "미연동 계정") {
           navigate("/social-signup", { replace: true });
         } else {
           // 회원가입 완료 후 이동
