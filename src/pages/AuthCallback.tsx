@@ -38,10 +38,10 @@ export default function AuthCallback() {
         // 3. 로그인 상태 저장
         useAuthStore.getState().login({
           accessToken: token,
-          username: data.username,
-          name: data.name,
-          email: data.email,
-          userId: data.userId,
+          username: data?.username,
+          name: data?.name,
+          email: data?.email,
+          userId: data?.userId,
           pw: "",
         });
 
