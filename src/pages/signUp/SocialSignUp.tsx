@@ -66,6 +66,8 @@ const SocialSignUp: React.FC = () => {
 
       // 실제 회원가입 API 연결 예정
       await postSignUp({
+        password: "",
+        username: userInfo.name,
         name: userInfo.name,
         email: userInfo.email,
         phone: userInfo.phone,

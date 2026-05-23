@@ -2,8 +2,8 @@ import api from "@/lib/api";
 import authApi from "@/lib/authApi";
 
 export interface SignUpParams {
-  username?: string;
-  password?: string;
+  username: string;
+  password: string;
   email: string;
   name: string;
   phone: string;
