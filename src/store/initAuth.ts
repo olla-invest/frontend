@@ -13,7 +13,7 @@ export const initAuth = () => {
   if (token && username) {
     useAuthStore.setState({
       accessToken: token,
-      user: { username },
+      user: parsed?.state?.user,
       isLoggedIn: true,
     });
   }

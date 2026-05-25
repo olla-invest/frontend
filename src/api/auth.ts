@@ -47,7 +47,7 @@ export const postSignUp = async (signUpParams: SignUpParams) => {
 
 //sns 연동용 api
 export const patchSnsSignUp = async (SnsSignUpParams: SnsSignUpParams) => {
-  const res = await api.patch("/auth//social-profile", SnsSignUpParams);
+  const res = await api.patch("/auth/social-profile", SnsSignUpParams);
   return res.data;
 };
 
