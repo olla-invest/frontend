@@ -23,7 +23,7 @@ export default function AuthCallback() {
 
       try {
         // 1. 토큰 저장
-        localStorage.setItem("accessToken", token);
+        sessionStorage.setItem("accessToken", token);
 
         useAuthStore.setState({
           accessToken: token,
