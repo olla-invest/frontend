@@ -23,7 +23,7 @@ const SocialSignUp: React.FC = () => {
   });
 
   const [userInfo, setUserInfo] = useState({
-    name: user?.name ?? "",
+    name: "",
     email: user?.email ?? "",
     phone: "",
   });
