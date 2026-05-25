@@ -65,8 +65,6 @@ export default function LiveChartDetailContent({ detailInfo, variant = "modal" }
     const prevPrice = currentPrice / (1 + rate);
     const diff = Math.round(currentPrice - prevPrice);
 
-    console.log(currentPrice, prevPrice, diff, sign);
-
     const formattedPrice = Math.abs(diff).toLocaleString();
 
     return {

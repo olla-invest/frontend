@@ -159,5 +159,6 @@ export interface NewsItem {
   originallink: string;
   link: string;
   description: string;
-  pubDate: string; // 필요하면 Date로 변환해서 써도 됨
+  pubDate: string;
+  mediaName: string;
 }

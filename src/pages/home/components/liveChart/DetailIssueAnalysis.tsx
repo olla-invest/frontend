@@ -61,6 +61,25 @@ export default function DetailIssueAnalysis({ stockCode, stockName }: Props) {
     fetchNews();
   }, [stockCode]);
 
+  const sortedNews = [...(newsData?.items ?? [])].sort((a, b) => {
+    // 최신순
+    if (sortType === "latest") {
+      return new Date(b.pubDate).getTime() - new Date(a.pubDate).getTime();
+    }
+
+    // 관련도순
+    const countKeyword = (text: string, keyword: string) => {
+      const matches = text.match(new RegExp(keyword, "gi"));
+
+      return matches ? matches.length : 0;
+    };
+
+    const aCount = countKeyword(a.title + a.description, stockName);
+    const bCount = countKeyword(b.title + b.description, stockName);
+
+    return bCount - aCount;
+  });
+
   return (
     <div className="flex flex-col gap-4">
       {/* ai */}
@@ -91,7 +110,7 @@ export default function DetailIssueAnalysis({ stockCode, stockName }: Props) {
           </div>
         </div>
         <ul className="flex gap-6 flex-col">
-          {newsData?.items.map((e, i) => {
+          {sortedNews?.map((e, i) => {
             return (
               <li className="w-full" key={i}>
                 <a
@@ -113,7 +132,7 @@ export default function DetailIssueAnalysis({ stockCode, stockName }: Props) {
                       {renderTitle(e.title)}
                       {renderDescription(e.description)}
                       <div className="flex gap-1 items-center text-muted-foreground text-xs">
-                        <span>-</span>
+                        <span>{e.mediaName}</span>
                         {/* <span>서울경제</span> */}
                         <div className="size-0.5 bg-muted-foreground"></div>
                         <span>{formatDate(e.pubDate)}</span>
