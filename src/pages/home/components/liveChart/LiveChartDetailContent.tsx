@@ -58,11 +58,14 @@ export default function LiveChartDetailContent({ detailInfo, variant = "modal" }
   const getCompareInfo = (investmentIndicators?: string, currentPrice?: number) => {
     if (!investmentIndicators || !currentPrice) return null;
 
-    const sign = investmentIndicators[0];
     const rate = parseFloat(investmentIndicators.replace("%", "")) / 100;
+
+    const sign = rate >= 0 ? "+" : "-";
 
     const prevPrice = currentPrice / (1 + rate);
     const diff = Math.round(currentPrice - prevPrice);
+
+    console.log(currentPrice, prevPrice, diff, sign);
 
     const formattedPrice = Math.abs(diff).toLocaleString();
 
@@ -124,7 +127,7 @@ export default function LiveChartDetailContent({ detailInfo, variant = "modal" }
                 <div className="text-sm flex gap-1">
                   <span className="text-muted-foreground">전일 대비</span>
                   <span className={compareInfo.color}>
-                    {compareInfo.diffText}({compareInfo.rateText})
+                    {compareInfo.diffText}({compareInfo.rateText}%)
                   </span>
                 </div>
               )}
@@ -161,7 +164,7 @@ export default function LiveChartDetailContent({ detailInfo, variant = "modal" }
             <DetailStockInfo stockCode={detailInfo.id} />
           </TabsContent>
           <TabsContent value="issueAnalysis" className="h-full overflow-y-auto">
-            <DetailIssue stockCode={detailInfo.id} />
+            <DetailIssue stockCode={detailInfo.id} stockName={detailInfo.companyName} />
           </TabsContent>
         </Tabs>
       </div>

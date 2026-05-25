@@ -65,10 +65,13 @@ export default function DetailMarketStrength({ stockCode }: Props) {
   return (
     <div className="flex flex-col gap-4 w-full">
       <div className="w-full flex justify-between items-center">
-        <h3 className="text-xl font-semibold">시장대비강도(RS) 추이</h3>
+        <div className="flex flex-col">
+          <h3 className="text-xl font-semibold">시장대비강도(RS) 추이</h3>
+          <span className="block md:hidden text-xs text-muted-foreground">RS 기준 : 63일 (100%)</span>
+        </div>
 
         <div className="flex items-center gap-2.5">
-          <span className="text-xs text-muted-foreground">RS 기준 : 63일 (100%)</span>
+          <span className="hidden md:block text-xs text-muted-foreground">RS 기준 : 63일 (100%)</span>
 
           <RSSettingDropdown
             isOnModal={true}

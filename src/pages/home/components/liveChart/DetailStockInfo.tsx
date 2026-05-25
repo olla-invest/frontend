@@ -93,8 +93,8 @@ export default function DetailStockInfo({ stockCode }: Props) {
       {/* 기본정보 */}
       <section className="w-full py-2 flex flex-col gap-4">
         <h3 className="font-semibold text-xl">기본 정보</h3>
-        <div className="grid grid-cols-2 gap-4">
-          <div className="px-2 py-4 border-y flex flex-col gap-2">
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <div className="px-2 py-4 border-y md:flex flex-col gap-2 hidden">
             {sampleBasicInfo1.map((e, i) => (
               <div className="flex gap-1 text-sm" key={i}>
                 <span className="text-muted-foreground shrink-0 min-w-30">{e.title}</span>
@@ -102,8 +102,16 @@ export default function DetailStockInfo({ stockCode }: Props) {
               </div>
             ))}
           </div>
-          <div className="px-2 py-4 border-y flex flex-col gap-2">
+          <div className="px-2 py-4 border-y md:flex flex-col gap-2 hidden">
             {sampleBasicInfo2.map((e, i) => (
+              <div className="flex gap-1 text-sm" key={i}>
+                <span className="text-muted-foreground shrink-0 min-w-30">{e.title}</span>
+                <span className="font-semibold">{e.content}</span>
+              </div>
+            ))}
+          </div>
+          <div className="px-2 py-4 border-y flex md:hidden flex-col gap-2">
+            {[...sampleBasicInfo1, ...sampleBasicInfo2].map((e, i) => (
               <div className="flex gap-1 text-sm" key={i}>
                 <span className="text-muted-foreground shrink-0 min-w-30">{e.title}</span>
                 <span className="font-semibold">{e.content}</span>

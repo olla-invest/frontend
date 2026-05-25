@@ -12,10 +12,11 @@ interface ConfirmModalProps {
   onCancel?: () => void;
 
   confirmText?: string;
+  useCancel?: boolean;
   cancelText?: string;
 }
 
-export default function ConfirmModal({ open, onOpenChange, title, description, onConfirm, onCancel, confirmText = "확인", cancelText = "취소" }: ConfirmModalProps) {
+export default function ConfirmModal({ open, onOpenChange, title, description, onConfirm, onCancel, useCancel = true, confirmText = "확인", cancelText = "취소" }: ConfirmModalProps) {
   const handleCancel = () => {
     onCancel?.();
     onOpenChange(false);
@@ -31,13 +32,15 @@ export default function ConfirmModal({ open, onOpenChange, title, description, o
       <DialogContent className="w-[384px]">
         <DialogHeader>
           <DialogTitle className="h-7 text-center text-md text-foreground font-semiBold">{title}</DialogTitle>
-          {description && <DialogDescription className="text-center text-sm text-foreground font-medium pb-6">{description}</DialogDescription>}
+          {description && <DialogDescription className="text-center text-sm text-foreground font-medium pb-6 whitespace-pre-line">{description}</DialogDescription>}
         </DialogHeader>
 
         <DialogFooter className="w-full flex gap-2">
-          <Button type="button" variant="outline" className="flex-1" onClick={handleCancel}>
-            {cancelText}
-          </Button>
+          {useCancel && (
+            <Button type="button" variant="outline" className="flex-1" onClick={handleCancel}>
+              {cancelText}
+            </Button>
+          )}
           <Button type="button" variant="outline" className="text-primary flex-1" onClick={handleConfirm}>
             {confirmText}
           </Button>

@@ -3,6 +3,7 @@
 import { CartesianGrid, Line, LineChart, XAxis, YAxis, ReferenceLine } from "recharts";
 
 import { ChartContainer, ChartTooltip, ChartTooltipContent } from "@/components/ui/chart";
+import { useIsMobile } from "@/hooks/use-mobile";
 
 /* -------------------- 타입 -------------------- */
 
@@ -26,6 +27,7 @@ interface Props {
 export function ChartLineLinear({ data, filterValue }: Props) {
   // 조회기간 반영 데이터
   const filteredData = data.filter((d) => d.date >= filterValue.start && d.date <= filterValue.end).sort((a, b) => new Date(a.date).getTime() - new Date(b.date).getTime());
+  const isMobile = useIsMobile();
 
   return (
     <ChartContainer
@@ -40,7 +42,14 @@ export function ChartLineLinear({ data, filterValue }: Props) {
       <LineChart data={filteredData} margin={{ top: 10, left: 35, right: 0, bottom: 0 }}>
         <CartesianGrid vertical={false} />
 
-        <XAxis dataKey="date" interval={Math.floor(data.length / 7)} tickFormatter={(v) => `${v.slice(0, 4)}-${v.slice(4, 6)}-${v.slice(6, 8)}`} tickLine={false} axisLine={false} tickMargin={8} />
+        <XAxis
+          dataKey="date"
+          interval={isMobile ? Math.floor(filteredData.length / 3) : Math.floor(filteredData.length / 7)}
+          tickFormatter={(v) => `${v.slice(0, 4)}-${v.slice(4, 6)}-${v.slice(6, 8)}`}
+          tickLine={false}
+          axisLine={false}
+          tickMargin={8}
+        />
         <YAxis orientation="right" tickFormatter={(value: number) => value.toFixed(2)} tickLine={false} axisLine={false} tickMargin={8} />
 
         {/* 기준선 1.0 고정 */}

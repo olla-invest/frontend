@@ -5,12 +5,18 @@ import { getStockNews } from "@/api/chartDetails";
 import type { StockNews } from "@/types/api/chartDetails";
 
 import DOMPurify from "dompurify";
+import ConfirmModal from "@/components/confirmModal";
+import { useIsMobile } from "@/hooks/use-mobile";
 interface Props {
   stockCode: string;
+  stockName: string;
 }
-export default function DetailIssueAnalysis({ stockCode }: Props) {
+export default function DetailIssueAnalysis({ stockCode, stockName }: Props) {
   const [sortType, setSortType] = useState("latest");
   const [newsData, setNewsData] = useState<StockNews | null>(null);
+
+  const isMobile = useIsMobile();
+  const [confirmNews, setConfirmNews] = useState(false);
 
   const renderTitle = (html: string) => {
     const clean = DOMPurify.sanitize(html, {
@@ -72,9 +78,9 @@ export default function DetailIssueAnalysis({ stockCode }: Props) {
         </div>
       </section> */}
       <section className="w-full py-2 flex flex-col gap-4">
-        <div className="flex items-center justify-between px-6">
-          <h3 className="font-semibold text-xl">기본 정보</h3>
-          <div className="flex items-center gap-2.5">
+        <div className="flex items-center justify-between px-6 flex-wrap">
+          <h3 className="font-semibold text-xl">{stockName} 뉴스</h3>
+          <div className="flex items-center gap-2.5 shrink-0">
             <span className="text-muted-foreground text-xs">업데이트 일시 : {formatDate(Date())}</span>
             <Tabs defaultValue={sortType} onValueChange={(value) => setSortType(value)}>
               <TabsList className="p-0.75">
@@ -88,7 +94,19 @@ export default function DetailIssueAnalysis({ stockCode }: Props) {
           {newsData?.items.map((e, i) => {
             return (
               <li className="w-full" key={i}>
-                <a className="block px-6" href={e.originallink} target="blank">
+                <a
+                  className="block px-6"
+                  href={e.originallink}
+                  target={isMobile ? undefined : "_blank"}
+                  rel="noreferrer"
+                  onClick={(event) => {
+                    if (isMobile) {
+                      event.preventDefault();
+
+                      setConfirmNews(true);
+                    }
+                  }}
+                >
                   <div className="flex gap-6">
                     {/* 본문 */}
                     <div className="flex flex-col gap-2">
@@ -112,6 +130,17 @@ export default function DetailIssueAnalysis({ stockCode }: Props) {
           })}
         </ul>
       </section>
+      <ConfirmModal
+        open={confirmNews}
+        onOpenChange={setConfirmNews}
+        title=""
+        description={"뉴스 상세보기는 최적화된 환경을 위해\n웹버전에서 제공됩니다."}
+        confirmText="확인"
+        useCancel={false}
+        onConfirm={() => {
+          setConfirmNews(false);
+        }}
+      />
     </div>
   );
 }

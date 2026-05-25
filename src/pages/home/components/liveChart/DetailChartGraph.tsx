@@ -67,6 +67,11 @@ export default function DetailChartGraph({ data, chartPeriod }: Props) {
       borderVisible: false,
       wickUpColor: "#EF4444",
       wickDownColor: "#3B82F6",
+      priceFormat: {
+        type: "price",
+        precision: 0,
+        minMove: 1,
+      },
     });
 
     seriesRef.current = candlestickSeries;
