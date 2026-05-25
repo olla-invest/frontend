@@ -12,6 +12,14 @@ export interface SignUpParams {
   agreeMarketing?: boolean; // 선택 (기본값 false)
 }
 
+export interface SnsSignUpParams {
+  name: string;
+  phone: string;
+  agreeService: boolean;
+  agreePrivacy: boolean;
+  agreeMarketing: boolean;
+}
+
 export interface LoginParams {
   username: string;
   password: string;
@@ -34,6 +42,12 @@ export interface ChangePwParams {
 
 export const postSignUp = async (signUpParams: SignUpParams) => {
   const res = await api.post("/auth/register", signUpParams);
+  return res.data;
+};
+
+//sns 연동용 api
+export const patchSnsSignUp = async (SnsSignUpParams: SnsSignUpParams) => {
+  const res = await api.patch("/auth//social-profile", SnsSignUpParams);
   return res.data;
 };
 

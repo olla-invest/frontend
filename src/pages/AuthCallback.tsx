@@ -15,9 +15,6 @@ export default function AuthCallback() {
       // token만 받음
       const token = params.get("token");
 
-      console.log("현재 URL:", window.location.href);
-      console.log("token:", token);
-
       if (!token) {
         alert("로그인에 실패했습니다.");
         navigate("/login", { replace: true });
@@ -46,7 +43,7 @@ export default function AuthCallback() {
         });
 
         // 4. 이동
-        if (data.name === "미연동 계정") {
+        if (!data.snsLinkedYn) {
           navigate("/social-signup", { replace: true });
         } else {
           // 회원가입 완료 후 이동
