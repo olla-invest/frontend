@@ -10,7 +10,7 @@ import ConfirmModal from "./confirmModal";
 
 export function HeaderSub() {
   const isMobile = useIsMobile();
-  const { isLoggedIn, user } = useAuthStore();
+  const { isLoggedIn, userInfo } = useAuthStore();
   const navigate = useNavigate();
   const [showUserMenu, setShowUserMenu] = useState(false);
 
@@ -51,7 +51,7 @@ export function HeaderSub() {
                     setShowUserMenu((prev) => !prev);
                   }}
                 >
-                  <img src={UserBtnImg} alt={user + "정보"} />
+                  <img src={UserBtnImg} alt={userInfo?.name + "정보"} />
                 </button>
               </div>
             ) : (
@@ -60,14 +60,14 @@ export function HeaderSub() {
               </a>
             )}
           </div>
-          {showUserMenu && user && (
+          {showUserMenu && userInfo && (
             <div className="w-56 absolute top-0 right-0 rounded-sm bg-white shadow-md border z-20 translate-y-1/2">
               <div className="p-1">
                 <div className="flex py-1.5 px-2 gap-2">
-                  <img src={UserBtnImg} alt={user + "정보"} className="size-8" />
+                  <img src={UserBtnImg} alt={userInfo?.name + "정보"} className="size-8" />
                   <div className="flex flex-col ">
-                    <span className="text-sm text-popover-foreground font-semibold">{user.name}</span>
-                    <span className="text-xs text-muted-foreground">{user.username}</span>
+                    <span className="text-sm text-popover-foreground font-semibold">{userInfo?.name}</span>
+                    <span className="text-xs text-muted-foreground">{userInfo?.username}</span>
                   </div>
                 </div>
               </div>
