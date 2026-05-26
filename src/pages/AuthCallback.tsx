@@ -22,7 +22,7 @@ export default function AuthCallback() {
       }
 
       try {
-        const data = await getMe();
+        const data = await getMe(token);
         // SNS 연동 여부 체크
         if (!data?.snsLinkedYn) {
           navigate("/social-signup", {

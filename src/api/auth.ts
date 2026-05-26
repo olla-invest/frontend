@@ -71,7 +71,12 @@ export const patchChangePw = async (changePwParams: ChangePwParams) => {
   return res.data;
 };
 
-export const getMe = async () => {
-  const res = await authApi.get("/auth/me");
+export const getMe = async (token: string) => {
+  const res = await api.get("/auth/me", {
+    headers: {
+      Authorization: `Bearer ${token}`,
+    },
+  });
+
   return res.data;
 };
