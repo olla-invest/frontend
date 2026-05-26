@@ -13,8 +13,9 @@ import { patchSnsSignUp } from "@/api/auth";
 const SocialSignUp: React.FC = () => {
   const navigate = useNavigate();
 
-  // store에서 사용자 정보 가져오기
-  const user = useAuthStore((state) => state.user);
+  const login = useAuthStore((state) => state.login);
+
+  const storeUserInfo = useAuthStore((state) => state.userInfo);
 
   const [agreements, setAgreements] = useState({
     agreeService: false,
@@ -24,7 +25,7 @@ const SocialSignUp: React.FC = () => {
 
   const [userInfo, setUserInfo] = useState({
     name: "",
-    email: user?.email ?? "",
+    email: "",
     phone: "",
   });
 
@@ -57,14 +58,12 @@ const SocialSignUp: React.FC = () => {
     }
 
     try {
-      // callback에서 이미 저장된 토큰 사용
-      const token = localStorage.getItem("accessToken");
-
-      if (!token) {
+      // accessToken 체크
+      if (!storeUserInfo?.accessToken) {
         throw new Error("인증 정보가 없습니다.");
       }
 
-      // 실제 회원가입 API 연결 예정
+      // SNS 회원가입 API
       await patchSnsSignUp({
         name: userInfo.name,
         phone: userInfo.phone,
@@ -73,8 +72,19 @@ const SocialSignUp: React.FC = () => {
         agreeMarketing: agreements.agreeMarketing,
       });
 
-      // 회원가입 완료 후 이동
-      navigate("/home", { replace: true });
+      // 회원가입 완료 후 최종 로그인 처리
+      login({
+        accessToken: storeUserInfo.accessToken,
+        username: storeUserInfo.username,
+        name: userInfo.name,
+        email: userInfo.email,
+        userId: storeUserInfo.userId,
+      });
+
+      // 홈 이동
+      navigate("/home", {
+        replace: true,
+      });
     } catch (e: unknown) {
       console.error(e);
 
@@ -97,6 +107,7 @@ const SocialSignUp: React.FC = () => {
           className="pb-6"
           onSubmit={(e) => {
             e.preventDefault();
+
             handleSubmit();
           }}
         >

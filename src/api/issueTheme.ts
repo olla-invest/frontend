@@ -11,7 +11,7 @@ export const getIssueTheme = async (display?: number, page?: number) => {
 import { useAuthStore } from "@/store/useAuthStore";
 
 export const getIssueThemeDetail = async (themeCode: number) => {
-  const { accessToken } = useAuthStore.getState();
+  const { accessToken } = useAuthStore.getState().userInfo || {};
 
   const res = await api.get<IssueThemeDetailApiResponse>(`/issue-theme/${themeCode}`, {
     headers: accessToken

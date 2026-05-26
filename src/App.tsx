@@ -1,4 +1,4 @@
-import React, { useEffect } from "react";
+import React from "react";
 import { BrowserRouter as Router, Routes, Route, Navigate } from "react-router-dom";
 
 import "./App.css";
@@ -23,7 +23,6 @@ import SubLayout from "./layouts/SubLayout";
 
 import { useChartSocket } from "./hooks/useChartSocket";
 
-import { initAuth } from "./store/initAuth";
 import { useAuthStore } from "./store/useAuthStore";
 
 interface RouteProps {
@@ -35,9 +34,9 @@ interface RouteProps {
  * (/login, /signup 등)
  */
 const PublicRoute = ({ children }: RouteProps) => {
-  const accessToken = useAuthStore((state) => state.accessToken);
+  const isLoggedIn = useAuthStore((state) => state.isLoggedIn);
 
-  if (accessToken) {
+  if (isLoggedIn) {
     return <Navigate to="/home" replace />;
   }
 
@@ -49,9 +48,9 @@ const PublicRoute = ({ children }: RouteProps) => {
  * (필요한 페이지에만 적용)
  */
 const PrivateRoute = ({ children }: RouteProps) => {
-  const accessToken = useAuthStore((state) => state.accessToken);
+  const isLoggedIn = useAuthStore((state) => state.isLoggedIn);
 
-  if (!accessToken) {
+  if (!isLoggedIn) {
     return <Navigate to="/login" replace />;
   }
 
@@ -60,10 +59,6 @@ const PrivateRoute = ({ children }: RouteProps) => {
 
 const App: React.FC = () => {
   useChartSocket();
-
-  useEffect(() => {
-    initAuth();
-  }, []);
 
   return (
     <Router>
@@ -113,14 +108,19 @@ const App: React.FC = () => {
         <Route path="/change-pw" element={<ChangePw />} />
 
         <Route path="/auth/callback" element={<AuthCallback />} />
+
         <Route path="/social-signup" element={<SocialSignUp />} />
 
         {/* Policy Pages */}
         <Route element={<SubLayout />}>
           <Route path="/detail/:stockCode" element={<LiveChartDetailPage />} />
+
           <Route path="/policies/privacy" element={<Privacy />} />
+
           <Route path="/policies/terms" element={<Terms />} />
+
           <Route path="/policies/investmentNotice" element={<InvestmentNotice />} />
+
           <Route path="/policies/marketing" element={<Marketing />} />
         </Route>
 

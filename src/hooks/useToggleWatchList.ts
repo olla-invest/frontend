@@ -7,7 +7,7 @@ import { toast } from "sonner";
 /* =======================종목 토글======================= */
 export const toggleWatchStockList = async (stockCode: string): Promise<boolean> => {
   const { stockList, setWatchStockList } = useWatchStockListStore.getState();
-  const { accessToken } = useAuthStore.getState();
+  const { accessToken } = useAuthStore.getState().userInfo || {};
 
   if (!accessToken) {
     toast.warning("로그인 후 이용가능한 서비스입니다.", { position: "top-center" });
@@ -37,7 +37,7 @@ export const toggleWatchStockList = async (stockCode: string): Promise<boolean> 
 /* =======================테마 토글======================= */
 export const toggleWatchThemeList = async (themeCode: number) => {
   const { themeList, setWatchThemeList } = useWatchThemeStore.getState();
-  const { accessToken } = useAuthStore.getState();
+  const { accessToken } = useAuthStore.getState().userInfo || {};
 
   // 로그인 체크
   if (!accessToken) {

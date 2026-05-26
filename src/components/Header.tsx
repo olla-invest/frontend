@@ -9,7 +9,7 @@ import { useIsMobile } from "@/hooks/use-mobile";
 
 export function Header() {
   const navigate = useNavigate();
-  const { isLoggedIn, user } = useAuthStore();
+  const { isLoggedIn, userInfo } = useAuthStore();
   const [showUserMenu, setShowUserMenu] = useState(false);
   const logout = useAuthStore((state) => state.logout);
 
@@ -50,7 +50,7 @@ export function Header() {
                   setShowUserMenu((prev) => !prev);
                 }}
               >
-                <img src={UserBtnImg} alt={user + "정보"} />
+                <img src={UserBtnImg} alt={userInfo + "정보"} />
               </button>
             </div>
           ) : (
@@ -60,14 +60,14 @@ export function Header() {
           )}
         </div>
       </div>
-      {showUserMenu && user && (
+      {showUserMenu && userInfo && (
         <div className="w-56 absolute right-6 mt-1 rounded-sm bg-white shadow-md border z-20">
           <div className="p-1">
             <div className="flex py-1.5 px-2 gap-2">
-              <img src={UserBtnImg} alt={user + "정보"} className="size-8" />
+              <img src={UserBtnImg} alt={userInfo.name + "정보"} className="size-8" />
               <div className="flex flex-col ">
-                <span className="text-sm text-popover-foreground font-semibold">{user.name}</span>
-                <span className="text-xs text-muted-foreground">{user.username}</span>
+                <span className="text-sm text-popover-foreground font-semibold">{userInfo.name}</span>
+                <span className="text-xs text-muted-foreground">{userInfo.username}</span>
               </div>
             </div>
           </div>
