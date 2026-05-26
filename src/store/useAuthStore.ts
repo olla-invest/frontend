@@ -34,9 +34,9 @@ export const useAuthStore = create<AuthState>()(
 
       logout: () => {
         useWatchStockListStore.getState().clearWatchStockList();
-
         useWatchThemeStore.getState().clearWatchThemeList();
-
+        // 이전ver auth 정보 삭제
+        localStorage.removeItem("auth-storage");
         set({
           userInfo: null,
           isLoggedIn: false,
