@@ -19,6 +19,8 @@ export default function IssueDetailModal({ onClose, selectIssue }: ModalProps) {
   const { themeList } = useWatchThemeStore();
   const [isBookmark, setIsBookmark] = useState(isInWatchThemeList(themeList ?? [], selectIssue.themeCode));
 
+  const BASE_URL = import.meta.env.VITE_API_BASE_URL;
+
   useEffect(() => {
     const getIssueDetailData = async () => {
       try {
@@ -30,6 +32,10 @@ export default function IssueDetailModal({ onClose, selectIssue }: ModalProps) {
     };
     getIssueDetailData();
   }, []);
+
+  const getStockImageUrl = (stockCode: string) => {
+    return `${BASE_URL}/stock-image/${stockCode}.png`;
+  };
 
   return (
     <DraggableModal onClose={onClose}>
@@ -113,8 +119,10 @@ export default function IssueDetailModal({ onClose, selectIssue }: ModalProps) {
                     <TableCell className="w-16">{stock.rank}</TableCell>
                     <TableCell className="truncate font-semibold text-slate-800">
                       <div className="flex items-center gap-2">
-                        <div className="size-8 rounded-full bg-[#d9d9d9]"></div>
-                        {stock.companyName}
+                        <div className="size-8 rounded-full bg-[#D9D9D9] overflow-hidden text-center">
+                          <img src={getStockImageUrl(stock.stockCode)} alt={stock.companyName} className="w-full h-full object-cover" />
+                        </div>
+                        <span>{stock.companyName}</span>
                       </div>
                     </TableCell>
                     <TableCell className="flex justify-end items-center gap-1">
