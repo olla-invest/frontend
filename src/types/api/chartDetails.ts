@@ -69,10 +69,18 @@ export interface GraphDetail {
 }
 
 //시장 강도 분석
+interface RSItem {
+  rsStartDate: string;
+  rsEndDate: string;
+  strength: number;
+  period: number;
+}
+
 export interface MarketStrengthGraph {
   startDate: string;
   endDate: string;
   data: [{ date: string; rsRaw: number }];
+  rsFilters?: RSItem[];
 }
 
 //종목 상세

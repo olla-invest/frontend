@@ -9,7 +9,6 @@ import { v4 as uuid } from "uuid";
 import { ChartLineLinear } from "./DetailMarketChart";
 import { postMarketStrengthGraphData } from "@/api/chartDetails";
 import type { MarketStrengthGraph } from "@/types/api/chartDetails";
-
 interface Props {
   stockCode: string;
 }
@@ -62,16 +61,18 @@ export default function DetailMarketStrength({ stockCode }: Props) {
     fetch();
   }, [stockCode, filterValue]);
 
+  const result = `RS 기준 : ${graphData?.rsFilters?.map((item) => `${item.period}일 (${item.strength}%)`).join(", ")}`;
+
   return (
     <div className="flex flex-col gap-4 w-full">
       <div className="w-full flex justify-between items-center">
         <div className="flex flex-col">
           <h3 className="text-xl font-semibold">시장대비강도(RS) 추이</h3>
-          <span className="block md:hidden text-xs text-muted-foreground">RS 기준 : 63일 (100%)</span>
+          <span className="block md:hidden text-xs text-muted-foreground">{result}</span>
         </div>
 
         <div className="flex items-center gap-2.5">
-          <span className="hidden md:block text-xs text-muted-foreground">RS 기준 : 63일 (100%)</span>
+          <span className="hidden md:block text-xs text-muted-foreground">{result}</span>
 
           <RSSettingDropdown
             isOnModal={true}
