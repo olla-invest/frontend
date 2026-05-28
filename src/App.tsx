@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useEffect } from "react";
 import { BrowserRouter as Router, Routes, Route, Navigate } from "react-router-dom";
 
 import "./App.css";
@@ -60,6 +60,26 @@ const PrivateRoute = ({ children }: RouteProps) => {
 
 const App: React.FC = () => {
   useChartSocket();
+
+  // PrintScreen 감지
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      console.log(e);
+      // Windows/Linux: PrintScreen
+      const isPrintScreen = e.key === "PrintScreen";
+
+      if (isPrintScreen) {
+        navigator.clipboard.writeText("").catch(() => {});
+        document.body.style.visibility = "hidden";
+        setTimeout(() => {
+          document.body.style.visibility = "visible";
+        }, 300);
+      }
+    };
+
+    window.addEventListener("keydown", handleKeyDown);
+    return () => window.removeEventListener("keydown", handleKeyDown);
+  }, []);
 
   return (
     <Router>
