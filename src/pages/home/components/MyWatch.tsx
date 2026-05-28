@@ -95,8 +95,8 @@ export default function MyWatch() {
   };
 
   useEffect(() => {
-    setIsLoading(true);
     const getRecommendData = async () => {
+      setIsLoading(true);
       try {
         const res = await getRecommend();
         setRecommend(res);

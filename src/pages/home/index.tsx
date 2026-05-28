@@ -1,4 +1,5 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect } from "react";
+import { useSearchParams } from "react-router-dom";
 import { LiveChart } from "./components/LiveChart";
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
 import { IssueTheme } from "./components/IssueTheme";
@@ -22,8 +23,9 @@ const MOBILE_WIDTH = 768;
 
 const Home: React.FC = () => {
   const isLoggedIn = useAuthStore((state) => state.isLoggedIn);
-
-  const [activeTab, setActiveTab] = useState("liveChart");
+  const [searchParams, setSearchParams] = useSearchParams();
+  // URL에서 탭 읽기, 없으면 기본값
+  const activeTab = searchParams.get("tab") ?? "liveChart";
 
   useEffect(() => {
     const handleResize = () => {
@@ -31,7 +33,7 @@ const Home: React.FC = () => {
 
       // 모바일에서 myWatch 탭 제거
       if (isMobile && activeTab === "myWatch") {
-        setActiveTab("liveChart");
+        setSearchParams({ tab: "liveChart" });
       }
     };
 
@@ -53,12 +55,12 @@ const Home: React.FC = () => {
       return;
     }
 
-    setActiveTab(value);
+    setSearchParams({ tab: value });
   };
 
   return (
     <div className="md:h-[calc(100vh-120px)]">
-      <div className="pt-2 pb-14 px-6 h-full overflow-hidden">
+      <div className="pt-2 pb-14 px-4 md:px-6 h-full overflow-hidden">
         <Tabs value={activeTab} onValueChange={handleTabChange} className="w-full h-full gap-0">
           <TabsList variant="line" className="justify-start border-b w-full p-0 pb-0.5 gap-4">
             {tabs.map((tab) => {

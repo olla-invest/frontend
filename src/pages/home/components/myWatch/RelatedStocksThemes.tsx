@@ -69,6 +69,11 @@ export default function RelatedStocksThemes({ recommendData, handleStockModal, h
   const recommendedTheme: RecommendedTheme = recommendData.recommendedTheme;
   const recommendedStcok: RecommendedStock = recommendData.recommendedStock;
 
+  const BASE_URL = import.meta.env.VITE_API_BASE_URL;
+  const getStockImageUrl = (stockCode: string) => {
+    return `${BASE_URL}/stock-image/${stockCode}.png`;
+  };
+
   return (
     <div className="w-full grid grid-cols-2 gap-4">
       <div
@@ -119,7 +124,9 @@ export default function RelatedStocksThemes({ recommendData, handleStockModal, h
           handleStockModal(recommendedStcok);
         }}
       >
-        <div className="size-12 rounded-full bg-[#d9d9d9] shrink-0"></div>
+        <div className="size-12 rounded-full bg-[#d9d9d9] shrink-0">
+          <img src={getStockImageUrl(recommendedStcok.stockCode)} alt={recommendedStcok.companyName} className="w-full h-full object-cover rounded-full" />
+        </div>
         <div className="flex flex-col gap-1">
           <span className="text-slate-800 font-semibold">{recommendData.recommendedStock.companyName}</span>
           <div className="flex gap-1 items-center flex-wrap">

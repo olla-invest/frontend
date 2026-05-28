@@ -24,6 +24,7 @@ import SubLayout from "./layouts/SubLayout";
 import { useChartSocket } from "./hooks/useChartSocket";
 
 import { useAuthStore } from "./store/useAuthStore";
+import IssueDetailPage from "./pages/home/components/issueTheme/IssueDetailPage";
 
 interface RouteProps {
   children: React.ReactNode;
@@ -106,21 +107,15 @@ const App: React.FC = () => {
         />
 
         <Route path="/change-pw" element={<ChangePw />} />
-
         <Route path="/auth/callback" element={<AuthCallback />} />
-
         <Route path="/social-signup" element={<SocialSignUp />} />
 
-        {/* Policy Pages */}
         <Route element={<SubLayout />}>
           <Route path="/detail/:stockCode" element={<LiveChartDetailPage />} />
-
+          <Route path="/themeDetail/:themeCode" element={<IssueDetailPage />} />
           <Route path="/policies/privacy" element={<Privacy />} />
-
           <Route path="/policies/terms" element={<Terms />} />
-
           <Route path="/policies/investmentNotice" element={<InvestmentNotice />} />
-
           <Route path="/policies/marketing" element={<Marketing />} />
         </Route>
 
