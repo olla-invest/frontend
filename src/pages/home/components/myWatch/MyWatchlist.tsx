@@ -7,13 +7,21 @@ interface Props {
   bookmarks: Record<string, boolean>;
 }
 
+const BASE_URL = import.meta.env.VITE_API_BASE_URL;
+
+const getStockImageUrl = (stockCode: string) => {
+  return `${BASE_URL}/stock-image/${stockCode}.png`;
+};
+
 export default function MyWatchlist({ item, bookmarks }: Props) {
   return (
     <li className="py-1 flex items-center justify-between gap-1">
       {item.type === "stock" ? (
         <div className="flex justify-between gap-4 flex-1">
           <div className="flex gap-2 items-center w-32 flex-1">
-            <div className="size-8 rounded-full bg-[#D9D9D9] shrink-0" />
+            <div className="size-8 rounded-full bg-[#D9D9D9] shrink-0">
+              <img src={getStockImageUrl(item.stockCode)} alt={item.companyName} className="w-full h-full object-cover rounded-full" />
+            </div>
             <span className="truncate">{item.companyName}</span>
           </div>
           <div className="flex flex-col text-sm items-end py-1">

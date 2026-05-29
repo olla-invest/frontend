@@ -18,9 +18,12 @@ export interface StockdetailInfo {
 }
 
 export default function MyWatch() {
-  //store에서 가져오기
-  const stockList = useWatchStockListStore((state) => state.stockList);
-  const themeList = useWatchThemeStore((state) => state.themeList);
+  const rawStockList = useWatchStockListStore((state) => state.stockList);
+  const rawThemeList = useWatchThemeStore((state) => state.themeList);
+
+  const stockList = useMemo(() => rawStockList ?? [], [rawStockList]);
+  const themeList = useMemo(() => rawThemeList ?? [], [rawThemeList]);
+
   const [recommend, setRecommend] = useState<RecommendationResponse>();
 
   const [isLoading, setIsLoading] = useState(false);
@@ -106,6 +109,12 @@ export default function MyWatch() {
         setIsLoading(false);
       }
     };
+
+    const getMyWatchListData = () => {
+      useWatchStockListStore.getState().fetchWatchStockList();
+      useWatchThemeStore.getState().fetchWatchThemeList();
+    };
+    getMyWatchListData();
     getRecommendData();
   }, []);
 
@@ -139,7 +148,7 @@ export default function MyWatch() {
                   {stockList?.slice(0, 3).map((stock) => (
                     <StockFocus key={stock.stockCode} stock={stock} handleStockModal={handleStockModal} />
                   ))}
-                  {themeList?.length === 0 && (
+                  {stockList?.length === 0 && (
                     <div className="bg-blue-50 text-secondary-foreground w-full h-50 rounded-xl flex justify-center items-center">
                       <span className="text-sm">관심 종목이 없습니다</span>
                     </div>

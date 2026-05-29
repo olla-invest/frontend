@@ -1,55 +1,48 @@
 import { create } from "zustand";
-import { persist, createJSONStorage } from "zustand/middleware";
 import type { WatchListStock, WatchListTheme } from "@/types/api/watchList";
+import { getWatchStockList, getWatchThemeList } from "@/api/watchList";
 
 interface WatchStockListStore {
   stockList: WatchListStock[] | null;
+  fetchWatchStockList: () => void;
   setWatchStockList: (data: WatchListStock[]) => void;
   clearWatchStockList: () => void;
 }
 
 interface WatchThemeListStore {
   themeList: WatchListTheme[] | null;
+  fetchWatchThemeList: () => void;
   setWatchThemeList: (data: WatchListTheme[]) => void;
   clearWatchThemeList: () => void;
 }
 
-export const useWatchStockListStore = create<WatchStockListStore>()(
-  persist(
-    (set) => ({
-      stockList: null,
+export const useWatchStockListStore = create<WatchStockListStore>()((set) => ({
+  stockList: null,
 
-      setWatchStockList: (data) => {
-        set({ stockList: data });
-      },
+  fetchWatchStockList: () => {
+    getWatchStockList().then((data) => set({ stockList: data.stocks ?? data }));
+  },
 
-      clearWatchStockList: () => {
-        set({ stockList: [] });
-      },
-    }),
-    {
-      name: "watchStockList",
-      storage: createJSONStorage(() => sessionStorage),
-    },
-  ),
-);
+  setWatchStockList: (data) => {
+    set({ stockList: data });
+  },
 
-export const useWatchThemeStore = create<WatchThemeListStore>()(
-  persist(
-    (set) => ({
-      themeList: null,
+  clearWatchStockList: () => {
+    set({ stockList: [] });
+  },
+}));
 
-      setWatchThemeList: (data) => {
-        set({ themeList: data });
-      },
+export const useWatchThemeStore = create<WatchThemeListStore>()((set) => ({
+  themeList: null,
+  fetchWatchThemeList: () => {
+    getWatchThemeList().then((data) => set({ themeList: data.themes ?? data }));
+  },
 
-      clearWatchThemeList: () => {
-        set({ themeList: [] });
-      },
-    }),
-    {
-      name: "watchThemeList",
-      storage: createJSONStorage(() => sessionStorage),
-    },
-  ),
-);
+  setWatchThemeList: (data) => {
+    set({ themeList: data });
+  },
+
+  clearWatchThemeList: () => {
+    set({ themeList: [] });
+  },
+}));

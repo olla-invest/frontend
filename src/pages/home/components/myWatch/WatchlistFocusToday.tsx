@@ -143,6 +143,12 @@ export function StockFocus({ stock, handleStockModal }: StockFocusProps) {
 
   const rankMeta = RANK_META[rankStatus];
 
+  const BASE_URL = import.meta.env.VITE_API_BASE_URL;
+
+  const getStockImageUrl = (stockCode: string) => {
+    return `${BASE_URL}/stock-image/${stockCode}.png`;
+  };
+
   return (
     <div
       className="border-b bg-white px-2 py-3 flex gap-2"
@@ -150,7 +156,9 @@ export function StockFocus({ stock, handleStockModal }: StockFocusProps) {
         handleStockModal(stock);
       }}
     >
-      <div className="size-12 rounded-full bg-[#d9d9d9] shrink-0"></div>
+      <div className="size-12 rounded-full bg-[#d9d9d9] shrink-0">
+        <img src={getStockImageUrl(stock.stockCode)} alt={stock.companyName} className="w-full h-full object-cover" />
+      </div>
       <div className="flex flex-col gap-1">
         <span className="text-slate-800 font-semibold">{stock.companyName}</span>
         <div className="flex gap-1 items-center flex-wrap">

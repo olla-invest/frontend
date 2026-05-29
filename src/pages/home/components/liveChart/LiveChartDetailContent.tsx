@@ -34,16 +34,18 @@ interface LiveChartDetailContentProps {
 }
 
 export default function LiveChartDetailContent({ detailInfo, variant = "modal" }: LiveChartDetailContentProps) {
-  const { stockList } = useWatchStockListStore();
-  const [isBookmark, setIsBookmark] = useState(isInWatchList(stockList ?? [], detailInfo.id));
   const [basicData, setBasicData] = useState<StockBasicDataResponse | null>();
 
   const isPage = variant === "page";
   const horizontalPadding = isPage ? "px-4 sm:px-6" : "px-6";
   const tabsListWidth = isPage ? "w-full" : "w-[calc(100%-48px)]";
 
+  const { stockList, fetchWatchStockList } = useWatchStockListStore();
+
+  const isBookmark = useMemo(() => isInWatchList(stockList ?? [], detailInfo.id), [stockList, detailInfo.id]);
+
   useEffect(() => {
-    const fetch = async () => {
+    const fetchBasicData = async () => {
       try {
         const { data } = await getStockBasicData(detailInfo.id);
         setBasicData(data);
@@ -52,7 +54,8 @@ export default function LiveChartDetailContent({ detailInfo, variant = "modal" }
       }
     };
 
-    fetch();
+    fetchWatchStockList();
+    fetchBasicData();
   }, [detailInfo.id]);
 
   const getCompareInfo = (investmentIndicators?: string, currentPrice?: number) => {
@@ -109,11 +112,7 @@ export default function LiveChartDetailContent({ detailInfo, variant = "modal" }
               <span className="font-bold">{detailInfo.companyName}</span>
               <button
                 onClick={async () => {
-                  const success = await toggleWatchStockList(detailInfo.id);
-
-                  if (success) {
-                    setIsBookmark((prev) => !prev);
-                  }
+                  await toggleWatchStockList(detailInfo.id);
                 }}
               >
                 <i className={`icon ${isBookmark ? "icon-star-fill" : "icon-star"}`} />

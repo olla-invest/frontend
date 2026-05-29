@@ -64,7 +64,6 @@ const App: React.FC = () => {
   // PrintScreen 감지
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
-      console.log(e);
       // Windows/Linux: PrintScreen
       const isPrintScreen = e.key === "PrintScreen";
 
