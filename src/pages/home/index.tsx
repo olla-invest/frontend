@@ -59,15 +59,15 @@ const Home: React.FC = () => {
   };
 
   return (
-    <div className="md:h-[calc(100vh-120px)]">
-      <div className="pt-2 pb-14 px-4 md:px-6 h-full overflow-hidden">
-        <Tabs value={activeTab} onValueChange={handleTabChange} className="w-full h-full gap-0">
-          <TabsList variant="line" className="justify-start border-b w-full p-0 pb-0.5 gap-4">
+    <div className="">
+      <div className="pb-14 px-4 md:px-6 h-full relative">
+        <Tabs value={activeTab} onValueChange={handleTabChange} className="w-full h-full gap-0 relative">
+          <TabsList variant="line" className="h-13! justify-start border-b w-full p-0 pt-2 pb-0.5 gap-4 sticky top-13 left-0 right-0 z-10 bg-white">
             {tabs.map((tab) => {
               const isMyWatch = tab.value === "myWatch";
 
               return (
-                <TabsTrigger key={tab.value} value={tab.value} className={`grow-0 px-0 py-2 text-base ${isMyWatch ? "hidden md:flex" : ""}`}>
+                <TabsTrigger key={tab.value} value={tab.value} className={`grow-0 h-fit px-0 py-2 text-base ${isMyWatch ? "hidden md:flex" : ""}`}>
                   {tab.name}
                 </TabsTrigger>
               );
@@ -78,11 +78,11 @@ const Home: React.FC = () => {
             <LiveChart />
           </TabsContent>
 
-          <TabsContent value="issueTheme" className="h-full pt-4">
+          <TabsContent value="issueTheme" className="h-full overflow-y-auto pt-4">
             <IssueTheme />
           </TabsContent>
 
-          <TabsContent value="myWatch" className="hidden h-full pt-4 md:block">
+          <TabsContent value="myWatch" className="hidden h-full overflow-y-auto pt-4 md:block">
             <MyWatch />
           </TabsContent>
         </Tabs>

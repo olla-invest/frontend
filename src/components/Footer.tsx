@@ -5,7 +5,7 @@ interface FooterProps {
 export function Footer({ isHideBottomMenu = false }: FooterProps) {
   const baseURL = window.location.origin;
   return (
-    <footer className="md:absolute bottom-0 left-0 md:h-17 md:p-6 pt-12 pb-16 border-t w-full">
+    <footer className="md:h-17 md:p-6 pt-12 pb-16 border-t w-full">
       <div className="flex items-center justify-between text-sm text-muted-foreground flex-col gap-4 md:flex-row">
         {!isHideBottomMenu && (
           <div className="flex gap-2 items-center cursor-pointer transition-all">

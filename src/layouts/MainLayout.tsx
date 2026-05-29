@@ -8,7 +8,7 @@ export default function MainLayout() {
   return (
     <SidebarProvider>
       <MainSidebar />
-      <SidebarInset className="max-w-468 my-0 mx-auto">
+      <SidebarInset className="w-[calc(100vw-47px)] max-w-468 my-0 mx-auto relative">
         <Header />
         <Outlet /> {/* children 대신 Outlet */}
         <Footer />

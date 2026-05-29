@@ -175,7 +175,7 @@ const columns: ColumnDef<StockRankingApiItem>[] = [
           <img src={getStockImageUrl(row.original.id)} alt={row.original.companyName} className="w-full h-full object-cover" />
         </div>
 
-        <div className="min-w-0 w-[80px] font-semibold text-slate-800 line-clamp-2 truncate">{row.getValue("companyName")}</div>
+        <div className="min-w-0 w-20 font-semibold text-slate-800 line-clamp-2 truncate">{row.getValue("companyName")}</div>
       </div>
     ),
   },
@@ -192,11 +192,12 @@ const columns: ColumnDef<StockRankingApiItem>[] = [
   {
     accessorKey: "relativeStrengthScore",
     header: () => (
-      <div className="text-right md:min-w-32">
-        시장대비
-        <br />
-        강도 점수
-      </div>
+      <>
+        <div className="text-right md:min-w-32 hidden md:block">시장대비 강도점수</div>
+        <div className="text-right md:min-w-32 md:hidden">
+          시장대비 <br /> 강도점수
+        </div>
+      </>
     ),
     cell: ({ row }) => <div className="text-right">{row.getValue("relativeStrengthScore")}</div>,
   },
@@ -492,7 +493,7 @@ export function LiveChart() {
 
   return (
     <>
-      <div className="w-full flex flex-col h-full">
+      <div className="w-full flex flex-col h-full relative">
         <ChartFilter filter={filter} setFilter={setFilter} onSearch={handleSearch} />
 
         <div className="justify-between items-center py-4 hidden md:flex">
@@ -543,9 +544,9 @@ export function LiveChart() {
             </DropdownMenu>
           </div>
         </div>
-        <div className="flex flex-col gap-4 md:max-h-[calc(100%-172px)] flex-1 justify-between overflow-visible">
-          <Table className={`h-full ${isMobile ? "w-full" : "min-w-max"}`}>
-            <TableHeader className="sticky top-0 left-0 bg-white shadow-[0_1px_0_0_rgba(0,0,0,0.1)] shrink-0">
+        <div className="flex flex-col gap-4 justify-between bg-white pt-4 shrink-0">
+          <Table className={`${isMobile ? "w-full" : "min-w-max"}`}>
+            <TableHeader className="bg-white shadow-[0_1px_0_0_rgba(0,0,0,0.1)]">
               {table.getHeaderGroups().map((hg) => (
                 <TableRow key={hg.id}>
                   {hg.headers.map((header) => (
