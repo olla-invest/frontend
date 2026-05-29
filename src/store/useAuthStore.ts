@@ -16,7 +16,7 @@ interface AuthState {
   isLoggedIn: boolean;
 
   login: (userInfo: UserInfo) => void;
-  logout: () => void;
+  logout: (navigate: (path: string) => void) => void;
 }
 
 export const useAuthStore = create<AuthState>()(
@@ -32,11 +32,12 @@ export const useAuthStore = create<AuthState>()(
         });
       },
 
-      logout: () => {
+      logout: (navigate: (path: string) => void) => {
         useWatchStockListStore.getState().clearWatchStockList();
         useWatchThemeStore.getState().clearWatchThemeList();
         // 이전ver auth 정보 삭제
         localStorage.removeItem("auth-storage");
+        navigate("/login");
         set({
           userInfo: null,
           isLoggedIn: false,

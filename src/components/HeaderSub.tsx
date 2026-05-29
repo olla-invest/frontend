@@ -17,7 +17,7 @@ export function HeaderSub() {
   const logout = useAuthStore((state) => state.logout);
   const [confirmLogout, setConfirmLogout] = useState(false);
   const handleLogout = () => {
-    logout();
+    logout(navigate);
     setShowUserMenu(false);
     toast.success("로그아웃 되었습니다", { position: "top-center" });
   };
