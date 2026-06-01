@@ -59,9 +59,9 @@ const Home: React.FC = () => {
   };
 
   return (
-    <div className="sticky">
+    <div className="sticky min-h-[calc(100vh-120px)]">
       <div className="pb-14 px-4 md:px-6 h-full relative">
-        <Tabs value={activeTab} onValueChange={handleTabChange} className="w-full h-full gap-0 relative">
+        <Tabs value={activeTab} onValueChange={handleTabChange} className="w-full gap-0 relative">
           <TabsList variant="line" className="h-13! justify-start border-b w-full p-0 pt-2 pb-0.5 gap-4 sticky top-13 left-0 right-0 z-10 bg-white">
             {tabs.map((tab) => {
               const isMyWatch = tab.value === "myWatch";

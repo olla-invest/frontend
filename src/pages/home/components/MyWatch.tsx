@@ -121,7 +121,7 @@ export default function MyWatch() {
   return (
     <>
       {isLoading ? (
-        <LoadingUi />
+        <LoadingUi boxStyle="min-h-[300px] h-full flex items-center justify-center" />
       ) : (
         <div className="flex h-full xl:flex-row overflow-y-auto flex-col">
           {/* 왼쪽 영역 */}

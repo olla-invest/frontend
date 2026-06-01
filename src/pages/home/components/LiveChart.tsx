@@ -170,12 +170,12 @@ const columns: ColumnDef<StockRankingApiItem>[] = [
     accessorKey: "companyName",
     header: () => <div className="md:min-w-40">종목명</div>,
     cell: ({ row }) => (
-      <div className="flex gap-2 items-center min-w-0">
+      <div className="flex gap-2 items-center min-w-0 max-w-28 overflow-hidden">
         <div className="size-8 shrink-0 bg-[#D9D9D9] rounded-full overflow-hidden hidden md:block">
           <img src={getStockImageUrl(row.original.id)} alt={row.original.companyName} className="w-full h-full object-cover" />
         </div>
 
-        <div className="min-w-0 w-20 font-semibold text-slate-800 line-clamp-2 truncate">{row.getValue("companyName")}</div>
+        <div className="min-w-0 max-w-20 font-semibold text-slate-800 line-clamp-2 break-keep">{row.getValue("companyName")}</div>
       </div>
     ),
   },

@@ -263,7 +263,7 @@ export function IssueTheme() {
         {/* 데스크탑: 2컬럼 */}
         <div className="hidden md:flex w-full md:min-h-112.5">
           {isLoading ? (
-            <div className="w-full h-[calc(100vh-195px)] flex items-center justify-center">
+            <div className="w-full h-full flex items-center justify-center md:min-h-112.5">
               <LoadingUi message="이슈 테마 데이터를 불러오는 중입니다..." />
             </div>
           ) : (
