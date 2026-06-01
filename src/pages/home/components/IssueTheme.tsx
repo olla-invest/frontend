@@ -155,7 +155,7 @@ export function IssueTheme() {
       id: "themeName",
       accessorKey: "themeName",
       header: "테마명",
-      cell: ({ row }) => <div className="w-30 truncate text-slate-800 font-semibold">{row.getValue("themeName")}</div>,
+      cell: ({ row }) => <div className="w-30 line-clamp-2 text-slate-800 font-semibold">{row.getValue("themeName")}</div>,
     },
     {
       accessorKey: "stats",
@@ -198,7 +198,7 @@ export function IssueTheme() {
         }}
       >
         {row.getVisibleCells().map((cell) => (
-          <TableCell key={cell.id} className={cell.column.id === "themeName" ? "w-full" : ""}>
+          <TableCell key={cell.id} className={cell.column.id === "themeName" ? "whitespace-normal w-full" : ""}>
             {flexRender(cell.column.columnDef.cell, cell.getContext())}
           </TableCell>
         ))}

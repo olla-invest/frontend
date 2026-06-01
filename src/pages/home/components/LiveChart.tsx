@@ -170,12 +170,11 @@ const columns: ColumnDef<StockRankingApiItem>[] = [
     accessorKey: "companyName",
     header: () => <div className="md:min-w-40">종목명</div>,
     cell: ({ row }) => (
-      <div className="flex gap-2 items-center min-w-0 max-w-28 overflow-hidden">
+      <div className="flex gap-2 items-center w-28 md:w-40">
         <div className="size-8 shrink-0 bg-[#D9D9D9] rounded-full overflow-hidden hidden md:block">
           <img src={getStockImageUrl(row.original.id)} alt={row.original.companyName} className="w-full h-full object-cover" />
         </div>
-
-        <div className="min-w-0 max-w-20 font-semibold text-slate-800 line-clamp-2 break-keep">{row.getValue("companyName")}</div>
+        <p className="min-w-0 flex-1 font-semibold text-slate-800 line-clamp-2">{row.getValue("companyName")}</p>
       </div>
     ),
   },
@@ -565,7 +564,9 @@ export function LiveChart() {
                   ? table.getRowModel().rows.map((row) => (
                       <TableRow key={row.id} className="h-12.25" onClick={() => openStockDetail(row.original)}>
                         {row.getVisibleCells().map((cell) => (
-                          <TableCell key={cell.id}>{flexRender(cell.column.columnDef.cell, cell.getContext())}</TableCell>
+                          <TableCell key={cell.id} className={cell.column.id === "companyName" ? "whitespace-normal" : ""}>
+                            {flexRender(cell.column.columnDef.cell, cell.getContext())}
+                          </TableCell>
                         ))}
                       </TableRow>
                     ))
