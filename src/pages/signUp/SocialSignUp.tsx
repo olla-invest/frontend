@@ -65,8 +65,10 @@ const SocialSignUp: React.FC = () => {
 
       // SNS 회원가입 API
       await patchSnsSignUp({
+        username: storeUserInfo.username || "",
         name: userInfo.name,
         phone: userInfo.phone,
+        email: userInfo.email,
         agreeService: agreements.agreeService,
         agreePrivacy: agreements.agreePrivacy,
         agreeMarketing: agreements.agreeMarketing,
