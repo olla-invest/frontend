@@ -27,9 +27,10 @@ export default function MyWatchlist({ item, bookmarks, handleStockModal, handleT
             <span className="truncate">{item.companyName}</span>
           </div>
           <div className="flex flex-col text-sm items-end py-1">
-            <span className="text-slate-800 font-semibold">{item.closePrice}원</span>
+            <span className="text-slate-800 font-semibold">{item.closePrice.toLocaleString()}원</span>
             <span className={`text-xs ${item.priceChange1d > 0 ? "text-rose-500" : "text-blue-500"}`}>
-              {item.priceChange1d > 0 ? "+" + item.priceChange1d : item.priceChange1d}원 {item.priceChangeRate1d.toFixed(1)}%
+              {item.priceChange1d > 0 ? "+" + item.priceChange1d?.toLocaleString() : item.priceChange1d?.toLocaleString()}원{" "}
+              {item.priceChange1d > 0 ? "+" + item.priceChangeRate1d.toFixed(1) : item.priceChangeRate1d.toFixed(1)}%
             </span>
           </div>
         </div>

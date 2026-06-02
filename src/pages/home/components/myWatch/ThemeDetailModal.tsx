@@ -128,7 +128,7 @@ export default function ThemeDetailModal({ onClose, selectIssue }: ModalProps) {
                         {stock.companyName}
                       </div>
                     </TableCell>
-                    <TableCell className="flex justify-end items-center gap-1">
+                    <TableCell className="flex justify-end items-center gap-1 h-12.25">
                       <div>{stock.currentPrice.toLocaleString()}</div>
                       <div className={`w-14 text-right ${isUp ? "text-rose-500" : isDown ? "text-blue-500" : "text-gray-400"}`}>
                         {isUp && "+"}
