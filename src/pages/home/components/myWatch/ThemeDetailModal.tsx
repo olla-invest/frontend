@@ -10,6 +10,7 @@ import type { IssueThemeDetailApiResponse } from "@/types/api/issueTheme";
 import type { WatchListTheme } from "@/types/api/watchList";
 import { useWatchThemeStore } from "@/store/WatchListStore";
 import { isInWatchThemeList, toggleWatchThemeList } from "@/hooks/useToggleWatchList";
+import { openStockDetailInNewTab } from "../liveChart/stockDetailTypes";
 
 interface ModalProps {
   onClose: () => void;
@@ -30,6 +31,12 @@ export default function ThemeDetailModal({ onClose, selectIssue }: ModalProps) {
     };
     getIssueDetailData();
   }, []);
+
+  const BASE_URL = import.meta.env.VITE_API_BASE_URL;
+
+  const getStockImageUrl = (stockCode: string) => {
+    return `${BASE_URL}/stock-image/${stockCode}.png`;
+  };
 
   const rankChange = selectIssue.prevRank - selectIssue.rank;
   return (
@@ -111,11 +118,13 @@ export default function ThemeDetailModal({ onClose, selectIssue }: ModalProps) {
                 const isDown = stock.changeRate < 0;
 
                 return (
-                  <TableRow key={stock.stockCode} className="text-slate-700 h-10">
+                  <TableRow key={stock.stockCode} className="text-slate-700 h-10" onClick={() => openStockDetailInNewTab(stock.stockCode)}>
                     <TableCell className="w-16">{stock.rank}</TableCell>
                     <TableCell className="truncate font-semibold text-slate-800">
                       <div className="flex items-center gap-2">
-                        <div className="size-8 rounded-full bg-[#d9d9d9]"></div>
+                        <div className="size-8 rounded-full bg-[#d9d9d9]">
+                          <img src={getStockImageUrl(stock.stockCode)} alt={stock.companyName} className="w-full h-full object-cover rounded-full" />
+                        </div>
                         {stock.companyName}
                       </div>
                     </TableCell>

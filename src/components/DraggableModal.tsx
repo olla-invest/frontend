@@ -41,7 +41,7 @@ export default function DraggableModal({ title, onClose, children }: DraggableMo
       setSize(newSize);
       setPosition(centerModal(newSize));
     };
-
+    window.document.body.style.overflow = "hidden"; // 모달 오픈 시 배경 스크롤 방지
     window.addEventListener("resize", handleResize);
     return () => window.removeEventListener("resize", handleResize);
   }, []);
@@ -76,6 +76,22 @@ export default function DraggableModal({ title, onClose, children }: DraggableMo
     };
   }, [isDragging]);
 
+  const closePop = (e: KeyboardEvent) => {
+    if (e.key === "Escape") {
+      window.document.body.style.overflow = ""; // 모달 닫힐 때 스크롤 복원
+      onClose();
+    }
+    window.document.body.style.overflow = ""; // 모달 닫힐 때 스크롤 복원
+    onClose();
+  };
+
+  useEffect(() => {
+    window.addEventListener("keydown", closePop);
+    return () => {
+      window.removeEventListener("keydown", closePop);
+    };
+  }, [onClose]);
+
   return (
     <div
       ref={modalRef}
@@ -90,7 +106,7 @@ export default function DraggableModal({ title, onClose, children }: DraggableMo
     >
       <div className="flex justify-between items-center px-4 py-2 cursor-move rounded-t-xl" onMouseDown={handleMouseDown}>
         {title && <span className="font-semibold">{title}</span>}
-        <button onClick={onClose} className="text-sm text-gray-500 hover:text-black ml-auto">
+        <button onClick={() => closePop(new KeyboardEvent("keydown", { key: "Escape" }))} className="text-sm text-gray-500 hover:text-black ml-auto">
           ✕
         </button>
       </div>
