@@ -10,6 +10,8 @@ import { useWatchThemeStore } from "@/store/WatchListStore";
 import { isInWatchThemeList, toggleWatchThemeList } from "@/hooks/useToggleWatchList";
 import { useIsMobile } from "@/hooks/use-mobile";
 import { LoadingUi } from "@/components/LoadingUi";
+import { openStockDetailInNewTab } from "../liveChart/stockDetailTypes";
+import { useNavigate } from "react-router-dom";
 
 interface ContentProps {
   selectIssue: IssueTheme;
@@ -20,6 +22,7 @@ export default function IssueDetailContent({ selectIssue }: ContentProps) {
   const [isLoading, setIsLoading] = useState(false);
   const { themeList } = useWatchThemeStore();
   const [isBookmark, setIsBookmark] = useState(isInWatchThemeList(themeList ?? [], selectIssue.themeCode));
+  const navigate = useNavigate();
 
   const BASE_URL = import.meta.env.VITE_API_BASE_URL;
 
@@ -40,6 +43,14 @@ export default function IssueDetailContent({ selectIssue }: ContentProps) {
 
   const getStockImageUrl = (stockCode: string) => {
     return `${BASE_URL}/stock-image/${stockCode}.png`;
+  };
+
+  const handleStockClick = (stockCode: string) => {
+    if (isMobile) {
+      navigate(`/detail/${stockCode}`);
+    } else {
+      openStockDetailInNewTab(stockCode);
+    }
   };
 
   return (
@@ -149,11 +160,11 @@ export default function IssueDetailContent({ selectIssue }: ContentProps) {
                     const isDown = stock.changeRate < 0;
 
                     return (
-                      <TableRow key={stock.stockCode} className="text-slate-700 h-10">
+                      <TableRow key={stock.stockCode} className="text-slate-700 h-10" onClick={() => handleStockClick(stock.stockCode)}>
                         {/* 순위 - 모바일 sticky */}
-                        <TableCell className="md:static sticky left-0 z-10 bg-background w-7.5 md:w-8">{stock.rank}</TableCell>
+                        <TableCell className="md:static md:bg-transparent bg-background sticky left-0 z-10 w-7.5 md:w-8">{stock.rank}</TableCell>
                         {/* 기업명 - 모바일 sticky */}
-                        <TableCell className="md:static sticky left-12 z-10 bg-background font-semibold text-slate-800">
+                        <TableCell className="md:static md:bg-transparent bg-background sticky left-12 z-10 font-semibold text-slate-800">
                           <div className="flex items-center gap-2">
                             <div className="size-8 rounded-full bg-[#D9D9D9] overflow-hidden text-center hidden md:block">
                               <img src={getStockImageUrl(stock.stockCode)} alt={stock.companyName} className="w-full h-full object-cover" />
@@ -161,7 +172,7 @@ export default function IssueDetailContent({ selectIssue }: ContentProps) {
                             <span className="w-30 truncate">{stock.companyName}</span>
                           </div>
                         </TableCell>
-                        <TableCell className="flex justify-end items-center gap-1 md:flex-row flex-col">
+                        <TableCell className="flex justify-end items-center gap-1 md:flex-row flex-col md:h-12.25">
                           <div>{stock.currentPrice.toLocaleString()}</div>
                           <div className={`w-14 text-right ${isUp ? "text-rose-500" : isDown ? "text-blue-500" : "text-gray-400"}`}>
                             {isUp && "+"}
