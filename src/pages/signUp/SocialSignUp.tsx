@@ -107,7 +107,6 @@ const SocialSignUp: React.FC = () => {
           className="pb-6"
           onSubmit={(e) => {
             e.preventDefault();
-
             handleSubmit();
           }}
         >

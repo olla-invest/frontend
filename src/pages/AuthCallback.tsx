@@ -25,6 +25,14 @@ export default function AuthCallback() {
         const data = await getMe(token);
         // SNS 연동 여부 체크
         if (!data?.snsLinkedYn) {
+          useAuthStore.getState().login({
+            accessToken: token,
+            username: data?.username,
+            name: data?.name,
+            email: data?.email,
+            userId: data?.userId,
+          });
+          console.log("디버깅:" + JSON.stringify(useAuthStore.getState().userInfo));
           navigate("/social-signup", {
             replace: true,
             state: {
