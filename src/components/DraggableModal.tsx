@@ -15,7 +15,7 @@ export default function DraggableModal({ title, onClose, children }: DraggableMo
 
   const getResponsiveSize = () => {
     const maxWidth = window.innerWidth - MARGIN;
-    const maxHeight = window.innerHeight - MARGIN;
+    const maxHeight = window.innerHeight - MARGIN - 61; // 상단 헤더 높이 고려
 
     return {
       width: Math.min(DEFAULT_WIDTH, maxWidth),
@@ -25,7 +25,7 @@ export default function DraggableModal({ title, onClose, children }: DraggableMo
 
   const centerModal = (size: { width: number; height: number }) => ({
     x: (window.innerWidth - size.width) / 2,
-    y: (window.innerHeight - size.height) / 2,
+    y: (window.innerHeight - size.height) / 2 + 10, // 상단 헤더 높이 고려
   });
 
   // 초기값 계산
@@ -56,10 +56,9 @@ export default function DraggableModal({ title, onClose, children }: DraggableMo
 
   const handleMouseMove = (e: MouseEvent) => {
     if (!isDragging) return;
-
     setPosition({
-      x: e.clientX - offset.current.x,
-      y: e.clientY - offset.current.y,
+      x: e.clientX - offset.current.x < 0 ? 0 : e.clientX - offset.current.x > window.innerWidth - size.width ? window.innerWidth - size.width : e.clientX - offset.current.x,
+      y: e.clientY - offset.current.y < 52 ? 52 : e.clientY - offset.current.y > window.innerHeight - size.height ? window.innerHeight - size.height : e.clientY - offset.current.y, // 상단 헤더 높이 고려
     });
   };
 

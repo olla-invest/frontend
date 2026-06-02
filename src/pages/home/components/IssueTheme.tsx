@@ -1,11 +1,9 @@
 import { useEffect, useState, useRef, useCallback } from "react";
-import { Button } from "@/components/ui/button";
+
 import { Table, TableBody, TableCell, TableRow } from "@/components/ui/table";
-import { DropdownMenu, DropdownMenuCheckboxItem, DropdownMenuContent, DropdownMenuGroup, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
 import { getCoreRowModel, useReactTable, flexRender, type ColumnDef } from "@tanstack/react-table";
-import { ChevronDown } from "lucide-react";
+
 import IssueDetailModal from "./issueTheme/IssueDetailModal";
-import { IssueThemePagination } from "./issueTheme/IssueThemePagination";
 import { format } from "date-fns";
 
 import { getIssueTheme } from "@/api/issueTheme";
@@ -30,8 +28,8 @@ export function IssueTheme() {
   const navigate = useNavigate();
   const [isLoading, setIsLoading] = useState(false);
   // 데스크탑용
-  const [page, setPage] = useState(1);
-  const [pageSize, setPageSize] = useState(10);
+  const [page] = useState(1);
+  const [pageSize] = useState(40);
   const [basicData, setBasicData] = useState<IssueThemeApiResponse>();
   const [rows, setRows] = useState<IssueThemeRow[]>([]);
 
@@ -52,8 +50,13 @@ export function IssueTheme() {
     try {
       const res = await getIssueTheme(pageSize * 2, page);
       const mapped = mapToRows(res.themes);
+      if (res.total >= pageSize * 2) {
+        const res2 = await getIssueTheme(res.total, page);
+        setBasicData(res2);
+      } else {
+        setBasicData(res);
+      }
       setRows(mapped);
-      setBasicData(res);
     } catch (err) {
       console.log(err);
     } finally {
@@ -189,6 +192,8 @@ export function IssueTheme() {
         key={row.id}
         className="h-12.25 flex items-center"
         onClick={() => {
+          document.createElement("div");
+
           if (!isMobile) {
             setDetailOpen(true);
             setSelectIssue(row.original.original);
@@ -213,32 +218,6 @@ export function IssueTheme() {
             <span>업데이트 일시 {basicData?.updatedAt ? format(new Date(basicData.updatedAt), "yyyy-MM-dd HH:mm:ss") : "-"}</span>
           </div>
           <span className="text-sm">전체 {basicData?.total ?? 0}건</span>
-        </div>
-        <div className="hidden md:block">
-          <DropdownMenu>
-            <DropdownMenuTrigger asChild>
-              <Button variant="outline" size="sm">
-                {pageSize}
-                <ChevronDown />
-              </Button>
-            </DropdownMenuTrigger>
-            <DropdownMenuContent align="end">
-              <DropdownMenuGroup>
-                {[5, 10, 20, 30, 50].map((size) => (
-                  <DropdownMenuCheckboxItem
-                    key={size}
-                    checked={pageSize === size}
-                    onCheckedChange={() => {
-                      setPage(1);
-                      setPageSize(size);
-                    }}
-                  >
-                    {size}
-                  </DropdownMenuCheckboxItem>
-                ))}
-              </DropdownMenuGroup>
-            </DropdownMenuContent>
-          </DropdownMenu>
         </div>
       </div>
 
@@ -277,12 +256,6 @@ export function IssueTheme() {
             </>
           )}
         </div>
-      </div>
-
-      {/* 페이지네이션: 데스크탑만 */}
-      <div className="hidden md:flex justify-between items-center">
-        <p className="text-muted-foreground shrink-0 mt-4">이슈 테마에 포함된 종목은 실시간 차트에서 조회되는 종목에 한해 제공됩니다.</p>
-        <IssueThemePagination page={page} total={basicData?.total ?? 0} pageSize={pageSize} onChange={(next) => setPage(next)} />
       </div>
 
       {detailOpen && selectIssue && <IssueDetailModal onClose={() => setDetailOpen(false)} selectIssue={selectIssue} />}
