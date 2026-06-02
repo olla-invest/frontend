@@ -9,6 +9,7 @@ import { getRecommend } from "@/api/watchList";
 import type { WatchListTheme, WatchListStock, RecommendationResponse, RecommendedStock, RecommendedTheme } from "@/types/api/watchList";
 import ThemeDetailModal from "./myWatch/ThemeDetailModal";
 import LiveChartDetail from "./liveChart/LiveChartDetail";
+import { openStockDetailInNewTab } from "./liveChart/stockDetailTypes";
 
 export interface StockdetailInfo {
   id: string;
@@ -70,13 +71,13 @@ export default function MyWatch() {
   }, [stockList, themeList]);
 
   const handleStockModal = (stockItem: WatchListStock | RecommendedStock) => {
+    openStockDetailInNewTab(stockItem.stockCode);
     setSelectStock({
       id: stockItem.stockCode,
       companyName: stockItem.companyName,
       investmentIndicators: "",
       currentPrice: stockItem.closePrice,
     });
-    setStockModalOpen(true);
   };
 
   const handleThemeModal = (themeItem: WatchListTheme | RecommendedTheme) => {
@@ -177,7 +178,7 @@ export default function MyWatch() {
 
               <ul className="flex flex-col w-full overflow-y-auto">
                 {sumWatchList && sumWatchList.length > 0 ? (
-                  sumWatchList.map((item, i) => <MyWatchlist key={i} item={item} bookmarks={bookmarks} />)
+                  sumWatchList.map((item, i) => <MyWatchlist key={i} item={item} bookmarks={bookmarks} handleStockModal={handleStockModal} handleThemeModal={handleThemeModal} />)
                 ) : (
                   <li className="text-center text-sm text-muted-foreground py-10">관심 항목이 없습니다.</li>
                 )}

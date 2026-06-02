@@ -156,7 +156,7 @@ export function StockFocus({ stock, handleStockModal }: StockFocusProps) {
         handleStockModal(stock);
       }}
     >
-      <div className="size-12 rounded-full bg-[#d9d9d9] shrink-0">
+      <div className="size-12 rounded-full overflow-hidden bg-[#d9d9d9] shrink-0">
         <img src={getStockImageUrl(stock.stockCode)} alt={stock.companyName} className="w-full h-full object-cover" />
       </div>
       <div className="flex flex-col gap-1">

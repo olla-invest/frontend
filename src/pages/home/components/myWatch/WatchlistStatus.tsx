@@ -57,12 +57,25 @@ const RANK_META = {
   },
 } as const;
 
+const BASE_URL = import.meta.env.VITE_API_BASE_URL;
+
+const getStockImageUrl = (stockCode: string) => {
+  return `${BASE_URL}/stock-image/${stockCode}.png`;
+};
+
 export default function WatchlistStatus({ themeList, stockList, handleThemeModal, handleStockModal }: WatchlistStatusProps) {
   const stockColumns: ColumnDef<WatchListStock>[] = [
     {
       accessorKey: "companyName",
       header: "기업",
-      cell: ({ row }) => <div className="min-w-24">{row.original.companyName}</div>,
+      cell: ({ row }) => (
+        <div className="min-w-24 flex items-center gap-2">
+          <div className="size-8 rounded-full overflow-hidden bg-[#d9d9d9]">
+            <img src={getStockImageUrl(row.original.stockCode)} alt={row.original.companyName} className="w-full h-full object-cover" />
+          </div>
+          {row.original.companyName}
+        </div>
+      ),
     },
     {
       accessorKey: "closePrice",
@@ -135,7 +148,14 @@ export default function WatchlistStatus({ themeList, stockList, handleThemeModal
     {
       accessorKey: "themeName",
       header: "테마",
-      cell: ({ row }) => <div className="min-w-24">{row.original.themeName}</div>,
+      cell: ({ row }) => {
+        return (
+          <div className="min-w-24 flex items-center gap-2">
+            <div className="size-8 rounded-full overflow-hidden bg-[#d9d9d9]"></div>
+            {row.original.themeName}
+          </div>
+        );
+      },
     },
     {
       id: "rankChange",

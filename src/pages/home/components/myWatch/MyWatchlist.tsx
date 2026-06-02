@@ -5,6 +5,8 @@ type SumWatchItem = (WatchListStock & { type: "stock" }) | (WatchListTheme & { t
 interface Props {
   item: SumWatchItem;
   bookmarks: Record<string, boolean>;
+  handleStockModal: (stock: WatchListStock) => void;
+  handleThemeModal: (stock: WatchListTheme) => void;
 }
 
 const BASE_URL = import.meta.env.VITE_API_BASE_URL;
@@ -13,9 +15,9 @@ const getStockImageUrl = (stockCode: string) => {
   return `${BASE_URL}/stock-image/${stockCode}.png`;
 };
 
-export default function MyWatchlist({ item, bookmarks }: Props) {
+export default function MyWatchlist({ item, bookmarks, handleStockModal, handleThemeModal }: Props) {
   return (
-    <li className="py-1 flex items-center justify-between gap-1">
+    <li className="py-1 flex items-center justify-between gap-1 h-12" onClick={() => (item.type === "stock" ? handleStockModal(item) : handleThemeModal(item))}>
       {item.type === "stock" ? (
         <div className="flex justify-between gap-4 flex-1">
           <div className="flex gap-2 items-center w-32 flex-1">
