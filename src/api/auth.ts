@@ -13,7 +13,7 @@ export interface SignUpParams {
 }
 
 export interface SnsSignUpParams {
-  username: string;
+  username?: string;
   email: string;
   name: string;
   phone: string;
