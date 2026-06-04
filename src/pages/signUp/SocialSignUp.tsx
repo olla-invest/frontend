@@ -9,6 +9,7 @@ import AgreementSection from "./components/AgreementSection";
 
 import { useAuthStore } from "@/store/useAuthStore";
 import { patchSnsSignUp } from "@/api/auth";
+import { toast } from "sonner";
 
 const SocialSignUp: React.FC = () => {
   const navigate = useNavigate();
@@ -47,6 +48,8 @@ const SocialSignUp: React.FC = () => {
       ...prev,
       [key]: checked,
     }));
+    setError(null);
+    setErrorType(null);
   };
 
   const handleSubmit = async () => {
@@ -109,6 +112,7 @@ const SocialSignUp: React.FC = () => {
       });
     } catch (e: unknown) {
       console.error(e);
+      toast.error("회원가입에 실패했습니다. 다시 시도해주세요.");
 
       if (isAxiosError(e) && e.response?.data?.message?.includes("이미 해당 이메일")) {
         setError("이미 해당 이메일로 가입된 계정이 있습니다. 일반 로그인을 이용해주세요.");

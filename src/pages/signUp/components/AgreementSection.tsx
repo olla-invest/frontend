@@ -59,7 +59,7 @@ export default function AgreementSection({ agreeService, agreePrivacy, agreeMark
         </div>
       </div>
 
-      {error && <span className="text-red-500 text-xs">{error}</span>}
+      {error && errorType === "agreements" && <span className="text-red-500 text-xs">{error}</span>}
     </div>
   );
 }
