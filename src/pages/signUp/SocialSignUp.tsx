@@ -2,7 +2,7 @@ import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { isAxiosError } from "axios";
 
-import { Field, FieldLabel, FieldDescription } from "@/components/ui/field";
+import { Field, FieldLabel } from "@/components/ui/field";
 import { Input } from "@/components/ui/input";
 import LogoImg from "@/assets/images/olla-logo.svg";
 import AgreementSection from "./components/AgreementSection";
@@ -25,7 +25,7 @@ const SocialSignUp: React.FC = () => {
 
   const [userInfo, setUserInfo] = useState({
     name: "",
-    email: "",
+    email: storeUserInfo?.email || "",
     phone: "",
   });
 
@@ -130,8 +130,6 @@ const SocialSignUp: React.FC = () => {
                   }))
                 }
               />
-
-              {error && <FieldDescription className="text-[#DC2626] text-xs">{error}</FieldDescription>}
             </Field>
 
             <Field>
