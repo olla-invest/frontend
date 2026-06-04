@@ -48,15 +48,12 @@ export function IssueTheme() {
   const getIssueData = async () => {
     setIsLoading(true);
     try {
-      const res = await getIssueTheme(pageSize * 2, page);
-      const mapped = mapToRows(res.themes);
-      if (res.total >= pageSize * 2) {
-        const res2 = await getIssueTheme(res.total, page);
-        setBasicData(res2);
-      } else {
-        setBasicData(res);
-      }
-      setRows(mapped);
+      // 1건만 불러서 total 파악
+      const probe = await getIssueTheme(1, 1);
+      // total 크기로 한 번에 전체 조회
+      const res = await getIssueTheme(probe.total, 1);
+      setBasicData(res);
+      setRows(mapToRows(res.themes));
     } catch (err) {
       console.log(err);
     } finally {
