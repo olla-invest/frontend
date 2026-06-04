@@ -8,18 +8,19 @@ interface Props {
   agreePrivacy: boolean;
   agreeMarketing: boolean;
   error?: string;
+  errorType?: string;
 
   onAllChange: (checked: boolean) => void;
   onChange: (key: "agreeService" | "agreePrivacy" | "agreeMarketing", checked: boolean) => void;
 }
 
-export default function AgreementSection({ agreeService, agreePrivacy, agreeMarketing, error, onAllChange, onChange }: Props) {
+export default function AgreementSection({ agreeService, agreePrivacy, agreeMarketing, error, errorType, onAllChange, onChange }: Props) {
   const allChecked = agreeService && agreePrivacy && agreeMarketing;
   const baseURL = window.location.origin;
 
   return (
     <div className="mt-2">
-      <div className={`${error && "border-red-500 ring-3 ring-red-100"} p-3 border rounded-md`}>
+      <div className={`${errorType === "agreements" && error && "border-red-500 ring-3 ring-red-100"} p-3 border rounded-md`}>
         {/* 전체 선택 */}
         <div className="pb-2.5 mb-2.5 border-b">
           <div className="flex gap-2">

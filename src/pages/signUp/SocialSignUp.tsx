@@ -2,7 +2,7 @@ import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { isAxiosError } from "axios";
 
-import { Field, FieldLabel } from "@/components/ui/field";
+import { Field, FieldLabel, FieldDescription } from "@/components/ui/field";
 import { Input } from "@/components/ui/input";
 import LogoImg from "@/assets/images/olla-logo.svg";
 import AgreementSection from "./components/AgreementSection";
@@ -30,6 +30,7 @@ const SocialSignUp: React.FC = () => {
   });
 
   const [error, setError] = useState<string | null>(null);
+  const [errorType, setErrorType] = useState<string | null>(null);
 
   // 전체 선택
   const handleAllChange = (checked: boolean) => {
@@ -51,9 +52,28 @@ const SocialSignUp: React.FC = () => {
   const handleSubmit = async () => {
     setError(null);
 
+    if (!userInfo.name) {
+      setError("이름을 입력해주세요.");
+      setErrorType("name");
+      return;
+    }
+
+    if (!userInfo.phone) {
+      setError("휴대폰번호를 입력해주세요.");
+      setErrorType("phone");
+      return;
+    }
+
+    if (!userInfo.email) {
+      setError("이메일을 입력해주세요.");
+      setErrorType("email");
+      return;
+    }
+
     // 필수 약관 체크
     if (!agreements.agreeService || !agreements.agreePrivacy) {
       setError("필수 약관에 동의해주세요.");
+      setErrorType("agreements");
       return;
     }
 
@@ -130,6 +150,7 @@ const SocialSignUp: React.FC = () => {
                   }))
                 }
               />
+              {errorType === "name" && <FieldDescription className="text-red-500">{error}</FieldDescription>}
             </Field>
 
             <Field>
@@ -147,6 +168,7 @@ const SocialSignUp: React.FC = () => {
                   }))
                 }
               />
+              {errorType === "phone" && <FieldDescription className="text-red-500">{error}</FieldDescription>}
             </Field>
 
             <Field>
@@ -164,6 +186,7 @@ const SocialSignUp: React.FC = () => {
                   }))
                 }
               />
+              {errorType === "email" && <FieldDescription className="text-red-500">{error}</FieldDescription>}
             </Field>
 
             <AgreementSection
@@ -171,6 +194,7 @@ const SocialSignUp: React.FC = () => {
               agreePrivacy={!!agreements.agreePrivacy}
               agreeMarketing={!!agreements.agreeMarketing}
               error={error || ""}
+              errorType={errorType || ""}
               onAllChange={handleAllChange}
               onChange={handleChange}
             />
