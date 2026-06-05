@@ -25,6 +25,7 @@ import { useChartSocket } from "./hooks/useChartSocket";
 
 import { useAuthStore } from "./store/useAuthStore";
 import IssueDetailPage from "./pages/home/components/issueTheme/IssueDetailPage";
+import { ScrollToTop } from "./utils/scrollTop";
 
 interface RouteProps {
   children: React.ReactNode;
@@ -82,6 +83,7 @@ const App: React.FC = () => {
 
   return (
     <Router>
+      <ScrollToTop />
       <Routes>
         {/* Main Layout */}
         <Route element={<MainLayout />}>
