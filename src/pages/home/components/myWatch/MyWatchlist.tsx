@@ -17,14 +17,14 @@ const getStockImageUrl = (stockCode: string) => {
 
 export default function MyWatchlist({ item, bookmarks, handleStockModal, handleThemeModal }: Props) {
   return (
-    <li className="py-1 flex items-center justify-between gap-1 h-12" onClick={() => (item.type === "stock" ? handleStockModal(item) : handleThemeModal(item))}>
+    <li className="p-1 flex items-center justify-between gap-1 h-12 rounded-md hover:bg-accent" onClick={() => (item.type === "stock" ? handleStockModal(item) : handleThemeModal(item))}>
       {item.type === "stock" ? (
         <div className="flex justify-between gap-4 flex-1">
           <div className="flex gap-2 items-center w-32 flex-1">
             <div className="size-8 rounded-full bg-[#D9D9D9] shrink-0">
               <img src={getStockImageUrl(item.stockCode)} alt={item.companyName} className="w-full h-full object-cover rounded-full" />
             </div>
-            <span className="truncate">{item.companyName}</span>
+            <span className="truncate text-sm font-semibold">{item.companyName}</span>
           </div>
           <div className="flex flex-col text-sm items-end py-1">
             <span className="text-slate-800 font-semibold">{item.closePrice.toLocaleString()}원</span>
@@ -38,7 +38,7 @@ export default function MyWatchlist({ item, bookmarks, handleStockModal, handleT
         <div className="flex justify-between gap-4 flex-1">
           <div className="flex gap-2 items-center w-32 flex-1">
             <div className="size-8 rounded-md bg-[#D9D9D9] shrink-0" />
-            <span className="truncate">{item.themeName}</span>
+            <span className="truncate text-sm font-semibold">{item.themeName}</span>
           </div>
           <div className="flex gap-2 text-slate-700 text-sm items-center">
             <span>{item.totalCount}개 중</span>

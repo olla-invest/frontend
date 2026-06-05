@@ -23,7 +23,7 @@ export function Header() {
   const isMobile = useIsMobile();
 
   return (
-    <header className="h-13 w-full py-2 px-6 sticky top-0 left-0 right-0 z-10 bg-white border-b">
+    <header className="h-13 w-full py-2 px-6 sticky top-0 left-0 right-0 z-10 bg-white">
       <div className="flex justify-between h-full items-center">
         <h1
           className="logo"

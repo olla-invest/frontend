@@ -230,9 +230,11 @@ export default function DetailChart({ stockCode }: { stockCode: string }) {
         <Table>
           <TableHeader className="sticky top-0 left-0 bg-white shadow-[0_1px_0_0_rgba(0,0,0,0.1)] shrink-0">
             {table.getHeaderGroups().map((hg) => (
-              <TableRow key={hg.id}>
+              <TableRow key={hg.id} className="hover:bg-transparent">
                 {hg.headers.map((header) => (
-                  <TableHead key={header.id}>{flexRender(header.column.columnDef.header, header.getContext())}</TableHead>
+                  <TableHead key={header.id} className="text-muted-foreground">
+                    {flexRender(header.column.columnDef.header, header.getContext())}
+                  </TableHead>
                 ))}
               </TableRow>
             ))}
@@ -245,7 +247,7 @@ export default function DetailChart({ stockCode }: { stockCode: string }) {
                 ? table.getRowModel().rows.map((row) => (
                     <TableRow key={row.id} className="h-12">
                       {row.getVisibleCells().map((cell) => (
-                        <TableCell key={cell.id} className="text-sm">
+                        <TableCell key={cell.id} className="text-sm text-slate-700">
                           {flexRender(cell.column.columnDef.cell, cell.getContext())}
                         </TableCell>
                       ))}

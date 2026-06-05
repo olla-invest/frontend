@@ -12,7 +12,7 @@ const years = Array.from({ length: currentYear - 2000 + 1 }, (_, i) => 2000 + i)
 export function DateYearSelect({ selectYear, setSelectYear }: Props) {
   return (
     <Select value={selectYear} onValueChange={setSelectYear}>
-      <SelectTrigger>
+      <SelectTrigger className="font-medium">
         <SelectValue placeholder="연도 선택" />
       </SelectTrigger>
       <SelectContent className="z-1001">

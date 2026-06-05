@@ -353,7 +353,7 @@ export default function ChartFilter(props: ChartFilterProps) {
 
   return (
     <div className="mt-2 pb-4 border-b mb-4 md:mb-0">
-      <form className="flex gap-2 flex-col md:flex-row">
+      <form className="flex gap-2 flex-col md:flex-wrap md:flex-row">
         <Tabs
           value={filterValue.market}
           onValueChange={(value) => {
@@ -372,7 +372,7 @@ export default function ChartFilter(props: ChartFilterProps) {
           </TabsList>
         </Tabs>
 
-        <div className="flex gap-2 overflow-x-auto">
+        <div className="flex gap-2 overflow-x-auto md:flex-wrap">
           {isMobile ? renderMobileFilterButtons() : renderDesktopFilters()}
 
           <Button type="button" variant="outline" className="text-primary hidden md:block" onClick={() => props.onSearch({ ...props.filter })}>

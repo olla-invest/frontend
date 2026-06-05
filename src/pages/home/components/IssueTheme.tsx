@@ -220,14 +220,14 @@ export function IssueTheme() {
     <div className="flex flex-col md:h-[calc(100%-36px)]">
       <div className="flex justify-between gap-4 mb-4">
         <div className="flex gap-2 items-center max-h-8 text-muted-foreground text-xs">
-          <div className="bg-muted p-2 rounded-sm flex align-middle gap-1">
+          <div className="bg-muted p-2 rounded-xs flex align-middle gap-1">
             <span>업데이트 일시 {basicData?.updatedAt ? format(new Date(basicData.updatedAt), "yyyy-MM-dd HH:mm:ss") : "-"}</span>
           </div>
           <span className="text-sm">전체 {basicData?.total ?? 0}건</span>
         </div>
       </div>
 
-      <div className="overflow-x-auto w-full border-t md:border-t-0">
+      <div className="overflow-x-auto w-full border-t">
         {/* 모바일: 무한 스크롤 단일 테이블 */}
         <div className="md:hidden w-full">
           {isLoading ? (
@@ -262,7 +262,9 @@ export function IssueTheme() {
           )}
         </div>
       </div>
-
+      <div className="h-9 md:flex hidden items-center text-xs text-muted-foreground mt-4">
+        <p>이슈 테마에 포함된 종목은 실시간 차트에서 조회되는 종목에 한해 제공됩니다.</p>
+      </div>
       {detailOpen && selectIssue && <IssueDetailModal onClose={() => setDetailOpen(false)} selectIssue={selectIssue} />}
     </div>
   );

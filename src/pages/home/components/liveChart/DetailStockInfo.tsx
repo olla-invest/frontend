@@ -130,15 +130,15 @@ export default function DetailStockInfo({ stockCode }: Props) {
 
         {/* 손익 */}
         <div className="flex flex-col gap-1">
-          <span>손익 현황</span>
+          <span className="font-medium">손익 현황</span>
           <Table>
             <TableHeader>
               <TableRow>
-                <TableHead className="text-muted-foreground w-45">구분</TableHead>
-                <TableHead className="text-muted-foreground text-right">1Q</TableHead>
-                <TableHead className="text-muted-foreground text-right">2Q</TableHead>
-                <TableHead className="text-muted-foreground text-right">3Q</TableHead>
-                <TableHead className="text-muted-foreground text-right">4Q</TableHead>
+                <TableHead className="text-muted-foreground w-1/5">구분</TableHead>
+                <TableHead className="text-muted-foreground text-right w-1/5">1Q</TableHead>
+                <TableHead className="text-muted-foreground text-right w-1/5">2Q</TableHead>
+                <TableHead className="text-muted-foreground text-right w-1/5">3Q</TableHead>
+                <TableHead className="text-muted-foreground text-right w-1/5">4Q</TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>
@@ -169,15 +169,15 @@ export default function DetailStockInfo({ stockCode }: Props) {
 
         {/* 현금흐름 */}
         <div className="flex flex-col gap-1">
-          <span>현금흐름 현황</span>
+          <span className="font-medium">현금흐름 현황</span>
           <Table>
             <TableHeader>
               <TableRow>
-                <TableHead className="text-muted-foreground w-45">구분</TableHead>
-                <TableHead className="text-muted-foreground text-right">1Q</TableHead>
-                <TableHead className="text-muted-foreground text-right">2Q</TableHead>
-                <TableHead className="text-muted-foreground text-right">3Q</TableHead>
-                <TableHead className="text-muted-foreground text-right">4Q</TableHead>
+                <TableHead className="text-muted-foreground w-1/5">구분</TableHead>
+                <TableHead className="text-muted-foreground text-right w-1/5">1Q</TableHead>
+                <TableHead className="text-muted-foreground text-right w-1/5">2Q</TableHead>
+                <TableHead className="text-muted-foreground text-right w-1/5">3Q</TableHead>
+                <TableHead className="text-muted-foreground text-right w-1/5">4Q</TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>
@@ -208,15 +208,15 @@ export default function DetailStockInfo({ stockCode }: Props) {
 
         {/* 수익성·효율 지표 */}
         <div className="flex flex-col gap-1">
-          <span>수익성·효율 지표</span>
+          <span className="font-medium">수익성·효율 지표</span>
           <Table>
             <TableHeader>
               <TableRow>
-                <TableHead className="text-muted-foreground w-45">구분</TableHead>
-                <TableHead className="text-muted-foreground text-right">1Q</TableHead>
-                <TableHead className="text-muted-foreground text-right">2Q</TableHead>
-                <TableHead className="text-muted-foreground text-right">3Q</TableHead>
-                <TableHead className="text-muted-foreground text-right">4Q</TableHead>
+                <TableHead className="text-muted-foreground w-1/5">구분</TableHead>
+                <TableHead className="text-muted-foreground text-right w-1/5">1Q</TableHead>
+                <TableHead className="text-muted-foreground text-right w-1/5">2Q</TableHead>
+                <TableHead className="text-muted-foreground text-right w-1/5">3Q</TableHead>
+                <TableHead className="text-muted-foreground text-right w-1/5">4Q</TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>
@@ -249,15 +249,15 @@ export default function DetailStockInfo({ stockCode }: Props) {
 
         {/* 재무 안정성 지표 */}
         <div className="flex flex-col gap-1">
-          <span>재무 안정성 지표</span>
+          <span className="font-medium">재무 안정성 지표</span>
           <Table>
             <TableHeader>
               <TableRow>
-                <TableHead className="text-muted-foreground w-45">구분</TableHead>
-                <TableHead className="text-muted-foreground text-right">1Q</TableHead>
-                <TableHead className="text-muted-foreground text-right">2Q</TableHead>
-                <TableHead className="text-muted-foreground text-right">3Q</TableHead>
-                <TableHead className="text-muted-foreground text-right">4Q</TableHead>
+                <TableHead className="text-muted-foreground w-1/5">구분</TableHead>
+                <TableHead className="text-muted-foreground text-right w-1/5">1Q</TableHead>
+                <TableHead className="text-muted-foreground text-right w-1/5">2Q</TableHead>
+                <TableHead className="text-muted-foreground text-right w-1/5">3Q</TableHead>
+                <TableHead className="text-muted-foreground text-right w-1/5">4Q</TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>

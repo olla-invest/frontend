@@ -163,7 +163,7 @@ const renderIndicators = (row: Row<StockRankingApiItem>) => {
 const columns: ColumnDef<StockRankingApiItem>[] = [
   {
     accessorKey: "rank",
-    header: () => <div className="text-left md:w-16">순위</div>,
+    header: () => <div className="text-left md:w-12">순위</div>,
     cell: ({ row }) => <div>{row.getValue("rank")}</div>,
   },
   {
@@ -547,9 +547,9 @@ export function LiveChart() {
           <Table className={`${isMobile ? "w-full" : "min-w-max"}`}>
             <TableHeader className="bg-white shadow-[0_1px_0_0_rgba(0,0,0,0.1)]">
               {table.getHeaderGroups().map((hg) => (
-                <TableRow key={hg.id}>
+                <TableRow key={hg.id} className="hover:bg-transparent">
                   {hg.headers.map((header) => (
-                    <TableHead key={header.id} className={`text-muted-foreground! ${header.id === "rankHistory" ? "w-40" : null}`}>
+                    <TableHead key={header.id} className={`text-muted-foreground! ${header.id === "rankHistory" ? "w-40 px-4" : null}`}>
                       {flexRender(header.column.columnDef.header, header.getContext())}
                     </TableHead>
                   ))}
@@ -564,7 +564,7 @@ export function LiveChart() {
                   ? table.getRowModel().rows.map((row) => (
                       <TableRow key={row.id} className="h-12.25" onClick={() => openStockDetail(row.original)}>
                         {row.getVisibleCells().map((cell) => (
-                          <TableCell key={cell.id} className={cell.column.id === "companyName" ? "whitespace-normal" : ""}>
+                          <TableCell key={cell.id} className={cell.column.id === "companyName" ? "whitespace-normal text-slate-700" : "text-slate-700"}>
                             {cell.column.id === "theme" ? (
                               <div className="h-8 flex items-center justify-end" title={row.original.themeFull}>
                                 {flexRender(cell.column.columnDef.cell, cell.getContext())}

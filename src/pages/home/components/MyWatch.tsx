@@ -174,7 +174,7 @@ export default function MyWatch() {
           {/* 오른쪽: 내 관심 리스트 */}
           <div className="xl:pl-6 xl:min-w-66 xl:max-w-86 py-4 w-full">
             <div className="flex flex-col gap-4 py-2 h-full">
-              <h4 className="text-xl text-foreground font-semibold">내관심</h4>
+              <h4 className="text-xl text-foreground font-semibold">내 관심</h4>
 
               <ul className="flex flex-col w-full overflow-y-auto">
                 {sumWatchList && sumWatchList.length > 0 ? (

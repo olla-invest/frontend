@@ -151,7 +151,7 @@ export default function WatchlistStatus({ themeList, stockList, handleThemeModal
       cell: ({ row }) => {
         return (
           <div className="min-w-24 flex items-center gap-2">
-            <div className="size-8 rounded-full overflow-hidden bg-[#d9d9d9]"></div>
+            <div className="size-8 rounded-md overflow-hidden bg-[#d9d9d9]"></div>
             {row.original.themeName}
           </div>
         );
@@ -225,7 +225,7 @@ export default function WatchlistStatus({ themeList, stockList, handleThemeModal
       <UiTable className="min-w-max">
         <TableHeader className="sticky top-0 bg-white">
           {table.getHeaderGroups().map((hg) => (
-            <TableRow key={hg.id}>
+            <TableRow key={hg.id} className="hover:bg-transparent">
               {hg.headers.map((header) => (
                 <TableHead key={header.id}>{flexRender(header.column.columnDef.header, header.getContext())}</TableHead>
               ))}
