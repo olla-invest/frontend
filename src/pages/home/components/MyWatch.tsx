@@ -126,7 +126,7 @@ export default function MyWatch() {
       ) : (
         <div className="flex h-full xl:flex-row overflow-y-auto flex-col">
           {/* 왼쪽 영역 */}
-          <div className="pr-6 xl:border-r xl:border-b-0 pt-4 flex flex-col gap-6">
+          <div className="pr-6 xl:border-r xl:border-b-0 pt-4 flex flex-col gap-6 flex-1">
             {/* 오늘 주목 */}
             <div className="flex flex-col gap-4 py-2">
               <h4 className="text-xl text-foreground font-semibold">오늘 주목해야 할 내 관심항목</h4>
