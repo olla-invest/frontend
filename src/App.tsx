@@ -25,7 +25,7 @@ import { useChartSocket } from "./hooks/useChartSocket";
 
 import { useAuthStore } from "./store/useAuthStore";
 import IssueDetailPage from "./pages/home/components/issueTheme/IssueDetailPage";
-import { ScrollToTop } from "./utils/scrollTop";
+import { ScrollToTop } from "./utils/ScrollTop";
 
 interface RouteProps {
   children: React.ReactNode;
