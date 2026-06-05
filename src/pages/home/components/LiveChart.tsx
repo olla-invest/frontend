@@ -493,7 +493,7 @@ export function LiveChart() {
   return (
     <>
       <div className="w-full flex flex-col h-full relative">
-        <ChartFilter filter={filter} setFilter={setFilter} onSearch={handleSearch} />
+        <ChartFilter filter={filter} setFilter={setFilter} onSearch={handleSearch} themeList={tableData?.themeList} />
 
         <div className="justify-between items-center py-4 hidden md:flex">
           <div className="flex gap-2 items-center max-h-8 text-muted-foreground text-xs">
@@ -565,7 +565,13 @@ export function LiveChart() {
                       <TableRow key={row.id} className="h-12.25" onClick={() => openStockDetail(row.original)}>
                         {row.getVisibleCells().map((cell) => (
                           <TableCell key={cell.id} className={cell.column.id === "companyName" ? "whitespace-normal" : ""}>
-                            {flexRender(cell.column.columnDef.cell, cell.getContext())}
+                            {cell.column.id === "theme" ? (
+                              <div className="h-8 flex items-center justify-end" title={row.original.themeFull}>
+                                {flexRender(cell.column.columnDef.cell, cell.getContext())}
+                              </div>
+                            ) : (
+                              flexRender(cell.column.columnDef.cell, cell.getContext())
+                            )}
                           </TableCell>
                         ))}
                       </TableRow>

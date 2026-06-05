@@ -21,13 +21,17 @@ import { v4 as uuid } from "uuid";
 
 import { getDefaultRSRange } from "@/utils/tradingDay";
 import { format } from "date-fns";
-import { THEME_CODES } from "@/constants/theme";
 import { useIsMobile } from "@/hooks/use-mobile";
 import ChartFilterBottomSheet from "./ChartFilterBottomSheet";
 import ChartFilterMobilePanels, { type MobileFilterDraft, type MobileFilterTab } from "./ChartFilterMobilePanels";
 
 interface ChartFilterProps {
   filter: ChartFilterState;
+  themeList?: {
+    sourceThemeNo: string;
+    themeCode: number;
+    themeName: string;
+  }[];
   setFilter: React.Dispatch<React.SetStateAction<ChartFilterState>>;
   onSearch: (filter: ChartFilterState) => void;
 }
@@ -67,6 +71,7 @@ function buildRsFromPeriods(periods: RSPeriod[]) {
 export default function ChartFilter(props: ChartFilterProps) {
   const isMobile = useIsMobile();
   const filterValue = { ...props.filter };
+  const themeList = props.themeList;
   const filterSetter = props.setFilter;
   const [priceInput, setPriceInput] = useState(DEFAULT_PRICE_INPUT);
   const [priceChange, setPriceChange] = useState(false);
@@ -268,20 +273,29 @@ export default function ChartFilter(props: ChartFilterProps) {
                 전체
               </DropdownMenuCheckboxItem>
 
-              {THEME_CODES?.map((theme) => {
-                const checked = filterValue.theme.some((t) => t?.code === theme.code);
+              {themeList?.map((theme) => {
+                const checked = filterValue.theme.some((t) => t?.code === theme.themeCode);
                 return (
                   <DropdownMenuCheckboxItem
-                    key={theme.code}
+                    key={theme.themeCode}
                     checked={checked}
                     onCheckedChange={(isChecked) => {
                       filterSetter((prev) => ({
                         ...prev,
-                        theme: isChecked ? [...prev.theme, theme] : prev.theme.filter((t) => t?.code !== theme.code),
+                        theme: isChecked
+                          ? [
+                              ...prev.theme,
+                              {
+                                code: theme.themeCode,
+                                name: theme.themeName,
+                                description: "",
+                              },
+                            ]
+                          : prev.theme.filter((t) => t?.code !== theme.themeCode),
                       }));
                     }}
                   >
-                    {theme.name}
+                    {theme.themeName}
                   </DropdownMenuCheckboxItem>
                 );
               })}

@@ -13,6 +13,11 @@ export interface StockRankingApiResponse {
     queryStartDate: string;
   };
   stocks: StockRankingApiItem[];
+  themeList?: {
+    sourceThemeNo: string;
+    themeCode: number;
+    themeName: string;
+  }[];
 }
 
 export interface StockRankingApiItem {
@@ -27,6 +32,7 @@ export interface StockRankingApiItem {
   investmentIndicators: string;
   investmentIndicatorsDtl: string;
   theme: string;
+  themeFull: string;
   upName: string;
   rankHistory: {
     oneDayAgo: number | null;
