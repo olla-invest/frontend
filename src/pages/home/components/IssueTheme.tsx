@@ -27,64 +27,24 @@ export function IssueTheme() {
   const themeList = useWatchThemeStore((state) => state.themeList);
   const navigate = useNavigate();
   const [isLoading, setIsLoading] = useState(false);
+
   // 데스크탑용
   const [page] = useState(1);
-  const [pageSize] = useState(40);
   const [basicData, setBasicData] = useState<IssueThemeApiResponse>();
   const [rows, setRows] = useState<IssueThemeRow[]>([]);
 
   // 모바일 무한스크롤용
   const isMobile = useIsMobile();
-  const [mobilePage, setMobilePage] = useState(1);
   const [mobileRows, setMobileRows] = useState<IssueThemeRow[]>([]);
-  const [mobileHasMore, setMobileHasMore] = useState(true);
   const [mobileLoading, setMobileLoading] = useState(false);
-  const observerRef = useRef<HTMLDivElement>(null);
+
+  // 최신 상태를 ref로 관리 → stale closure 방지
+  const mobileLoadingRef = useRef(false);
+  const mobileHasMoreRef = useRef(true);
+  const mobilePageRef = useRef(1);
 
   const [detailOpen, setDetailOpen] = useState(false);
   const [selectIssue, setSelectIssue] = useState<IssueTheme>();
-
-  // 데스크탑 데이터 fetch
-  const getIssueData = async () => {
-    setIsLoading(true);
-    try {
-      // 1건만 불러서 total 파악
-      const probe = await getIssueTheme(1, 1);
-      // total 크기로 한 번에 전체 조회
-      const res = await getIssueTheme(probe.total, 1);
-      setBasicData(res);
-      setRows(mapToRows(res.themes));
-    } catch (err) {
-      console.log(err);
-    } finally {
-      setIsLoading(false);
-    }
-  };
-
-  // 모바일 데이터 fetch (누적)
-  const getMobileData = useCallback(
-    async (nextPage: number) => {
-      if (mobileLoading || !mobileHasMore) return;
-      try {
-        setMobileLoading(true);
-        const mobilePageSize = 20;
-        const res = await getIssueTheme(mobilePageSize, nextPage);
-        const mapped = mapToRows(res.themes);
-
-        setMobileRows((prev) => [...prev, ...mapped]);
-        setMobilePage(nextPage);
-
-        // 더 불러올 데이터가 없으면 중단
-        const totalLoaded = nextPage * mobilePageSize;
-        if (totalLoaded >= res.total) setMobileHasMore(false);
-      } catch (err) {
-        console.log(err);
-      } finally {
-        setMobileLoading(false);
-      }
-    },
-    [mobileLoading, mobileHasMore],
-  );
 
   const mapToRows = (themes: IssueTheme[]): IssueThemeRow[] =>
     themes.map((item) => ({
@@ -95,32 +55,83 @@ export function IssueTheme() {
       original: item,
     }));
 
-  // 데스크탑: page/pageSize 변경 시 fetch
+  // 데스크탑 데이터 fetch
+  const getIssueData = async () => {
+    setIsLoading(true);
+    try {
+      const probe = await getIssueTheme(1, 1);
+      const res = await getIssueTheme(probe.total, 1);
+      setBasicData(res);
+      setRows(mapToRows(res.themes));
+    } catch (err) {
+      console.log(err);
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  // 모바일 데이터 fetch
+  const getMobileData = useCallback(async (nextPage: number) => {
+    if (mobileLoadingRef.current || !mobileHasMoreRef.current) return;
+
+    try {
+      mobileLoadingRef.current = true;
+      setMobileLoading(true);
+
+      const mobilePageSize = 20;
+      const res = await getIssueTheme(mobilePageSize, nextPage);
+      const mapped = mapToRows(res.themes);
+
+      setMobileRows((prev) => [...prev, ...mapped]);
+      mobilePageRef.current = nextPage;
+
+      const totalLoaded = nextPage * mobilePageSize;
+      if (totalLoaded >= res.total) {
+        mobileHasMoreRef.current = false;
+      }
+    } catch (err) {
+      console.log(err);
+    } finally {
+      mobileLoadingRef.current = false;
+      setMobileLoading(false);
+    }
+  }, []);
+
+  // 데스크탑: 진입 시 fetch
   useEffect(() => {
     if (!isMobile) getIssueData();
-  }, [page, pageSize, isMobile]);
+  }, [page, isMobile]);
 
-  // 모바일: 첫 진입 시 1페이지 fetch
+  // 모바일: 첫 진입 시 ref + state 초기화 후 1페이지 fetch
   useEffect(() => {
-    if (isMobile) getMobileData(1);
+    if (isMobile) {
+      // 웹 → 모바일 전환 시 상태 리셋
+      mobileLoadingRef.current = false;
+      mobileHasMoreRef.current = true;
+      mobilePageRef.current = 1;
+      setMobileRows([]);
+      setMobileLoading(false);
+      getMobileData(1);
+    }
   }, [isMobile]);
 
-  // IntersectionObserver: 맨 아래 감지 → 다음 페이지 fetch
-  useEffect(() => {
-    if (!isMobile) return;
+  const observerTargetRef = useCallback(
+    (node: HTMLDivElement | null) => {
+      if (!node || !isMobile) return;
 
-    const observer = new IntersectionObserver(
-      (entries) => {
-        if (entries[0].isIntersecting) {
-          getMobileData(mobilePage + 1);
-        }
-      },
-      { threshold: 0.5 },
-    );
+      const observer = new IntersectionObserver(
+        (entries) => {
+          if (entries[0].isIntersecting) {
+            getMobileData(mobilePageRef.current + 1);
+          }
+        },
+        { threshold: 0.1 },
+      );
 
-    if (observerRef.current) observer.observe(observerRef.current);
-    return () => observer.disconnect();
-  }, [isMobile, mobilePage, getMobileData]);
+      observer.observe(node);
+    },
+    [isMobile, getMobileData],
+  );
 
   const bookmarkColumn: ColumnDef<IssueThemeRow> = {
     id: "bookmark",
@@ -189,8 +200,6 @@ export function IssueTheme() {
         key={row.id}
         className="h-12.25 flex items-center"
         onClick={() => {
-          document.createElement("div");
-
           if (!isMobile) {
             setDetailOpen(true);
             setSelectIssue(row.original.original);
@@ -228,8 +237,7 @@ export function IssueTheme() {
               <Table>
                 <TableBody>{renderRows(mobileTable.getRowModel().rows)}</TableBody>
               </Table>
-              {/* 감지 타겟 */}
-              <div ref={observerRef} className="h-10 flex items-center justify-center">
+              <div ref={observerTargetRef} className="h-10 flex items-center justify-center">
                 {mobileLoading && <span className="text-muted-foreground text-sm">불러오는 중...</span>}
               </div>
             </>
