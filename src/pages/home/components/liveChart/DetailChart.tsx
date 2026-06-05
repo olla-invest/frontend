@@ -107,7 +107,10 @@ export default function DetailChart({ stockCode }: { stockCode: string }) {
     {
       accessorKey: "close",
       header: () => <div className="text-right">종가</div>,
-      cell: ({ row }) => <div className="text-right font-semibold text-slate-800">{(row.getValue("close") as number)?.toLocaleString()}</div>,
+      cell: ({ row }) => {
+        const value = row.getValue("close") as number;
+        return <div className="text-right font-semibold text-slate-800">{isNaN(value) || value == null ? "-" : value.toLocaleString()}</div>;
+      },
     },
     {
       accessorKey: "changeRate",
@@ -123,27 +126,42 @@ export default function DetailChart({ stockCode }: { stockCode: string }) {
     {
       accessorKey: "volume",
       header: () => <div className="text-right">거래량(주)</div>,
-      cell: ({ row }) => <div className="text-right">{(row.getValue("volume") as number)?.toLocaleString()}</div>,
+      cell: ({ row }) => {
+        const value = row.getValue("volume") as number;
+        return <div className="text-right">{isNaN(value) || value == null ? "-" : value.toLocaleString()}</div>;
+      },
     },
     {
       accessorKey: "tradingValue",
       header: () => <div className="text-right">거래대금</div>,
-      cell: ({ row }) => <div className="text-right">{(row.getValue("tradingValue") as number)?.toLocaleString()}</div>,
+      cell: ({ row }) => {
+        const value = row.getValue("tradingValue") as number;
+        return <div className="text-right">{isNaN(value) || value == null ? "-" : value.toLocaleString()}</div>;
+      },
     },
     {
       accessorKey: "open",
       header: () => <div className="text-right">시가</div>,
-      cell: ({ row }) => <div className="text-right">{(row.getValue("open") as number)?.toLocaleString()}</div>,
+      cell: ({ row }) => {
+        const value = row.getValue("open") as number;
+        return <div className="text-right">{isNaN(value) || value == null ? "-" : value.toLocaleString()}</div>;
+      },
     },
     {
       accessorKey: "high",
       header: () => <div className="text-right">고가</div>,
-      cell: ({ row }) => <div className="text-right">{(row.getValue("high") as number)?.toLocaleString()}</div>,
+      cell: ({ row }) => {
+        const value = row.getValue("high") as number;
+        return <div className="text-right">{isNaN(value) || value == null ? "-" : value.toLocaleString()}</div>;
+      },
     },
     {
       accessorKey: "low",
       header: () => <div className="text-right">저가</div>,
-      cell: ({ row }) => <div className="text-right">{(row.getValue("low") as number)?.toLocaleString()}</div>,
+      cell: ({ row }) => {
+        const value = row.getValue("low") as number;
+        return <div className="text-right">{isNaN(value) || value == null ? "-" : value.toLocaleString()}</div>;
+      },
     },
   ];
 

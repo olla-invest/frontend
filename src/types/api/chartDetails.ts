@@ -1,8 +1,6 @@
-import { type UTCTimestamp } from "lightweight-charts";
-
 // API 응답 원본
 export interface CandleResponse {
-  time: string | UTCTimestamp;
+  time: string;
   open: string;
   high: string;
   low: string;
@@ -52,7 +50,7 @@ export interface TableDetail {
 
 // 차트용
 export interface GraphDetailItem {
-  time: UTCTimestamp;
+  time: string;
   open: number;
   high: number;
   low: number;

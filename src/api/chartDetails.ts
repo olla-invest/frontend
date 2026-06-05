@@ -1,5 +1,4 @@
 import api from "@/lib/api";
-import type { UTCTimestamp } from "lightweight-charts";
 
 import type { ChartResponse, TableDetail, GraphDetail, MarketStrengthGraph, StockNews } from "@/types/api/chartDetails";
 
@@ -53,8 +52,7 @@ const transformGraphResponse = (response: ChartResponse): GraphDetail => {
     stockCode: response.stockCode,
     candleType: response.candleType,
     candles: response.candles.map((c) => ({
-      time: typeof c.time === "string" ? (Math.floor(new Date(c.time).getTime() / 1000) as UTCTimestamp) : c.time,
-
+      time: c.time,
       open: Number(c.open),
       high: Number(c.high),
       low: Number(c.low),

@@ -54,11 +54,11 @@ export default function DetailStockInfo({ stockCode }: Props) {
     { title: "업종", content: detailInfo?.overview.industryName },
     { title: "테마", content: detailInfo?.overview.theme },
     { title: "상장일", content: formatDate(detailInfo?.overview.establishedDate) },
-    { title: "시가총액", content: "-" },
+    { title: "시가총액", content: formatAmount(detailInfo?.overview.marketCap) },
   ];
 
   const sampleBasicInfo2 = [
-    { title: "실제 기업가치", content: "-" },
+    // { title: "실제 기업가치", content: "-" },
     { title: "주요사업", content: detailInfo?.overview.businessInfo.join(", ") },
   ];
 
@@ -222,10 +222,10 @@ export default function DetailStockInfo({ stockCode }: Props) {
             <TableBody>
               <TableRow className="h-12.25">
                 <TableCell className="text-slate-700">영업이익률</TableCell>
-                <TableCell className="text-right">{formatPercent(getProfitability("q1", "총자산영업이익률"))}</TableCell>
-                <TableCell className="text-right">{formatPercent(getProfitability("q2", "총자산영업이익률"))}</TableCell>
-                <TableCell className="text-right">{formatPercent(getProfitability("q3", "총자산영업이익률"))}</TableCell>
-                <TableCell className="text-right">{formatPercent(getProfitability("q4", "총자산영업이익률"))}</TableCell>
+                <TableCell className="text-right">{formatPercent(getProfitability("q1", "영업이익률"))}</TableCell>
+                <TableCell className="text-right">{formatPercent(getProfitability("q2", "영업이익률"))}</TableCell>
+                <TableCell className="text-right">{formatPercent(getProfitability("q3", "영업이익률"))}</TableCell>
+                <TableCell className="text-right">{formatPercent(getProfitability("q4", "영업이익률"))}</TableCell>
               </TableRow>
 
               <TableRow className="h-12.25">
@@ -238,10 +238,10 @@ export default function DetailStockInfo({ stockCode }: Props) {
 
               <TableRow className="h-12.25">
                 <TableCell className="text-slate-700">ROA</TableCell>
-                <TableCell className="text-right">{formatPercent(getProfitability("q1", "총자산영업이익률"))}</TableCell>
-                <TableCell className="text-right">{formatPercent(getProfitability("q2", "총자산영업이익률"))}</TableCell>
-                <TableCell className="text-right">{formatPercent(getProfitability("q3", "총자산영업이익률"))}</TableCell>
-                <TableCell className="text-right">{formatPercent(getProfitability("q4", "총자산영업이익률"))}</TableCell>
+                <TableCell className="text-right">{formatPercent(getProfitability("q1", "ROA"))}</TableCell>
+                <TableCell className="text-right">{formatPercent(getProfitability("q2", "ROA"))}</TableCell>
+                <TableCell className="text-right">{formatPercent(getProfitability("q3", "ROA"))}</TableCell>
+                <TableCell className="text-right">{formatPercent(getProfitability("q4", "ROA"))}</TableCell>
               </TableRow>
             </TableBody>
           </Table>
