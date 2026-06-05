@@ -115,7 +115,7 @@ const Login: React.FC = () => {
       <div className="py-14">
         {/* 로고 */}
         <div className="flex justify-center mb-10 cursor-pointer">
-          <img src={LogoImg} alt="olla" className="w-22 aspect-auto" onClick={() => navigate("/home")} />
+          <img src={LogoImg} alt="olla" className="w-22 aspect-auto" />
         </div>
 
         <form className="pb-6">

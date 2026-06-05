@@ -87,14 +87,14 @@ const App: React.FC = () => {
       <Routes>
         {/* Main Layout */}
         <Route element={<MainLayout />}>
-          <Route path="/" element={<Navigate to="/home" replace />} />
+          <Route path="/" element={<Navigate to={useAuthStore.getState().isLoggedIn ? "/home" : "/login"} replace />} />
 
           <Route
             path="/home"
             element={
-              // <PrivateRoute>
-              <Home />
-              // </PrivateRoute>
+              <PrivateRoute>
+                <Home />
+              </PrivateRoute>
             }
           />
 
