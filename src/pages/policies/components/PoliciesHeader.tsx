@@ -9,7 +9,7 @@ interface PoliciesHeaderProps {
 }
 
 export default function PoliciesHeader({ title, useSelect, lastUpdate = "" }: PoliciesHeaderProps) {
-  const options = [{ value: "1", name: "yyyy.mm.dd" }];
+  const options = [{ value: "1", name: "2026.06.06" }];
   return (
     <div className="flex flex-col gap-6">
       <h3 className="text-foreground text-2xl font-semibold">{title}</h3>

@@ -3,7 +3,7 @@ import PoliciesHeader from "./components/PoliciesHeader";
 export default function Terms() {
   return (
     <div className="policiesWrap">
-      <PoliciesHeader lastUpdate="yyyy.mm.dd" useSelect={true} title="서비스 이용약관" />
+      <PoliciesHeader lastUpdate="2026.06.06" useSelect={true} title="서비스 이용약관" />
       <div className="text-sm text-slate-700 pt-6 flex flex-col gap-6">
         <p className="text-muted-foreground">주식회사 OLLA(이하 “회사”)가 제공하는 OLLA 서비스(이하 “서비스”)의 이용과 관련하여 회사와 이용자 간의 권리·의무 및 책임사항을 규정함을 목적으로 합니다.</p>
         {/* 1조 */}

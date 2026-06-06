@@ -2,7 +2,7 @@ import PoliciesHeader from "./components/PoliciesHeader";
 export default function Privacy() {
   return (
     <div className="policiesWrap">
-      <PoliciesHeader lastUpdate="yyyy.mm.dd" useSelect={true} title="개인정보 처리방침" />
+      <PoliciesHeader lastUpdate="2026.06.06" useSelect={true} title="개인정보 처리방침" />
       <div className="text-sm text-slate-700 pt-6 flex flex-col gap-6">
         <p className="text-muted-foreground">
           주식회사 OLLA(이하 “회사”)**는 「개인정보 보호법」 등 관련 법령을 준수하여 이용자의 개인정보를 안전하게 보호하기 위해 다음과 같이 처리방침을 수립·공개합니다

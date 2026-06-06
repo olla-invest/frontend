@@ -1,7 +1,7 @@
 import PoliciesHeader from "./components/PoliciesHeader";
 export default function InvestmentNotice() {
   return (
-    <div className="policiesWrap">
+    <div className="policiesWrap h-[calc(100vh-120px)] overflow-y-auto">
       <PoliciesHeader useSelect={false} title="투자 유의사항" />
       <div className="text-sm text-slate-700 pt-6 flex flex-col gap-6">
         <div className="policiesBox">
