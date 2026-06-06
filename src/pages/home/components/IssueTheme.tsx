@@ -14,6 +14,7 @@ import { toggleWatchThemeList, isInWatchThemeList } from "@/hooks/useToggleWatch
 import { useIsMobile } from "@/hooks/use-mobile";
 import { useNavigate } from "react-router-dom";
 import { LoadingUi } from "@/components/LoadingUi";
+import { getThemeIcon } from "@/utils/ThemeIcon";
 
 interface IssueThemeRow {
   themeCode: number;
@@ -166,7 +167,16 @@ export function IssueTheme() {
       id: "themeName",
       accessorKey: "themeName",
       header: "테마명",
-      cell: ({ row }) => <div className="w-30 line-clamp-2 text-slate-800 font-semibold">{row.getValue("themeName")}</div>,
+      cell: ({ row }) => (
+        <div className="flex items-center gap-2">
+          {!isMobile && (
+            <div className="size-8 rounded-md bg-[#D9D9D9] overflow-hidden shrink-0">
+              <img src={getThemeIcon(row.original.themeCode)} alt={row.original.themeName} className="w-full" />
+            </div>
+          )}
+          <div className="w-30 line-clamp-2 md:line-clamp-1 md:w-full text-slate-800 font-semibold">{row.getValue("themeName")}</div>
+        </div>
+      ),
     },
     {
       accessorKey: "stats",

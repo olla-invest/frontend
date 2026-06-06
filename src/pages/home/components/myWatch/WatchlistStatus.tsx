@@ -4,6 +4,7 @@ import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
 import type { WatchListTheme, WatchListStock, StockEventType } from "@/types/api/watchList";
 import { Badge } from "@/components/ui/badge";
 import { CircleCheckIcon } from "lucide-react";
+import { getThemeIcon } from "@/utils/ThemeIcon";
 
 interface WatchlistStatusProps {
   themeList: WatchListTheme[] | null;
@@ -151,7 +152,9 @@ export default function WatchlistStatus({ themeList, stockList, handleThemeModal
       cell: ({ row }) => {
         return (
           <div className="min-w-24 flex items-center gap-2">
-            <div className="size-8 rounded-md overflow-hidden bg-[#d9d9d9]"></div>
+            <div className="size-8 rounded-md overflow-hidden bg-[#d9d9d9]">
+              <img src={getThemeIcon(row.original.themeCode)} alt={row.original.themeName} className="w-full" />
+            </div>
             {row.original.themeName}
           </div>
         );

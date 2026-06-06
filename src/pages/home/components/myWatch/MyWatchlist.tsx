@@ -1,5 +1,6 @@
 import type { WatchListStock, WatchListTheme } from "@/types/api/watchList";
 import { toggleWatchThemeList, toggleWatchStockList } from "@/hooks/useToggleWatchList";
+import { getThemeIcon } from "@/utils/ThemeIcon";
 
 type SumWatchItem = (WatchListStock & { type: "stock" }) | (WatchListTheme & { type: "theme" });
 interface Props {
@@ -37,7 +38,9 @@ export default function MyWatchlist({ item, bookmarks, handleStockModal, handleT
       ) : (
         <div className="flex justify-between gap-4 flex-1">
           <div className="flex gap-2 items-center w-32 flex-1">
-            <div className="size-8 rounded-md bg-[#D9D9D9] shrink-0" />
+            <div className="size-8 rounded-md bg-[#D9D9D9] overflow-hidden shrink-0">
+              <img src={getThemeIcon(item.themeCode)} alt={item.themeName} className="w-full" />
+            </div>
             <span className="truncate text-sm font-semibold">{item.themeName}</span>
           </div>
           <div className="flex gap-2 text-slate-700 text-sm items-center">

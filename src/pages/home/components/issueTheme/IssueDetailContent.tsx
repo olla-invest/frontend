@@ -12,6 +12,7 @@ import { useIsMobile } from "@/hooks/use-mobile";
 import { LoadingUi } from "@/components/LoadingUi";
 import { openStockDetailInNewTab } from "../liveChart/stockDetailTypes";
 import { useNavigate } from "react-router-dom";
+import { getThemeIcon } from "@/utils/ThemeIcon";
 
 interface ContentProps {
   selectIssue: IssueTheme;
@@ -59,8 +60,11 @@ export default function IssueDetailContent({ selectIssue }: ContentProps) {
         <LoadingUi boxStyle="h-[calc(100vh-195px)]!" />
       ) : (
         <div>
-          <div className="flex flex-col gap-1 px-6 py-2">
-            <div className="flex justify-between items-center flex-wrap gap-4">
+          <div className="flex justify-between items-center flex-wrap gap-4 px-6 py-2">
+            <div className="flex items-center gap-2.5">
+              <div className="rounded-md size-16 overflow-hidden shrink-0">
+                <img src={getThemeIcon(detailData?.themeCode)} alt={detailData?.themeName} className="w-full" />
+              </div>
               <div className="flex flex-col gap-2">
                 <div className="flex items-center gap-1">
                   <span className="font-bold text-2xl">{detailData?.themeName}</span>
@@ -74,6 +78,26 @@ export default function IssueDetailContent({ selectIssue }: ContentProps) {
                   >
                     <i className={`icon ${isBookmark ? "icon-star-fill" : "icon-star"}`} />
                   </button>
+                </div>
+                <div className="hidden md:flex gap-1 items-center">
+                  <div className="flex gap-1 text-sm">
+                    <span className="text-muted-foreground">순위변동</span>
+                    <span>{selectIssue?.rank}위</span>
+                    {selectIssue?.rankChange && (
+                      <div className={`flex items-center gap-0.5 ${selectIssue.rankChange > 0 ? "text-rose-500" : selectIssue.rankChange < 0 ? "text-blue-500" : "text-gray-400"}`}>
+                        {selectIssue.rankChange > 0 && <i className="icon icon-arrow-up" />}
+                        {selectIssue.rankChange < 0 && <i className="icon icon-arrow-down" />}
+                        {Math.abs(selectIssue.rankChange)}
+                      </div>
+                    )}
+                  </div>
+                  <div className="size-0.5 rounded-full bg-muted-foreground" />
+                  <div className="flex gap-1 text-sm">
+                    <span className="text-muted-foreground">테마 내 상승종목수</span>
+                    <span>
+                      <span className="text-rose-500">{detailData?.risingCount}</span>/{detailData?.totalCount}
+                    </span>
+                  </div>
                 </div>
                 <div className="md:hidden flex gap-1 items-center">
                   <div className="flex gap-1 text-sm">
@@ -96,36 +120,16 @@ export default function IssueDetailContent({ selectIssue }: ContentProps) {
                   </div>
                 </div>
               </div>
-
-              <div className="py-1 flex gap-1 flex-wrap">
-                {detailData?.insights.map((e, i) => {
-                  return (
-                    <Badge variant="outline" key={i}>
-                      {e}
-                    </Badge>
-                  );
-                })}
-              </div>
             </div>
-            <div className="hidden md:flex gap-1 items-center">
-              <div className="flex gap-1 text-sm">
-                <span className="text-muted-foreground">순위변동</span>
-                <span>{selectIssue?.rank}위</span>
-                {selectIssue?.rankChange && (
-                  <div className={`flex items-center gap-0.5 ${selectIssue.rankChange > 0 ? "text-rose-500" : selectIssue.rankChange < 0 ? "text-blue-500" : "text-gray-400"}`}>
-                    {selectIssue.rankChange > 0 && <i className="icon icon-arrow-up" />}
-                    {selectIssue.rankChange < 0 && <i className="icon icon-arrow-down" />}
-                    {Math.abs(selectIssue.rankChange)}
-                  </div>
-                )}
-              </div>
-              <div className="size-0.5 rounded-full bg-muted-foreground" />
-              <div className="flex gap-1 text-sm">
-                <span className="text-muted-foreground">테마 내 상승종목수</span>
-                <span>
-                  <span className="text-rose-500">{detailData?.risingCount}</span>/{detailData?.totalCount}
-                </span>
-              </div>
+
+            <div className="py-1 flex gap-1 flex-wrap self-start">
+              {detailData?.insights.map((e, i) => {
+                return (
+                  <Badge variant="outline" key={i}>
+                    {e}
+                  </Badge>
+                );
+              })}
             </div>
           </div>
 

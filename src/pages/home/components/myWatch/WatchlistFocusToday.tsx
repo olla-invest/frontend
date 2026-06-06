@@ -1,6 +1,7 @@
 import { Badge } from "@/components/ui/badge";
 import { CircleCheckIcon } from "lucide-react";
 import type { StockEventType, WatchListStock, WatchListTheme } from "@/types/api/watchList";
+import { getThemeIcon } from "@/utils/ThemeIcon";
 
 interface ThemeFocusProps {
   theme: WatchListTheme;
@@ -62,7 +63,6 @@ export function ThemeFocus({ theme, handleThemeModal }: ThemeFocusProps) {
   } as const;
 
   const rankMeta = RANK_META[rankStatus];
-
   return (
     <div
       className="bg-slate-50 rounded-md p-4 flex-1"
@@ -74,7 +74,7 @@ export function ThemeFocus({ theme, handleThemeModal }: ThemeFocusProps) {
         <div className="flex flex-col gap-2 h-full">
           <div className="flex flex-col gap-1">
             <div className="size-16 rounded-md bg-[#d9d9d9] shrink-0 overflow-hidden">
-              {theme.imageUrl && <img src={theme.imageUrl} alt={theme.themeName} className="w-full h-full object-cover" />}
+              <img src={getThemeIcon(theme?.themeCode)} alt={theme?.themeName} className="w-full" />
             </div>
 
             <span className="text-slate-800 font-semibold">{theme.themeName}</span>

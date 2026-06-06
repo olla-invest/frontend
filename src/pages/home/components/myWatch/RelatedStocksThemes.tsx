@@ -2,6 +2,7 @@ import { Badge } from "@/components/ui/badge";
 import { CircleCheckIcon } from "lucide-react";
 import type { RecommendationResponse, RecommendedStock, RecommendedTheme } from "@/types/api/watchList";
 import type { WatchListTheme, WatchListStock, StockEventType } from "@/types/api/watchList";
+import { getThemeIcon } from "@/utils/ThemeIcon";
 
 interface RelatedStocksThemesProps {
   recommendData: RecommendationResponse;
@@ -82,7 +83,9 @@ export default function RelatedStocksThemes({ recommendData, handleStockModal, h
           handleThemeModal(recommendedTheme);
         }}
       >
-        <div className="size-12 rounded-md bg-[#d9d9d9] shrink-0"></div>
+        <div className="size-12 rounded-md bg-[#d9d9d9] overflow-hidden shrink-0">
+          <img src={getThemeIcon(recommendData.recommendedTheme.themeCode)} alt={recommendData.recommendedTheme.themeName} className="w-full" />
+        </div>
         <div className="flex flex-col gap-1">
           <span className="text-slate-800 font-semibold">{recommendData.recommendedTheme.themeName}</span>
           <div className="flex gap-1 items-center flex-wrap">
