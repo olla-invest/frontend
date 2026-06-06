@@ -9,7 +9,6 @@ import AgreementSection from "./components/AgreementSection";
 
 import { useAuthStore } from "@/store/useAuthStore";
 import { patchSnsSignUp } from "@/api/auth";
-import { toast } from "sonner";
 
 const SocialSignUp: React.FC = () => {
   const navigate = useNavigate();
@@ -105,18 +104,19 @@ const SocialSignUp: React.FC = () => {
         email: userInfo.email,
         userId: storeUserInfo.userId,
       });
-
+      setError(null);
+      setErrorType(null);
       // 홈 이동
       navigate("/home", {
         replace: true,
       });
     } catch (e: unknown) {
       console.error(e);
-      toast.error("회원가입에 실패했습니다. 다시 시도해주세요.");
-
-      if (isAxiosError(e) && e.response?.data?.message?.includes("이미 해당 이메일")) {
-        setError("이미 해당 이메일로 가입된 계정이 있습니다. 일반 로그인을 이용해주세요.");
+      if (isAxiosError(e) && e.response) {
+        setErrorType("signUp");
+        setError(e.response.data.message);
       } else {
+        setErrorType("signUp");
         setError("회원가입 중 오류가 발생했습니다.");
       }
     }
@@ -202,6 +202,7 @@ const SocialSignUp: React.FC = () => {
               onAllChange={handleAllChange}
               onChange={handleChange}
             />
+            {errorType === "signUp" && <FieldDescription className="text-red-500">{error}</FieldDescription>}
           </div>
 
           <button type="submit" className="bg-[#1E1B4B] text-white text-sm w-full h-10 rounded-md">
