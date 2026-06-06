@@ -26,6 +26,11 @@ export default function DetailMarketStrength({ stockCode }: Props) {
     },
   ]);
 
+  const [queryRange, setQueryRange] = useState({
+    startDate: format(defaultRSRange.from!, "yyyyMMdd"),
+    endDate: format(defaultRSRange.to!, "yyyyMMdd"),
+  });
+
   const [filterValue, setFilterValue] = useState<{
     rs?: { from: string; to: string; ratio: number }[];
   }>({
@@ -41,11 +46,15 @@ export default function DetailMarketStrength({ stockCode }: Props) {
   useEffect(() => {
     const fetch = async () => {
       try {
+        const rsFilters = filterValue.rs ?? [];
+        const startDate = rsFilters.reduce((earliest, v) => (v.from < earliest ? v.from : earliest), rsFilters[0]?.from ?? format(defaultRSRange.from!, "yyyyMMdd"));
+        const endDate = rsFilters.reduce((latest, v) => (v.to > latest ? v.to : latest), rsFilters[0]?.to ?? format(defaultRSRange.to!, "yyyyMMdd"));
+
         const res = await postMarketStrengthGraphData({
           stockCode,
-          startDate: format(defaultRSRange.from!, "yyyyMMdd"),
-          endDate: format(defaultRSRange.to!, "yyyyMMdd"),
-          rsFilters: filterValue.rs?.map((v) => ({
+          startDate,
+          endDate,
+          rsFilters: rsFilters.map((v) => ({
             rsStartDate: v.from,
             rsEndDate: v.to,
             strength: v.ratio,
@@ -53,6 +62,10 @@ export default function DetailMarketStrength({ stockCode }: Props) {
         });
 
         setGraphData(res);
+        setQueryRange({
+          startDate: startDate.replace(/-/g, ""),
+          endDate: endDate.replace(/-/g, ""),
+        });
       } catch (err) {
         console.log("시장 강도 분석 조회 오류", err);
       }
@@ -97,8 +110,8 @@ export default function DetailMarketStrength({ stockCode }: Props) {
           <ChartLineLinear
             data={graphData.data}
             filterValue={{
-              start: format(defaultRSRange.from!, "yyyyMMdd"),
-              end: format(defaultRSRange.to!, "yyyyMMdd"),
+              start: queryRange.startDate,
+              end: queryRange.endDate,
             }}
           />
         )}

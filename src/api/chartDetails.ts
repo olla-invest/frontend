@@ -19,7 +19,7 @@ interface ChartGraphParams {
 
 interface MarketStrengthGraphParams {
   stockCode: string;
-  startDate: string;
+  startDate?: string;
   endDate?: string;
   rsFilters?: {
     rsStartDate: string;
