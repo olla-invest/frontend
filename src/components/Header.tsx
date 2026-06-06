@@ -1,4 +1,4 @@
-import { Button } from "@/components/ui/button";
+// import { Button } from "@/components/ui/button";
 import { useAuthStore } from "@/store/useAuthStore";
 import { useNavigate } from "react-router-dom";
 import UserBtnImg from "@/assets/images/user-info.png";
@@ -34,14 +34,14 @@ export function Header() {
           <span className="sr-only">olla</span>
         </h1>
         <div className="flex gap-2 items-center">
-          <Button
+          {/* <Button
             onClick={() => {
               navigate("/plan");
             }}
             className="hidden md:block"
           >
             olla 플랜 업그레이드하기
-          </Button>
+          </Button> */}
           {isLoggedIn ? (
             <div className="flex gap-2 items-center">
               <button
@@ -74,7 +74,7 @@ export function Header() {
           <ul className="flex flex-col gap-2 p-1 text-sm text-popover-foreground font-normal border-t">
             {!isMobile && (
               <>
-                <li>
+                {/* <li>
                   <button
                     className="w-full px-2 py-1.5 cursor-pointer text-left"
                     onClick={() => {
@@ -83,7 +83,7 @@ export function Header() {
                   >
                     플랜 업그레이드 하기
                   </button>
-                </li>
+                </li> */}
                 <li>
                   <button
                     className="w-full px-2 py-1.5 cursor-pointer text-left"
