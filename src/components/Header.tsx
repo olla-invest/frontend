@@ -54,9 +54,11 @@ export function Header() {
               </button>
             </div>
           ) : (
-            <a href="" className="block py-2 px-4 text-slate-700 text-sm" onClick={() => navigate("/login")}>
-              로그인
-            </a>
+            ""
+            //임시) 로그인 안해도 실시간 차트 화면으로 이동하도록 수정
+            // <a href="" className="block py-2 px-4 text-slate-700 text-sm" onClick={() => navigate("/login")}>
+            //   로그인
+            // </a>
           )}
         </div>
       </div>

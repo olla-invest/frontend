@@ -53,7 +53,7 @@ const PrivateRoute = ({ children }: RouteProps) => {
   const isLoggedIn = useAuthStore((state) => state.isLoggedIn);
 
   if (!isLoggedIn) {
-    return <Navigate to="/login" replace />;
+    return <Navigate to="/home" replace />;
   }
 
   return <>{children}</>;
@@ -87,14 +87,16 @@ const App: React.FC = () => {
       <Routes>
         {/* Main Layout */}
         <Route element={<MainLayout />}>
-          <Route path="/" element={<Navigate to={useAuthStore.getState().isLoggedIn ? "/home" : "/login"} replace />} />
-
+          {/* 임시) 로그인 안해도 실시간 차트 화면으로 이동하도록 수정 */}
+          {/* <Route path="/" element={<Navigate to={useAuthStore.getState().isLoggedIn ? "/home" : "/login"} replace />} /> */}
+          <Route path="/" element={<Navigate to="/home" replace />} />
           <Route
             path="/home"
             element={
-              <PrivateRoute>
-                <Home />
-              </PrivateRoute>
+              // <PrivateRoute>
+              // 임시) 로그인 안해도 실시간 차트 화면으로 이동하도록 수정
+              <Home />
+              // </PrivateRoute>
             }
           />
 

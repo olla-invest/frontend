@@ -15,8 +15,9 @@ type TabItem = {
 
 const tabs: TabItem[] = [
   { name: "실시간 차트", value: "liveChart" },
-  { name: "🔥 이슈 테마", value: "issueTheme" },
-  { name: "내 관심", value: "myWatch" },
+  //임시) 이슈 테마 탭 제거
+  // { name: "🔥 이슈 테마", value: "issueTheme" },
+  // { name: "내 관심", value: "myWatch" },
 ];
 
 const MOBILE_WIDTH = 768;
