@@ -42,24 +42,24 @@ export function Header() {
           >
             olla 플랜 업그레이드하기
           </Button> */}
-          {isLoggedIn ? (
-            <div className="flex gap-2 items-center">
-              <button
-                className="size-8"
-                onClick={() => {
-                  setShowUserMenu((prev) => !prev);
-                }}
-              >
-                <img src={UserBtnImg} alt={userInfo + "정보"} />
-              </button>
-            </div>
-          ) : (
-            ""
-            //임시) 로그인 안해도 실시간 차트 화면으로 이동하도록 수정
-            // <a href="" className="block py-2 px-4 text-slate-700 text-sm" onClick={() => navigate("/login")}>
-            //   로그인
-            // </a>
-          )}
+          {isLoggedIn
+            ? ""
+            : // <div className="flex gap-2 items-center">
+              //   <button
+              //     className="size-8"
+              //     onClick={() => {
+              //       setShowUserMenu((prev) => !prev);
+              //     }}
+              //   >
+              //     <img src={UserBtnImg} alt={userInfo + "정보"} />
+              //   </button>
+              // </div>
+              ""
+              //임시) 로그인 안해도 실시간 차트 화면으로 이동하도록 수정
+              // <a href="" className="block py-2 px-4 text-slate-700 text-sm" onClick={() => navigate("/login")}>
+              //   로그인
+              // </a>
+          }
         </div>
       </div>
       {showUserMenu && userInfo && (
