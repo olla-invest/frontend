@@ -87,16 +87,14 @@ const App: React.FC = () => {
       <Routes>
         {/* Main Layout */}
         <Route element={<MainLayout />}>
-          {/* 임시) 로그인 안해도 실시간 차트 화면으로 이동하도록 수정 */}
-          {/* <Route path="/" element={<Navigate to={useAuthStore.getState().isLoggedIn ? "/home" : "/login"} replace />} /> */}
+          <Route path="/" element={<Navigate to={useAuthStore.getState().isLoggedIn ? "/home" : "/login"} replace />} />
           <Route path="/" element={<Navigate to="/home" replace />} />
           <Route
             path="/home"
             element={
-              // <PrivateRoute>
-              // 임시) 로그인 안해도 실시간 차트 화면으로 이동하도록 수정
-              <Home />
-              // </PrivateRoute>
+              <PrivateRoute>
+                <Home />
+              </PrivateRoute>
             }
           />
 
