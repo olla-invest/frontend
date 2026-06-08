@@ -353,7 +353,8 @@ export default function ChartFilter(props: ChartFilterProps) {
 
   return (
     <div className="mt-2 pb-4 border-b mb-4 md:mb-0 relative">
-      <div className="absolute top-0 left-0 right-0 w-full h-full bg-[rgba(255,255,255,0.65)] z-8" />
+      {/* 필터 비활성화용 ui */}
+      {/* <div className="absolute top-0 left-0 right-0 w-full h-full bg-[rgba(255,255,255,0.65)] z-8" /> */}
       <form className="flex gap-2 flex-col md:flex-wrap md:flex-row">
         <Tabs
           value={filterValue.market}
