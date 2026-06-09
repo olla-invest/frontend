@@ -151,7 +151,7 @@ export function StockFocus({ stock, handleStockModal }: StockFocusProps) {
 
   return (
     <div
-      className="border-b bg-white px-2 py-3 flex gap-2"
+      className="border-b bg-white px-2 py-3 flex gap-2 last:border-0"
       onClick={() => {
         handleStockModal(stock);
       }}

@@ -252,26 +252,38 @@ export default function WatchlistStatus({ themeList, stockList, handleThemeModal
   return (
     <div>
       <Tabs defaultValue="stock">
-        <TabsList>
-          <TabsTrigger value="stock">종목</TabsTrigger>
-          <TabsTrigger value="theme">테마</TabsTrigger>
+        <TabsList className="h-9 p-0! bg-transparent!">
+          <TabsTrigger
+            value="stock"
+            className="px-3 py-2 text-muted-foreground data-[state=active]:font-medium data-[state=active]:text-foreground data-[state=active]:rounded-full data-[state=active]:bg-muted data-[state=active]:shadow-none!"
+          >
+            관심 종목
+            {stockList && stockList?.length > 0 && <span className="text-primary text-sm font-medium">{stockList?.length}</span>}
+          </TabsTrigger>
+          <TabsTrigger
+            value="theme"
+            className="px-3 py-2 text-muted-foreground data-[state=active]:font-medium data-[state=active]:text-foreground data-[state=active]:rounded-full data-[state=active]:bg-muted data-[state=active]:shadow-none!"
+          >
+            관심 테마
+            {themeList && themeList?.length > 0 && <span className="text-primary text-sm font-medium">{themeList?.length}</span>}
+          </TabsTrigger>
         </TabsList>
         <TabsContent value="stock">
           {stockList?.length === 0 ? (
-            <div className="bg-blue-50 text-secondary-foreground w-full h-50 rounded-xl flex justify-center items-center">
-              <span className="text-sm">관심 종목이 없습니다</span>
+            <div className="h-13 flex justify-center items-end">
+              <span className="text-sm text-muted-foreground">관심 종목이 없어요.</span>
             </div>
           ) : (
-            renderTable(stockTable, "stock")
+            <div className="min-h-52">{renderTable(stockTable, "stock")}</div>
           )}
         </TabsContent>
         <TabsContent value="theme">
           {themeList?.length === 0 ? (
-            <div className="bg-blue-50 text-secondary-foreground w-full h-50 rounded-xl flex justify-center items-center">
-              <span className="text-sm">관심 테마가 없습니다</span>
+            <div className="h-13 flex justify-center items-end">
+              <span className="text-sm text-muted-foreground">관심 테마가 없어요.</span>
             </div>
           ) : (
-            renderTable(themeTable, "theme")
+            <div className="min-h-52">{renderTable(themeTable, "theme")}</div>
           )}
         </TabsContent>
       </Tabs>

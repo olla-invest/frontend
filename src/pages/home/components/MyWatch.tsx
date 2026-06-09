@@ -127,36 +127,38 @@ export default function MyWatch() {
         <div className="flex h-full xl:flex-row overflow-y-auto flex-col">
           {/* 왼쪽 영역 */}
           <div className="pr-6 xl:border-r xl:border-b-0 pt-4 flex flex-col gap-6 flex-1">
-            {/* 오늘 주목 */}
-            <div className="flex flex-col gap-4 py-2">
-              <h4 className="text-xl text-foreground font-semibold">오늘 주목해야 할 내 관심항목</h4>
+            {/* 오늘 주목_종목 또는 테마가 1개리도 있어야 UI표시 */}
+            {(themeList.length > 0 || stockList.length > 0) && (
+              <div className="flex flex-col gap-4 py-2">
+                <h4 className="text-xl text-foreground font-semibold">오늘 주목해야 할 내 관심항목</h4>
 
-              <div className="grid grid-cols-2 gap-4">
-                {/* 테마 */}
-                <div className="flex gap-4 w-full">
-                  {themeList?.slice(0, 2).map((theme) => (
-                    <ThemeFocus key={theme.themeCode} theme={theme} handleThemeModal={handleThemeModal} />
-                  ))}
-                  {themeList?.length === 0 && (
-                    <div className="bg-blue-50 text-secondary-foreground w-full h-50 rounded-xl flex justify-center items-center">
-                      <span className="text-sm">관심 테마가 없습니다</span>
-                    </div>
-                  )}
-                </div>
+                <div className="grid grid-cols-2 gap-4">
+                  {/* 테마 */}
+                  <div className="flex gap-4 w-full">
+                    {themeList?.slice(0, 2).map((theme) => (
+                      <ThemeFocus key={theme.themeCode} theme={theme} handleThemeModal={handleThemeModal} />
+                    ))}
+                    {themeList?.length === 0 && (
+                      <div className="border rounded-md flex justify-center items-center w-full h-full min-h-20.5">
+                        <span className="text-sm text-muted-foreground">오늘 주목해야 할 내 관심 테마가 없어요.</span>
+                      </div>
+                    )}
+                  </div>
 
-                {/* 종목 */}
-                <div className="flex flex-col">
-                  {stockList?.slice(0, 3).map((stock) => (
-                    <StockFocus key={stock.stockCode} stock={stock} handleStockModal={handleStockModal} />
-                  ))}
-                  {stockList?.length === 0 && (
-                    <div className="bg-blue-50 text-secondary-foreground w-full h-50 rounded-xl flex justify-center items-center">
-                      <span className="text-sm">관심 종목이 없습니다</span>
-                    </div>
-                  )}
+                  {/* 종목 */}
+                  <div className="flex flex-col">
+                    {stockList?.slice(0, 3).map((stock) => (
+                      <StockFocus key={stock.stockCode} stock={stock} handleStockModal={handleStockModal} />
+                    ))}
+                    {stockList?.length === 0 && (
+                      <div className="border rounded-md flex justify-center items-center w-full h-full min-h-52">
+                        <span className="text-sm text-muted-foreground">오늘 주목해야 할 내 관심 종목이 없어요.</span>
+                      </div>
+                    )}
+                  </div>
                 </div>
               </div>
-            </div>
+            )}
 
             {/* 내 관심 현황 */}
             <div className="flex flex-col gap-4 py-2">
@@ -180,7 +182,7 @@ export default function MyWatch() {
                 {sumWatchList && sumWatchList.length > 0 ? (
                   sumWatchList.map((item, i) => <MyWatchlist key={i} item={item} bookmarks={bookmarks} handleStockModal={handleStockModal} handleThemeModal={handleThemeModal} />)
                 ) : (
-                  <li className="text-center text-sm text-muted-foreground py-10">관심 항목이 없습니다.</li>
+                  <li className="text-center text-sm text-muted-foreground h-13 flex items-end justify-center">관심 종목이 없어요.</li>
                 )}
               </ul>
             </div>
