@@ -139,7 +139,7 @@ export default function MyWatch() {
                   ))}
                   {themeList?.length === 0 && (
                     <div className="bg-blue-50 text-secondary-foreground w-full h-50 rounded-xl flex justify-center items-center">
-                      <span className="text-sm">관심 태마가 없습니다</span>
+                      <span className="text-sm">관심 테마가 없습니다</span>
                     </div>
                   )}
                 </div>

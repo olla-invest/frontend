@@ -53,7 +53,7 @@ const PrivateRoute = ({ children }: RouteProps) => {
   const isLoggedIn = useAuthStore((state) => state.isLoggedIn);
 
   if (!isLoggedIn) {
-    return <Navigate to="/home" replace />;
+    return <Navigate to="/login" replace />;
   }
 
   return <>{children}</>;
