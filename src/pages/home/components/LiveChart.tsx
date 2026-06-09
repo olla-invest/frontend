@@ -186,7 +186,7 @@ const columns: ColumnDef<StockRankingApiItem>[] = [
   {
     accessorKey: "exchange",
     header: () => <div className="text-right min-w-32">거래소</div>,
-    cell: ({ row }) => <div className="text-right">{row.getValue("exchange") === "KOSDAQ" ? "코스닥" : "코스피"}</div>,
+    cell: ({ row }) => <div className="text-right">{row.getValue("exchange")}</div>,
   },
   {
     accessorKey: "relativeStrengthScore",
