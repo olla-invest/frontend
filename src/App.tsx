@@ -39,16 +39,12 @@ const PublicRoute = ({ children }: RouteProps) => {
   const isLoggedIn = useAuthStore((state) => state.isLoggedIn);
 
   if (isLoggedIn) {
-    return <Navigate to="/login" replace />;
+    return <Navigate to="/home" replace />;
   }
 
   return <>{children}</>;
 };
 
-/**
- * 로그인 안된 사용자는 접근 불가
- * (필요한 페이지에만 적용)
- */
 const PrivateRoute = ({ children }: RouteProps) => {
   const isLoggedIn = useAuthStore((state) => state.isLoggedIn);
 
