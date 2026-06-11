@@ -1,3 +1,4 @@
+import { useState } from "react";
 import { Table as UiTable, TableBody, TableHeader, TableHead, TableCell, TableRow } from "@/components/ui/table";
 import { useReactTable, flexRender, getCoreRowModel, type ColumnDef, type Table as ReactTable } from "@tanstack/react-table";
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
@@ -5,6 +6,7 @@ import type { WatchListTheme, WatchListStock, StockEventType } from "@/types/api
 import { Badge } from "@/components/ui/badge";
 import { CircleCheckIcon } from "lucide-react";
 import { getThemeIcon } from "@/utils/ThemeIcon";
+import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
 
 interface WatchlistStatusProps {
   themeList: WatchListTheme[] | null;
@@ -65,6 +67,7 @@ const getStockImageUrl = (stockCode: string) => {
 };
 
 export default function WatchlistStatus({ themeList, stockList, handleThemeModal, handleStockModal }: WatchlistStatusProps) {
+  const [tooltipOpen, setTooltipOpen] = useState(false);
   const stockColumns: ColumnDef<WatchListStock>[] = [
     {
       accessorKey: "companyName",
@@ -97,7 +100,19 @@ export default function WatchlistStatus({ themeList, stockList, handleThemeModal
     },
     {
       id: "rankChange",
-      header: () => <div className="text-right">종목 순위 변화</div>,
+      header: () => (
+        <div className="text-right">
+          종목 순위 변화
+          <Tooltip open={tooltipOpen} onOpenChange={setTooltipOpen}>
+            <TooltipTrigger onClick={() => setTooltipOpen((prev) => !prev)}>
+              <i className="icon icon-info-gray ml-1" />
+            </TooltipTrigger>
+            <TooltipContent className="bg-primary">
+              <p>RS 기준 미충족 종목은 순위 변동을 제공하지 않습니다.</p>
+            </TooltipContent>
+          </Tooltip>
+        </div>
+      ),
       cell: ({ row }) => {
         const diff = Math.abs(row.original.prevRank - row.original.rank);
         const rankStatus = row.original.prevRank === row.original.rank ? "same" : row.original.prevRank > row.original.rank ? "up" : "down";

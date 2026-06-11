@@ -257,6 +257,12 @@ input:-webkit-autofill {
   background-image: url("../src/assets/icons/info.svg");
 }
 
+.icon-info-gray {
+  width: 16px;
+  height: 16px;
+  background-image: url("../src/assets/icons/info-gray.svg");
+}
+
 .icon-star {
   width: 24px;
   height: 24px;
