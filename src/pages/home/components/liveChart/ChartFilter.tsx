@@ -15,7 +15,7 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { ChevronDown } from "lucide-react";
 import RSSetting from "../../../../components/RSSettingDropdownContent";
-import type { ChartFilterState } from "@/pages/home/components/LiveChart";
+import type { ChartFilterState, RSFilterValue } from "@/pages/home/components/LiveChart";
 import type { RSPeriod } from "@/components/RSSettingDropdownContent";
 import { v4 as uuid } from "uuid";
 
@@ -91,6 +91,16 @@ export default function ChartFilter(props: ChartFilterProps) {
     },
   ]);
 
+  const convertRsToPeriods = (rs: RSFilterValue[]): RSPeriod[] =>
+    rs.map((item) => ({
+      id: uuid(),
+      ratio: item.ratio,
+      date: {
+        from: new Date(item.from),
+        to: new Date(item.to),
+      },
+    }));
+
   const [draftRsPeriods, setDraftRsPeriods] = useState<RSPeriod[]>(rsPeriods);
   const [draftFilters, setDraftFilters] = useState<MobileFilterDraft>({
     isHighPrice: null,
@@ -119,7 +129,7 @@ export default function ChartFilter(props: ChartFilterProps) {
   };
 
   const openMobileRs = () => {
-    setDraftRsPeriods(rsPeriods);
+    setDraftRsPeriods(filterValue.rs ? convertRsToPeriods(filterValue.rs) : draftRsPeriods);
     setMobileRsOpen(true);
   };
 
