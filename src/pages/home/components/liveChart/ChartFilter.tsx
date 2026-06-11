@@ -415,7 +415,14 @@ export default function ChartFilter(props: ChartFilterProps) {
             onApply={applyMobileFilters}
           >
             <div ref={sheetContentRef} className="h-full min-h-0">
-              <ChartFilterMobilePanels tab={mobileFilterTab} onTabChange={setMobileFilterTab} draft={draftFilters} onDraftChange={setDraftFilters} formatWithComma={formatWithComma} />
+              <ChartFilterMobilePanels
+                tab={mobileFilterTab}
+                onTabChange={setMobileFilterTab}
+                draft={draftFilters}
+                onDraftChange={setDraftFilters}
+                formatWithComma={formatWithComma}
+                themeList={themeList}
+              />
             </div>
           </ChartFilterBottomSheet>
         </>

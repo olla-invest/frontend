@@ -4,7 +4,6 @@ import { Button } from "@/components/ui/button";
 import { CheckIcon, CircleX } from "lucide-react";
 import { cn } from "@/lib/utils";
 import type { ChartFilterState } from "@/pages/home/components/LiveChart";
-import { THEME_CODES } from "@/constants/theme";
 import { InputGroup, InputGroupAddon, InputGroupButton, InputGroupInput } from "@/components/ui/input-group";
 
 const HIGH_PRICE_OPTIONS = [
@@ -40,9 +39,14 @@ interface ChartFilterMobilePanelsProps {
   draft: MobileFilterDraft;
   onDraftChange: (draft: MobileFilterDraft) => void;
   formatWithComma: (value: string) => string;
+  themeList?: {
+    sourceThemeNo: string;
+    themeCode: number;
+    themeName: string;
+  }[];
 }
 
-export default function ChartFilterMobilePanels({ tab, onTabChange, draft, onDraftChange, formatWithComma }: ChartFilterMobilePanelsProps) {
+export default function ChartFilterMobilePanels({ tab, onTabChange, draft, onDraftChange, formatWithComma, themeList }: ChartFilterMobilePanelsProps) {
   const setDraft = (patch: Partial<MobileFilterDraft>) => onDraftChange({ ...draft, ...patch });
 
   const highPriceValue = draft.isHighPrice?.value ?? "all";
@@ -79,20 +83,29 @@ export default function ChartFilterMobilePanels({ tab, onTabChange, draft, onDra
           <FilterCheckMenuItem role="menuitemcheckbox" selected={draft.theme.length === 0} onClick={() => setDraft({ theme: [] })}>
             전체
           </FilterCheckMenuItem>
-          {THEME_CODES?.map((theme) => {
-            const checked = draft.theme.some((t) => t?.code === theme.code);
+          {themeList?.map((theme) => {
+            const checked = draft.theme.some((t) => t?.code === theme.themeCode);
             return (
               <FilterCheckMenuItem
-                key={theme.code}
+                key={theme.themeCode}
                 role="menuitemcheckbox"
                 selected={checked}
                 onClick={() => {
                   setDraft({
-                    theme: checked ? draft.theme.filter((t) => t?.code !== theme.code) : [...draft.theme, theme],
+                    theme: checked
+                      ? draft.theme.filter((t) => t?.code !== theme.themeCode)
+                      : [
+                          ...draft.theme,
+                          {
+                            code: theme.themeCode,
+                            name: theme.themeName,
+                            description: "", // or omit if the field is optional in your type
+                          },
+                        ],
                   });
                 }}
               >
-                {theme.name}
+                {theme.themeName}
               </FilterCheckMenuItem>
             );
           })}
