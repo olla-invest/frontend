@@ -41,6 +41,7 @@ import ChartFilter from "./liveChart/ChartFilter";
 import LiveChartDetail from "./liveChart/LiveChartDetail";
 import { getStockDetailUrl, openStockDetailInNewTab, resolveStockDetailPageTarget, type StockDetailOpenMode, type StockDetailPageTarget } from "./liveChart/stockDetailTypes";
 import { useIsMobile } from "@/hooks/use-mobile";
+import { popFilterFromSession, saveFilterForDetailNav } from "@/utils/filterStorage";
 
 /* page: 상세 정보 페이지 모드 | modal: 상세 정보 모달 모드 */
 const STOCK_DETAIL_OPEN_MODE: StockDetailOpenMode = "page";
@@ -297,6 +298,7 @@ export function LiveChart() {
     const pageTarget = resolveStockDetailPageTarget(STOCK_DETAIL_PAGE_TARGET, isMobile);
 
     if (pageTarget === "navigate") {
+      saveFilterForDetailNav(appliedFilter);
       navigate(getStockDetailUrl(row.id));
       return;
     }
@@ -316,14 +318,19 @@ export function LiveChart() {
   const [isError, setIsError] = useState(false);
 
   //필터
-  const [filter, setFilter] = useState<ChartFilterState>({
+  //필터 초기값
+  const DEFAULT_FILTER: ChartFilterState = {
     rs: null,
     market: "all",
     isHighPrice: null,
     theme: [],
     price: null,
-  });
-  const [appliedFilter, setAppliedFilter] = useState<ChartFilterState>(filter);
+  };
+
+  const restored = popFilterFromSession();
+  // 초기값을 sessionStorage에서 복원
+  const [filter, setFilter] = useState<ChartFilterState>(restored ?? DEFAULT_FILTER);
+  const [appliedFilter, setAppliedFilter] = useState<ChartFilterState>(restored ?? DEFAULT_FILTER);
 
   const effectivePageSize = isMobile ? MOBILE_PAGE_SIZE : pageSize;
 
