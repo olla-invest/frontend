@@ -134,7 +134,7 @@ export default function ThemeDetailModal({ onClose, selectIssue }: ModalProps) {
               <TableRow className="font-medium">
                 <TableHead className="w-16 text-muted-foreground">순위</TableHead>
                 <TableHead className="text-muted-foreground">기업</TableHead>
-                <TableHead className="text-right text-muted-foreground">현재가(등락률)</TableHead>
+                <TableHead className="text-right text-muted-foreground">현재가</TableHead>
                 <TableHead className="text-right text-muted-foreground">시장대비강도 점수 점수</TableHead>
                 <TableHead className="text-right text-muted-foreground">거래대금 변화</TableHead>
               </TableRow>
@@ -157,7 +157,7 @@ export default function ThemeDetailModal({ onClose, selectIssue }: ModalProps) {
                       </div>
                     </TableCell>
                     <TableCell className="flex justify-end items-center gap-1 h-12.25">
-                      <div>{stock.currentPrice.toLocaleString()}</div>
+                      <div>{stock.currentPrice.toLocaleString()}원</div>
                       <div className={`w-14 text-right ${isUp ? "text-rose-500" : isDown ? "text-blue-500" : "text-gray-400"}`}>
                         {isUp && "+"}
                         {stock.changeRate.toFixed(2)}%

@@ -89,7 +89,7 @@ export default function WatchlistStatus({ themeList, stockList, handleThemeModal
 
         return (
           <div className="min-w-24 text-right">
-            {row.original.closePrice.toLocaleString()}
+            {row.original.closePrice.toLocaleString()}원
             <span className={`ml-2 text-xs ${change > 0 ? "text-red-500" : change < 0 ? "text-blue-500" : "text-muted-foreground"} w-12.5 inline-block`}>
               {change > 0 ? "+" : ""}
               {change.toFixed(2)}%

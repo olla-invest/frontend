@@ -109,7 +109,7 @@ export default function DetailChart({ stockCode }: { stockCode: string }) {
       header: () => <div className="text-right">종가</div>,
       cell: ({ row }) => {
         const value = row.getValue("close") as number;
-        return <div className="text-right font-semibold text-slate-800">{isNaN(value) || value == null ? "-" : value.toLocaleString()}</div>;
+        return <div className="text-right font-semibold text-slate-800">{isNaN(value) || value == null ? "-" : value.toLocaleString()}원</div>;
       },
     },
     {

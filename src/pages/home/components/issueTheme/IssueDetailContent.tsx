@@ -152,7 +152,7 @@ export default function IssueDetailContent({ selectIssue }: ContentProps) {
                     <TableHead className="md:static sticky left-0 z-10 bg-background w-12 text-muted-foreground">순위</TableHead>
                     {/* 기업명 - 모바일 sticky */}
                     <TableHead className="md:static sticky left-12 z-10 bg-background text-muted-foreground">기업</TableHead>
-                    <TableHead className="text-right text-muted-foreground">{isMobile ? "현재가" : "현재가(등락률)"}</TableHead>
+                    <TableHead className="text-right text-muted-foreground">현재가</TableHead>
                     <TableHead className="text-right text-muted-foreground whitespace-pre-line">{isMobile ? "시장대비\n강도 점수" : "시장대비강도 점수"}</TableHead>
                     <TableHead className="text-right text-muted-foreground whitespace-pre-line">{isMobile ? "거래대금\n변화" : "거래대금 변화"}</TableHead>
                   </TableRow>
@@ -177,7 +177,7 @@ export default function IssueDetailContent({ selectIssue }: ContentProps) {
                           </div>
                         </TableCell>
                         <TableCell className="flex justify-end items-center gap-1 md:flex-row flex-col md:h-12.25">
-                          <div>{stock.currentPrice.toLocaleString()}</div>
+                          <div>{stock.currentPrice.toLocaleString()}원</div>
                           <div className={`w-14 text-right ${isUp ? "text-rose-500" : isDown ? "text-blue-500" : "text-gray-400"}`}>
                             {isUp && "+"}
                             {stock.changeRate.toFixed(2)}%

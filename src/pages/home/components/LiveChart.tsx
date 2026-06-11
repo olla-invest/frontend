@@ -130,7 +130,7 @@ function LivePriceCell({ stockCode, basePrice, baseRate }: LivePriceCellProps) {
     >
       <div>
         {formatNumber(displayPrice)}
-        <span className="md:hidden inline">원</span>
+        <span className="inline">원</span>
       </div>
 
       <div className={`w-14 shrink-0 text-sm text-right ${rate?.startsWith("+") ? "text-rose-500" : rate?.startsWith("-") ? "text-blue-500" : "text-muted-foreground"}`}>{rate}</div>
