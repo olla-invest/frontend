@@ -245,15 +245,15 @@ const columns: ColumnDef<StockRankingApiItem>[] = [
     cell: ({ row }) => {
       const v = row.getValue("rankHistory") as {
         oneDayAgo: number | null;
-        today: number | null;
         twoDaysAgo: number | null;
+        threeDaysAgo: number | null;
       };
 
       return (
         <div className="flex">
           <span className="flex-1 text-center">{v.oneDayAgo ?? "-"}</span>
-          <span className="flex-1 text-center">{v.today ?? "-"}</span>
           <span className="flex-1 text-center">{v.twoDaysAgo ?? "-"}</span>
+          <span className="flex-1 text-center">{v.threeDaysAgo ?? "-"}</span>
         </div>
       );
     },
