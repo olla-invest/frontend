@@ -25,6 +25,7 @@ import { useWatchStockListStore, useWatchThemeStore } from "@/store/WatchListSto
 
 // API
 import { getWatchStockList, getWatchThemeList } from "@/api/watchList";
+import InfoModal from "./components/InfoModal";
 
 const Login: React.FC = () => {
   const navigate = useNavigate();
@@ -34,6 +35,8 @@ const Login: React.FC = () => {
   const [errors, setErrors] = useState<Partial<Record<"username" | "password", string>>>({});
   const [saveId, setSaveId] = useState(!!localStorage.getItem("saveId"));
   const [modal, setModal] = useState<"findId" | "findPw" | null>(null);
+
+  const [infoModal, setInfoModal] = useState(false);
 
   const [loginData, setLoginData] = useState<LoginParams>({
     username: localStorage.getItem("saveId") || "",
@@ -185,7 +188,12 @@ const Login: React.FC = () => {
 
             <div className="bg-[#E2E8F0] w-px h-3" />
 
-            <a onClick={() => navigate("/signup")} className="cursor-pointer">
+            <a
+              //임시 안내팝업 표시용
+              //onClick={() => navigate("/signup")}
+              onClick={() => setInfoModal(true)}
+              className="cursor-pointer"
+            >
               회원가입
             </a>
 
@@ -208,6 +216,13 @@ const Login: React.FC = () => {
             </a>
           </div>
         </div>
+
+        <InfoModal
+          open={infoModal}
+          onClose={() => {
+            setInfoModal(false);
+          }}
+        />
       </div>
     </div>
   );
