@@ -1,9 +1,7 @@
 import { Button } from "@/components/ui/button";
 import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetFooter } from "@/components/ui/sheet";
-import { useNavigate } from "react-router-dom";
 
-export default function InfoModalMobile({ open, onClose }: { open: boolean; onClose: () => void }) {
-  const navigate = useNavigate();
+export default function InfoModalMobile({ open, onClose, onClickEvent }: { open: boolean; onClose: () => void; onClickEvent: (() => void) | null }) {
   return (
     <Sheet
       open={open}
@@ -45,7 +43,15 @@ export default function InfoModalMobile({ open, onClose }: { open: boolean; onCl
           </div>
         </div>
         <SheetFooter className="p-4 pb-8 border-t">
-          <Button type="button" className="cursor-pointer" onClick={() => navigate("/signup")}>
+          <Button
+            type="button"
+            className="cursor-pointer"
+            onClick={() => {
+              if (onClickEvent) {
+                onClickEvent();
+              }
+            }}
+          >
             확인
           </Button>
         </SheetFooter>

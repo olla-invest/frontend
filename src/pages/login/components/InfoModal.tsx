@@ -1,9 +1,7 @@
 import { Button } from "@/components/ui/button";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog";
-import { useNavigate } from "react-router-dom";
 
-export default function InfoModal({ open, onClose }: { open: boolean; onClose: () => void }) {
-  const navigate = useNavigate();
+export default function InfoModal({ open, onClose, onClickEvent }: { open: boolean; onClose: () => void; onClickEvent: (() => void) | null }) {
   return (
     <Dialog
       open={open}
@@ -37,7 +35,15 @@ export default function InfoModal({ open, onClose }: { open: boolean; onClose: (
           </div>
         </div>
         <DialogFooter className="items-end pb-3 pt-20 border-t">
-          <Button type="button" className="cursor-pointer" onClick={() => navigate("/signup")}>
+          <Button
+            type="button"
+            className="cursor-pointer"
+            onClick={() => {
+              if (onClickEvent) {
+                onClickEvent();
+              }
+            }}
+          >
             확인
           </Button>
         </DialogFooter>

@@ -41,6 +41,7 @@ const Login: React.FC = () => {
 
   const [infoModal, setInfoModal] = useState(false);
   const [infoModalMobile, setInfoModalMobile] = useState(false);
+  const [infoClickEvent, setInfoClickEvent] = useState<(() => void) | null>(null);
 
   const [loginData, setLoginData] = useState<LoginParams>({
     username: localStorage.getItem("saveId") || "",
@@ -195,7 +196,16 @@ const Login: React.FC = () => {
             <a
               //임시 안내팝업 표시용
               //onClick={() => navigate("/signup")}
-              onClick={() => (isMobile ? setInfoModalMobile(true) : setInfoModal(true))}
+              onClick={() => {
+                if (isMobile) {
+                  setInfoModalMobile(true);
+                  setInfoModal(false);
+                } else {
+                  setInfoModal(true);
+                  setInfoModalMobile(false);
+                }
+                setInfoClickEvent(() => () => navigate("/signup"));
+              }}
               className="cursor-pointer"
             >
               회원가입
@@ -212,10 +222,34 @@ const Login: React.FC = () => {
           <span className="block text-xs text-muted-foreground mb-4">SNS로 로그인/회원가입</span>
 
           <div className="flex items-center justify-center gap-4">
-            <a className="size-12" onClick={() => (window.location.href = `${BASE_URL}/auth/naver`)}>
+            <a
+              className="size-12"
+              onClick={() => {
+                if (isMobile) {
+                  setInfoModalMobile(true);
+                  setInfoModal(false);
+                } else {
+                  setInfoModal(true);
+                  setInfoModalMobile(false);
+                }
+                setInfoClickEvent(() => () => (window.location.href = `${BASE_URL}/auth/naver`));
+              }}
+            >
               <img src={NaverImg} alt="네이버 로그인" />
             </a>
-            <a className="size-12" onClick={() => (window.location.href = `${BASE_URL}/auth/kakao`)}>
+            <a
+              className="size-12"
+              onClick={() => {
+                if (isMobile) {
+                  setInfoModalMobile(true);
+                  setInfoModal(false);
+                } else {
+                  setInfoModal(true);
+                  setInfoModalMobile(false);
+                }
+                setInfoClickEvent(() => () => (window.location.href = `${BASE_URL}/auth/kakao`));
+              }}
+            >
               <img src={KakaoImg} alt="카카오 로그인" />
             </a>
           </div>
@@ -226,6 +260,7 @@ const Login: React.FC = () => {
           onClose={() => {
             setInfoModalMobile(false);
           }}
+          onClickEvent={infoClickEvent}
         />
 
         <InfoModal
@@ -233,6 +268,7 @@ const Login: React.FC = () => {
           onClose={() => {
             setInfoModal(false);
           }}
+          onClickEvent={infoClickEvent}
         />
       </div>
     </div>
