@@ -86,6 +86,13 @@ body {
   display: none;
 }
 
+.dragText {
+  -webkit-user-select: text; /* 사파리, 크롬 */
+  -moz-user-select: text; /* 파이어폭스 */
+  -ms-user-select: text; /* IE, 엣지 */
+  user-select: text; /* 표준 */
+}
+
 h1 {
   font-size: 3.2em;
   line-height: 1.1;

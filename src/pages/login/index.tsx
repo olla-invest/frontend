@@ -26,8 +26,11 @@ import { useWatchStockListStore, useWatchThemeStore } from "@/store/WatchListSto
 // API
 import { getWatchStockList, getWatchThemeList } from "@/api/watchList";
 import InfoModal from "./components/InfoModal";
+import InfoModalMobile from "./components/InfoModalMobile";
+import { useIsMobile } from "@/hooks/use-mobile";
 
 const Login: React.FC = () => {
+  const isMobile = useIsMobile();
   const navigate = useNavigate();
   const BASE_URL = import.meta.env.VITE_API_BASE_URL;
   const [showPw, setShowPw] = useState(false);
@@ -37,6 +40,7 @@ const Login: React.FC = () => {
   const [modal, setModal] = useState<"findId" | "findPw" | null>(null);
 
   const [infoModal, setInfoModal] = useState(false);
+  const [infoModalMobile, setInfoModalMobile] = useState(false);
 
   const [loginData, setLoginData] = useState<LoginParams>({
     username: localStorage.getItem("saveId") || "",
@@ -191,7 +195,7 @@ const Login: React.FC = () => {
             <a
               //임시 안내팝업 표시용
               //onClick={() => navigate("/signup")}
-              onClick={() => setInfoModal(true)}
+              onClick={() => (isMobile ? setInfoModalMobile(true) : setInfoModal(true))}
               className="cursor-pointer"
             >
               회원가입
@@ -216,6 +220,13 @@ const Login: React.FC = () => {
             </a>
           </div>
         </div>
+
+        <InfoModalMobile
+          open={infoModalMobile}
+          onClose={() => {
+            setInfoModalMobile(false);
+          }}
+        />
 
         <InfoModal
           open={infoModal}

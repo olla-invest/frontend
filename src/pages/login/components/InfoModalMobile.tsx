@@ -1,22 +1,30 @@
 import { Button } from "@/components/ui/button";
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog";
+import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetFooter } from "@/components/ui/sheet";
 import { useNavigate } from "react-router-dom";
 
-export default function InfoModal({ open, onClose }: { open: boolean; onClose: () => void }) {
+export default function InfoModalMobile({ open, onClose }: { open: boolean; onClose: () => void }) {
   const navigate = useNavigate();
   return (
-    <Dialog
+    <Sheet
       open={open}
       onOpenChange={(isOpen: boolean) => {
         if (!isOpen) onClose();
       }}
     >
-      <DialogContent className="w-fit! flex flex-col gap-4">
-        <DialogHeader>
-          <DialogTitle className="font-semibold text-xl text-foreground">클로즈드 베타 테스트 운영 중</DialogTitle>
-        </DialogHeader>
-        <div className="py-10 flex flex-col gap-4 border-t w-fit">
-          <div className="font-medium text-gray-700 text-sm flex flex-col gap-5">
+      <SheetContent side="bottom" showCloseButton={false} className="h-[70vh] flex gap-4 max-h-none flex-col rounded-t-xl border-t p-0">
+        <SheetHeader className="shrink-0 px-4 pb-4 pt-0 text-left border-b">
+          <div
+            className="flex justify-center py-2"
+            onClick={() => {
+              onClose();
+            }}
+          >
+            <div className="w-9 h-1.25 rounded-full bg-secondary" />
+          </div>
+          <SheetTitle className="font-medium text-foreground text-base">클로즈드 베타 테스트 운영 중</SheetTitle>
+        </SheetHeader>
+        <div className="flex flex-col gap-4 px-4">
+          <div className="font-medium text-slate-700 text-sm flex flex-col gap-5">
             <p>안녕하세요. olla 팀입니다.</p>
             <p>
               olla 서비스는 현재 베타 테스트에 사전 지원해주신 분들에
@@ -36,12 +44,12 @@ export default function InfoModal({ open, onClose }: { open: boolean; onClose: (
             </p>
           </div>
         </div>
-        <DialogFooter className="items-end pb-3 pt-20 border-t">
+        <SheetFooter className="p-4 pb-8 border-t">
           <Button type="button" className="cursor-pointer" onClick={() => navigate("/signup")}>
             확인
           </Button>
-        </DialogFooter>
-      </DialogContent>
-    </Dialog>
+        </SheetFooter>
+      </SheetContent>
+    </Sheet>
   );
 }
