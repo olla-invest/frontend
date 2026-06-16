@@ -106,15 +106,15 @@ export default function RelatedStocksThemes({ recommendData, handleStockModal, h
             <div className="flex gap-2 text-slate-700 text-sm items-center">
               <span>{recommendData.recommendedTheme.totalCount}개 중</span>
               <span>
-                <span className="text-rose-500">{recommendData.recommendedTheme.risingCount}</span>
+                <span className="text-rose-500">{recommendData.recommendedTheme.risingCount ?? "-"}</span>
                 상승
               </span>
               <span>
-                <span className="text-muted-foreground">2</span>
+                <span className="text-muted-foreground">{recommendData.recommendedTheme.flatCount ?? "-"}</span>
                 보합
               </span>
               <span>
-                <span className="text-blue-500">4</span>
+                <span className="text-blue-500">{recommendData.recommendedTheme.downCount ?? "-"}</span>
                 하락
               </span>
             </div>
