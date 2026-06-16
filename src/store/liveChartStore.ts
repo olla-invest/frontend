@@ -10,6 +10,7 @@ interface NormalizedPrice {
   stockCode: string;
   price: number;
   changeRate: string;
+  prevDayCompare?: string;
 }
 
 interface LiveState {
@@ -31,6 +32,7 @@ export const useLiveStore = create<LiveState>()(
                 stockCode: data.stockCode,
                 price: Number(data.price),
                 changeRate: data.changeRate,
+                prevDayCompare: data.prevDayCompare,
               },
             },
           }),

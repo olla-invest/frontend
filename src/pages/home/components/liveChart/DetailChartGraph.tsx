@@ -4,10 +4,12 @@ import { useEffect, useRef } from "react";
 import { createChart, CandlestickSeries, ColorType, type IChartApi, type ISeriesApi, type CandlestickData, type Time } from "lightweight-charts";
 
 import type { GraphDetail } from "@/types/api/chartDetails";
+import type { TickPayload, SnapshotPayload } from "@/soket/socketTypes";
 
 interface Props {
   data: GraphDetail["candles"];
   chartPeriod?: "minute" | "day" | "week" | "month" | "year";
+  tick: TickPayload | SnapshotPayload | null;
 }
 
 // ✅ 모든 타입 → Unix timestamp(초)로 통일
@@ -63,10 +65,11 @@ const formatTickLabel = (time: Time, chartPeriod?: string): string => {
   return `${m}.${d}`;
 };
 
-export default function DetailChartGraph({ data, chartPeriod }: Props) {
+export default function DetailChartGraph({ data, chartPeriod, tick }: Props) {
   const containerRef = useRef<HTMLDivElement | null>(null);
   const chartRef = useRef<IChartApi | null>(null);
   const seriesRef = useRef<ISeriesApi<"Candlestick"> | null>(null);
+  const minuteOhlcRef = useRef<{ open: number; high: number; low: number } | null>(null);
 
   useEffect(() => {
     if (!containerRef.current) return;
@@ -82,9 +85,9 @@ export default function DetailChartGraph({ data, chartPeriod }: Props) {
       },
       timeScale: {
         tickMarkFormatter: (time: Time) => formatTickLabel(time, chartPeriod),
+        fixRightEdge: true,
       },
     });
-
     chartRef.current = chart;
 
     const candlestickSeries = chart.addSeries(CandlestickSeries, {
@@ -133,6 +136,48 @@ export default function DetailChartGraph({ data, chartPeriod }: Props) {
       chart.remove();
     };
   }, [data, chartPeriod]);
+
+  useEffect(() => {
+    if (!tick || !seriesRef.current || !data.length) return;
+
+    const last = data[data.length - 1];
+    const price = Number(tick.price);
+
+    if (chartPeriod === "minute") {
+      if (!minuteOhlcRef.current) {
+        // 첫 tick이면 초기화
+        minuteOhlcRef.current = {
+          open: Number(tick.open),
+          high: Number(tick.high),
+          low: Number(tick.low),
+        };
+      } else {
+        // 이후 tick은 high/low 갱신
+        minuteOhlcRef.current.high = Math.max(minuteOhlcRef.current.high, price);
+        minuteOhlcRef.current.low = Math.min(minuteOhlcRef.current.low, price);
+      }
+
+      seriesRef.current.update({
+        time: toChartTime(last.time, chartPeriod),
+        open: minuteOhlcRef.current.open,
+        high: minuteOhlcRef.current.high,
+        low: minuteOhlcRef.current.low,
+        close: price,
+      });
+    } else {
+      seriesRef.current.update({
+        time: toChartTime(last.time, chartPeriod),
+        open: Number(tick.open),
+        high: Number(tick.high),
+        low: Number(tick.low),
+        close: price,
+      });
+    }
+  }, [tick]);
+
+  useEffect(() => {
+    minuteOhlcRef.current = null;
+  }, [chartPeriod]);
 
   return (
     <div
