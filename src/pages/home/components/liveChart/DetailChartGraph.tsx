@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useRef } from "react";
-import { createChart, CandlestickSeries, ColorType, type IChartApi, type ISeriesApi, type CandlestickData, type Time } from "lightweight-charts";
+import { createChart, CandlestickSeries, ColorType, type IChartApi, type ISeriesApi, type CandlestickData, type Time, type UTCTimestamp } from "lightweight-charts";
 
 import type { GraphDetail } from "@/types/api/chartDetails";
 import type { TickPayload, SnapshotPayload } from "@/soket/socketTypes";
@@ -113,9 +113,9 @@ export default function DetailChartGraph({ data, chartPeriod, tick }: Props) {
         low: d.low,
         close: d.close,
       }))
-      // ✅ timestamp(숫자)로 통일했으므로 숫자 정렬
+      // timestamp(숫자)로 통일했으므로 숫자 정렬
       .sort((a, b) => Number(a.time) - Number(b.time))
-      // ✅ 중복 time 제거 (같은 timestamp 데이터 제거)
+      // 중복 time 제거 (같은 timestamp 데이터 제거)
       .filter((item, index, arr) => {
         if (index === 0) return true;
         return item.time !== arr[index - 1].time;
@@ -138,27 +138,26 @@ export default function DetailChartGraph({ data, chartPeriod, tick }: Props) {
   }, [data, chartPeriod]);
 
   useEffect(() => {
-    if (!tick || !seriesRef.current || !data.length) return;
+    if (!tick || !seriesRef.current) return;
 
-    const last = data[data.length - 1];
     const price = Number(tick.price);
+    // string이든 number든 UTCTimestamp(초 단위 숫자)로 안전하게 변환
+    const time = (typeof tick.time === "string" ? Math.floor(new Date(tick.time).getTime() / 1000) : Number(tick.time)) as UTCTimestamp;
 
     if (chartPeriod === "minute") {
       if (!minuteOhlcRef.current) {
-        // 첫 tick이면 초기화
         minuteOhlcRef.current = {
           open: Number(tick.open),
           high: Number(tick.high),
           low: Number(tick.low),
         };
       } else {
-        // 이후 tick은 high/low 갱신
         minuteOhlcRef.current.high = Math.max(minuteOhlcRef.current.high, price);
         minuteOhlcRef.current.low = Math.min(minuteOhlcRef.current.low, price);
       }
 
       seriesRef.current.update({
-        time: toChartTime(last.time, chartPeriod),
+        time,
         open: minuteOhlcRef.current.open,
         high: minuteOhlcRef.current.high,
         low: minuteOhlcRef.current.low,
@@ -166,11 +165,11 @@ export default function DetailChartGraph({ data, chartPeriod, tick }: Props) {
       });
     } else {
       seriesRef.current.update({
-        time: toChartTime(last.time, chartPeriod),
+        time,
         open: Number(tick.open),
         high: Number(tick.high),
         low: Number(tick.low),
-        close: price,
+        close: price, // tick.price 사용
       });
     }
   }, [tick]);
