@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 
 import { Field, FieldDescription, FieldLabel } from "@/components/ui/field";
 import { Input } from "@/components/ui/input";
@@ -49,6 +49,16 @@ const Login: React.FC = () => {
   });
 
   const login = useAuthStore((state) => state.login);
+  const sessionExpired = useAuthStore((state) => state.sessionExpired); // 추가
+  const clearSessionExpired = useAuthStore((state) => state.clearSessionExpired);
+
+  // 세션 만료 안내
+  useEffect(() => {
+    if (sessionExpired) {
+      toast.error("세션이 만료되었습니다. 다시 로그인해 주세요.", { position: "top-center" });
+      clearSessionExpired();
+    }
+  }, [sessionExpired, clearSessionExpired]);
 
   const handleLoginData = <K extends keyof LoginParams>(key: K, value: LoginParams[K]) => {
     setLoginData((prev) => ({

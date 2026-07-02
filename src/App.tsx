@@ -58,6 +58,13 @@ const PrivateRoute = ({ children }: RouteProps) => {
 const App: React.FC = () => {
   useChartSocket();
 
+  const checkAuth = useAuthStore((state) => state.checkAuth);
+  const isAuthChecked = useAuthStore((state) => state.isAuthChecked);
+
+  useEffect(() => {
+    checkAuth();
+  }, [checkAuth]);
+
   // PrintScreen 감지
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
@@ -76,6 +83,10 @@ const App: React.FC = () => {
     window.addEventListener("keydown", handleKeyDown);
     return () => window.removeEventListener("keydown", handleKeyDown);
   }, []);
+
+  if (!isAuthChecked) {
+    return null;
+  }
 
   return (
     <Router>
