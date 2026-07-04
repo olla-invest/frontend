@@ -7,7 +7,7 @@ export default function MarketSummary() {
       <div className="w-fit px-2 rounded-full bg-muted ml-auto">
         <span className="text-xs text-muted-foreground">2026-05-21 기준 · 매일 오후 4:30 자동 업데이트</span>
       </div>
-      <div className="flex md:gap-6 py-1 px-2 md:flex-row flex-col items-center gap-4">
+      <div className="flex md:gap-6 py-1 px-2 md:flex-row flex-col items-center gap-4 justify-center">
         <div className="flex flex-col gap-2 items-center text-center md:items-start md:text-left">
           <span className="text-slate-800 text-3xl font-semibold">큰 흐름은 살아있어요.</span>
           <span className="text-primary text-3xl font-semibold">지금 당장은 기다리세요.</span>

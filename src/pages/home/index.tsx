@@ -80,7 +80,7 @@ const Home: React.FC = () => {
             <LiveChart />
           </TabsContent>
 
-          <TabsContent value="marketView" className="h-full overflow-auto pt-8 mx-auto">
+          <TabsContent value="marketView" className="h-full overflow-auto pt-8">
             <MarketView />
           </TabsContent>
 
