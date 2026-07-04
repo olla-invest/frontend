@@ -4,7 +4,7 @@ import MarketTypeCard from "./marketView/MarketTypeCard";
 
 export function MarketView() {
   return (
-    <div className="min-w-5xl max-w-312 px-6 flex flex-col gap-8">
+    <div className="max-w-244 flex flex-col md:gap-8 overflow-hidden gap-10">
       <MarketSummary />
       <MarketTypeCard />
       <MarketTabCard />

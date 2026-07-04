@@ -34,17 +34,17 @@ export default function MarketTabCard() {
   ];
   return (
     <div className="flex flex-col w-full gap-6">
-      <div className="flex justify-center items-center gap-6">
+      <div className="md:flex md:justify-center md:items-center md:gap-6 grid grid-cols-2 gap-4">
         {demoData.map((data, index) => (
           <React.Fragment key={index}>
-            <div key={index} className="flex flex-col gap-1 flex-1">
+            <div className={`flex flex-col flex-1 gap-1 border-r md:border-r-0 ${index % 2 === 1 ? "border-r-0" : ""}`}>
               <div className="text-sm font-medium text-slate-800">{data.title}</div>
               <div className="flex flex-col">
                 <b className={`text-2xl font-semibold text-${data.color}-500`}>{data.declineRate}</b>
                 <p className="text-xs text-muted-foreground">{data.description}</p>
               </div>
             </div>
-            {index < demoData.length - 1 && <div className="border-r h-18" />}
+            {index < demoData.length - 1 && <div className="border-r h-18 hidden md:block" />}
           </React.Fragment>
         ))}
       </div>

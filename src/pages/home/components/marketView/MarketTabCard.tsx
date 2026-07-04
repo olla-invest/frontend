@@ -1,6 +1,8 @@
 import { useState } from "react";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import MaDecline from "./MaDecline";
+import MaDecline from "./marketTabCardComp/MaDecline";
+import Highlight from "./marketTabCardComp/HighLow";
+import Adr from "./marketTabCardComp/Adr";
 
 export default function MarketTabCard() {
   const [activeTab, setActiveTab] = useState("maDecline");
@@ -20,8 +22,8 @@ export default function MarketTabCard() {
   };
   return (
     <Tabs defaultValue="maDecline" value={activeTab} onValueChange={setActiveTab}>
-      <div className="flex items-center gap-4 mb-2">
-        <TabsList>
+      <div className="flex md:items-center md:flex-row gap-4 mb-2 flex-col items-start">
+        <TabsList className="w-full md:w-fit">
           <TabsTrigger value="maDecline">MA하락률</TabsTrigger>
           <TabsTrigger value="highLow">신고가, 신저가</TabsTrigger>
           <TabsTrigger value="adr">ADR</TabsTrigger>
@@ -36,10 +38,10 @@ export default function MarketTabCard() {
         <MaDecline />
       </TabsContent>
       <TabsContent value="highLow">
-        <div>작업중</div>
+        <Highlight />
       </TabsContent>
       <TabsContent value="adr">
-        <div>작업중</div>
+        <Adr />
       </TabsContent>
     </Tabs>
   );
