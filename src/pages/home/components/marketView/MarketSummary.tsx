@@ -4,7 +4,7 @@ export default function MarketSummary() {
   return (
     <section>
       <h3 className="sr-only">요약</h3>
-      <div className="w-fit px-2 rounded-full bg-muted ml-auto">
+      <div className="w-fit px-2 rounded-full bg-muted ml-auto hidden md:block">
         <span className="text-xs text-muted-foreground">2026-05-21 기준 · 매일 오후 4:30 자동 업데이트</span>
       </div>
       <div className="flex md:gap-6 py-1 px-2 md:flex-row flex-col items-center gap-4 justify-center">
@@ -18,7 +18,7 @@ export default function MarketSummary() {
           </p>
         </div>
         {/* gauge chart 영역 */}
-        <div>
+        <div className="text-center md:text-left">
           {/* signal   "sell" | "neutral" | "buy"  */}
           <GaugeChart label="단기" signal="sell" />
           <GaugeChart label="장기" signal="buy" />

@@ -29,12 +29,13 @@ export default function Adr() {
                 <b className={`text-2xl font-semibold text-${data.color}-500`}>{data.declineRate}</b>
                 <p className="text-xs text-muted-foreground">{data.description}</p>
               </div>
+              <Progress value={parseFloat(data.declineRate)} className="h-1 w-full rounded-full bg-slate-200 block md:hidden" barClassName={data.barColor} />
             </div>
-            {index < demoData.length - 1 && <div className="border-r h-18" />}
+            {index < demoData.length - 1 && <div className="border-r h-20" />}
           </React.Fragment>
         ))}
       </div>
-      <div className="flex flex-col gap-4">
+      <div className="flex-col gap-4 hidden md:flex">
         {demoData.map((data, index) => (
           <div key={index} className="flex gap-2 items-center">
             <span className="w-27.5 text-sm text-slate-700 shrink-0">{data.title}</span>

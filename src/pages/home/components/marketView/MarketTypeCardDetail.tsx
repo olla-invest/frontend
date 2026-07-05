@@ -20,13 +20,15 @@ export default function MarketTypeCardDetail({ info: { marketName, status, statu
   };
 
   return (
-    <div className="flex flex-col gap-4 w-full">
+    <div className="flex flex-col gap-4 flex-1">
       {/* 상단 */}
-      <div className="py-2 flex gap-2 justify-between w-full">
+      <div className="py-2 flex gap-0 md:gap-2 justify-between w-full items-start flex-wrap md:flex-nowrap">
         <div className="flex items-center gap-2 text-sm">
-          <div className={`size-2 rounded-full bg-${status === "sell" ? "blue" : status === "buy" ? "rose" : "slate"}-500`} />
-          <span className="text-slate-800 font-medium">{marketName}</span>
-          <span className="text-slate-700 text-sm">{statusDetail}</span>
+          <div className="flex items-center gap-2">
+            <div className={`size-2 rounded-full bg-${status === "sell" ? "blue" : status === "buy" ? "rose" : "slate"}-500`} />
+            <span className="text-slate-800 font-medium">{marketName}</span>
+          </div>
+          <span className="text-slate-700 text-sm hidden md:block">{statusDetail}</span>
         </div>
         <div className="flex items-center gap-2">
           <div className="flex items-center gap-1">
@@ -38,20 +40,21 @@ export default function MarketTypeCardDetail({ info: { marketName, status, statu
             <div className="text-muted-foreground text-xs">장기</div>
           </div>
         </div>
+        <span className="text-slate-700 text-sm w-full shrink-0 block md:hidden">{statusDetail}</span>
       </div>
       {/* 중간 */}
-      <div className="grid grid-cols-3 gap-4">
-        <div className={`p-4 flex items-center justify-between rounded-md ${dotColorMap[status] ?? "bg-slate-500"}`}>
+      <div className="grid grid-cols-3 gap-2 md:gap-4">
+        <div className={`p-4 flex justify-between rounded-md ${dotColorMap[status] ?? "bg-slate-500"} md:flex-row md:items-center items-start flex-col`}>
           <span className="text-slate-800 text-sm">권장비중</span>
-          <span className={`font-semibold ${textColorMap[status] ?? "text-slate-500"}`}>80 ~ 100%</span>
+          <span className={`font-semibold ${textColorMap[status] ?? "text-slate-500"} text-sm md:text-base`}>80 ~ 100%</span>
         </div>
-        <div className="p-4 flex items-center justify-between rounded-md bg-slate-50">
+        <div className="p-4 flex justify-between rounded-md bg-slate-50 md:flex-row md:items-center items-start flex-col">
           <span className="text-slate-800 text-sm">매도 신호</span>
-          <span className="font-semibold text-slate-700">2회</span>
+          <span className="font-semibold text-slate-700 text-sm md:text-base">2회</span>
         </div>
-        <div className="p-4 flex items-center justify-between rounded-md bg-slate-50">
+        <div className="p-4 flex justify-between rounded-md bg-slate-50 md:flex-row md:items-center items-start flex-col">
           <span className="text-slate-800 text-sm">상승 확인일</span>
-          <span className="font-semibold text-slate-700">2025-09-21</span>
+          <span className="font-semibold text-slate-700 text-xs md:text-base">2025-09-21</span>
         </div>
       </div>
       {/* 하단 */}

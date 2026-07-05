@@ -15,70 +15,67 @@ export default function MarketTypeCard() {
   return (
     <section className="pt-8 border-t">
       <h3 className="sr-only">시장별 카드</h3>
-      <div className="flex gap-6">
-        {/* 그래프 영역 */}
-        <div className="pr-6 border-r shrink-0 flex flex-col gap-6">
-          <div className="flex flex-col gap-4">
-            <div className="flex justify-between items-center">
-              <span className="font-semibold text-xl text-slate-800">코스피</span>
-              <div className="flex items-center gap-1">
-                <span className="font-medium text-xl text-slate-800">8,788.38</span>
-                <p className="font-medium text-xs text-rose-500">
-                  <i className="icon icon-arrow-up" />
-                  452.55(+4.56%)
-                </p>
-              </div>
-            </div>
-            <LineAreaChart colorType="red" />
-            <div className="flex items-center gap-4 text-xs ">
-              <div className="flex items-center gap-1">
-                <span className="text-muted-foreground">외인</span>
-                <span className="text-blue-500 font-medium">-14,610억</span>
-              </div>
-              <div className="flex items-center gap-1">
-                <span className="text-muted-foreground">기관</span>
-                <span className="text-blue-500 font-medium">-10,610억</span>
-              </div>
-              <div className="flex items-center gap-1">
-                <span className="text-muted-foreground">개인</span>
-                <span className="text-rose-500 font-medium">+28,680억</span>
-              </div>
+      {/* 코스닥 */}
+      <div className="flex gap-6 flex-col md:flex-row mb-6 md:mb-0">
+        <div className="flex flex-col gap-4 w-full pr-0 pb-0 border-r-0 shrink-0 md:pr-6 md:pb-6 md:border-r md:w-75">
+          <div className="flex justify-between items-center">
+            <span className="font-semibold text-xl text-slate-800">코스피</span>
+            <div className="flex items-center gap-1">
+              <span className="font-medium text-xl text-slate-800">8,788.38</span>
+              <p className="font-medium text-xs text-rose-500">
+                <i className="icon icon-arrow-up" />
+                452.55(+4.56%)
+              </p>
             </div>
           </div>
-          <div className="flex flex-col gap-4">
-            <div className="flex justify-between items-center">
-              <span className="font-semibold text-xl text-slate-800">코스닥</span>
-              <div className="flex items-center gap-1">
-                <span className="font-medium text-xl text-slate-800">1,188.38</span>
-                <p className="font-medium text-xs text-blue-500">
-                  <i className="icon icon-arrow-down" />
-                  452.55(-1.56%)
-                </p>
-              </div>
+          <LineAreaChart colorType="red" />
+          <div className="flex items-center gap-4 text-xs justify-between md:justify-start">
+            <div className="flex items-center gap-1">
+              <span className="text-muted-foreground">외인</span>
+              <span className="text-blue-500 font-medium">-14,610억</span>
             </div>
-            <LineAreaChart colorType="blue" />
-            <div className="flex items-center gap-4 text-xs ">
-              <div className="flex items-center gap-1">
-                <span className="text-muted-foreground">외인</span>
-                <span className="text-blue-500 font-medium">-14,610억</span>
-              </div>
-              <div className="flex items-center gap-1">
-                <span className="text-muted-foreground">기관</span>
-                <span className="text-blue-500 font-medium">-10,610억</span>
-              </div>
-              <div className="flex items-center gap-1">
-                <span className="text-muted-foreground">개인</span>
-                <span className="text-rose-500 font-medium">+28,680억</span>
-              </div>
+            <div className="flex items-center gap-1">
+              <span className="text-muted-foreground">기관</span>
+              <span className="text-blue-500 font-medium">-10,610억</span>
+            </div>
+            <div className="flex items-center gap-1">
+              <span className="text-muted-foreground">개인</span>
+              <span className="text-rose-500 font-medium">+28,680억</span>
             </div>
           </div>
         </div>
-
-        {/* 정보 영역 */}
-        <div className="flex flex-col gap-6 flex-1">
-          <MarketTypeCardDetail info={demodata} />
-          <MarketTypeCardDetail info={demodata2} />
+        <MarketTypeCardDetail info={demodata} />
+      </div>
+      {/* 코스피 */}
+      <div className="flex gap-6 flex-col md:flex-row">
+        <div className="flex flex-col gap-4 w-full pr-0 pb-0 border-r-0 shrink-0 md:pr-6 md:pb-6 md:border-r md:w-75">
+          <div className="flex justify-between items-center">
+            <span className="font-semibold text-xl text-slate-800">코스닥</span>
+            <div className="flex items-center gap-1">
+              <span className="font-medium text-xl text-slate-800">1,188.38</span>
+              <p className="font-medium text-xs text-blue-500">
+                <i className="icon icon-arrow-down" />
+                452.55(-1.56%)
+              </p>
+            </div>
+          </div>
+          <LineAreaChart colorType="blue" />
+          <div className="flex items-center gap-4 text-xs justify-between md:justify-start">
+            <div className="flex items-center gap-1">
+              <span className="text-muted-foreground">외인</span>
+              <span className="text-blue-500 font-medium">-14,610억</span>
+            </div>
+            <div className="flex items-center gap-1">
+              <span className="text-muted-foreground">기관</span>
+              <span className="text-blue-500 font-medium">-10,610억</span>
+            </div>
+            <div className="flex items-center gap-1">
+              <span className="text-muted-foreground">개인</span>
+              <span className="text-rose-500 font-medium">+28,680억</span>
+            </div>
+          </div>
         </div>
+        <MarketTypeCardDetail info={demodata2} />
       </div>
     </section>
   );
