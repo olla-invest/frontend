@@ -8,6 +8,7 @@ import MyWatch from "./components/MyWatch";
 import { useAuthStore } from "@/store/useAuthStore";
 import { toast } from "sonner";
 import { MarketView } from "./components/MarketView";
+import { MarketViewProvider } from "./context/marketViewContext";
 
 type TabItem = {
   name: string;
@@ -81,7 +82,9 @@ const Home: React.FC = () => {
           </TabsContent>
 
           <TabsContent value="marketView" className="h-full overflow-auto pt-8">
-            <MarketView />
+            <MarketViewProvider>
+              <MarketView />
+            </MarketViewProvider>
           </TabsContent>
 
           <TabsContent value="issueTheme" className="h-full overflow-y-auto pt-4">
