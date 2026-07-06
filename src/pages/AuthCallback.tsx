@@ -32,7 +32,6 @@ export default function AuthCallback() {
             email: data?.email,
             userId: data?.userId,
           });
-          console.log("디버깅:" + JSON.stringify(useAuthStore.getState().userInfo));
           navigate("/social-signup", {
             replace: true,
             state: {

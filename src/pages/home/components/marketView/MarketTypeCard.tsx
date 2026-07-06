@@ -57,7 +57,6 @@ const CardUi = ({ marketInfo, marketName, chartData }: { marketInfo: MarketData;
 };
 
 export default function MarketTypeCard({ kospi, kosdaq, chartData }: { kospi: MarketData | undefined; kosdaq: MarketData | undefined; chartData: MartketChart | undefined }) {
-  console.log(chartData);
   return (
     <section className="pt-8 border-t">
       <h3 className="sr-only">시장별 카드</h3>
