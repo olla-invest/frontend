@@ -237,7 +237,7 @@ export default function DetailChart({ stockCode }: { stockCode: string }) {
           </DropdownMenu>
         </div>
 
-        <DetailChartGraph data={graphData?.candles ?? []} chartPeriod={chartPeriod} tick={tick} />
+        <DetailChartGraph data={graphData?.candles ?? []} chartPeriod={chartPeriod} tick={tick} interval={chartPeriod === "minute" ? Number(minute) : undefined} />
       </div>
 
       <div className="py-2">
