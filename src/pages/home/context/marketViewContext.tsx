@@ -1,5 +1,5 @@
 import { createContext, useContext, useState, useEffect, type ReactNode } from "react";
-import { getMarketViewSummary } from "@/api/marketView"; // 실제 경로에 맞게 수정
+import { getMarketViewSummary } from "@/api/marketView";
 import type { MarketViewSummary } from "@/types/api/marketView";
 
 interface MarketViewContextType {

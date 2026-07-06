@@ -1,4 +1,7 @@
 import type { MarketData } from "@/types/api/marketView";
+import FollowThroughDateModal from "./marketTypeCard/FollowThroughDateModal";
+import { useState } from "react";
+import { useIsMobile } from "@/hooks/use-mobile";
 
 const getCardLabel = (marketState: string) => {
   switch (marketState) {
@@ -31,14 +34,17 @@ const getCardDot = (marketState: string) => {
 };
 
 const signalColorMap: Record<string, string> = {
-  GREEN: "bg-blue-500",
-  RED: "bg-rose-500",
-  YELLOW: "bg-slate-500",
+  blue: "bg-blue-500",
+  rose: "bg-rose-500",
+  slate: "bg-slate-500",
 };
 
 export default function MarketTypeCardDetail({ marketName, info }: { marketName: string; info: MarketData }) {
-  // 매도 신호일 태그: 최근일 1개 예시 (배열 전체를 보여주고 싶으면 latestDays.map으로 변경)
   const latestDistributionDay = info.distribution.latestDays;
+  const [isFollowThroughDateModalOpen, setIsFollowThroughDateModalOpen] = useState(false);
+
+  const isMobile = useIsMobile();
+  const SLICE = isMobile ? 2 : 3;
 
   return (
     <div className="flex flex-col gap-4 flex-1">
@@ -55,11 +61,11 @@ export default function MarketTypeCardDetail({ marketName, info }: { marketName:
         </div>
         <div className="flex items-center gap-2">
           <div className="flex items-center gap-1">
-            <div className={`size-2 rounded-full ${signalColorMap[info.shortSignal] ?? "bg-slate-500"}`} />
+            <div className={`size-2 rounded-full ${signalColorMap[info?.signalMeta?.short?.inactiveColorClass] ?? "bg-slate-500"}`} />
             <div className="text-muted-foreground text-xs">단기</div>
           </div>
           <div className="flex items-center gap-1">
-            <div className={`size-2 rounded-full ${signalColorMap[info.longSignal] ?? "bg-slate-500"}`} />
+            <div className={`size-2 rounded-full ${signalColorMap[info?.signalMeta?.long?.inactiveColorClass] ?? "bg-slate-500"}`} />
             <div className="text-muted-foreground text-xs">장기</div>
           </div>
         </div>
@@ -85,28 +91,33 @@ export default function MarketTypeCardDetail({ marketName, info }: { marketName:
       </div>
 
       {/* 하단 */}
-      <div className="flex items-center gap-2">
+      <div className="flex items-center gap-2 flex-wrap">
         {latestDistributionDay && (
-          <div className="flex gap-1 items-center text-xs">
+          <div className="flex gap-1 items-center text-xs shrink-0">
             <span className="text-muted-foreground">매도 신호일</span>
-            {latestDistributionDay.slice(0, 3).map((day, index, arr) => (
+            {latestDistributionDay.slice(0, SLICE).map((day, index, arr) => (
               <span key={index} className="text-slate-800 font-medium">
                 {day.tradeDate.slice(5).replace("-", "-")}({day.changeRate}%)
                 {index < arr.length - 1 && ", "}
               </span>
             ))}
-            {latestDistributionDay.length > 3 && <span className="text-slate-800 font-medium">...더보기</span>}
+            {latestDistributionDay.length > SLICE && (
+              <span className="text-slate-800 font-medium cursor-pointer" onClick={() => setIsFollowThroughDateModalOpen(true)}>
+                ...더보기
+              </span>
+            )}
           </div>
         )}
-        <div className="flex gap-1 items-center text-xs">
+        <div className="flex gap-1 items-center text-xs shrink-0">
           <span className="text-muted-foreground">상승 확인일</span>
           <span className="text-slate-800 font-medium">{info.rally.followThroughDate ?? "-"}</span>
         </div>
-        <div className="flex gap-1 items-center text-xs">
+        <div className="flex gap-1 items-center text-xs shrink-0">
           <span className="text-muted-foreground">반등일차</span>
           <span className="text-slate-800 font-medium">{info.rally.day ? `${info.rally.day}일차` : "-"}</span>
         </div>
       </div>
+      {isFollowThroughDateModalOpen && <FollowThroughDateModal isOpen={isFollowThroughDateModalOpen} onClose={() => setIsFollowThroughDateModalOpen(false)} marketName={marketName} />}
     </div>
   );
 }

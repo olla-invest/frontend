@@ -1,8 +1,17 @@
 type Signal = string;
 
+interface SignalMeta {
+  action: string;
+  actionLabel: string;
+  colorClass: string;
+  inactiveColorClass: string;
+  signalLabel: string;
+}
+
 interface SignalStatus {
   signal: Signal;
   label: string;
+  signalMeta: SignalMeta;
 }
 
 interface MarketIndex {
@@ -15,7 +24,7 @@ interface MarketIndex {
   volume: string;
 }
 
-interface MarketBreadth {
+export interface MarketBreadth {
   risingCount: number;
   flatCount: number;
   fallingCount: number;
@@ -32,7 +41,7 @@ interface InvestorFlow {
   unit: string;
 }
 
-interface MovingAverages {
+export interface MovingAverages {
   ma20: number;
   ma50: number;
   ma200: number;
@@ -42,7 +51,7 @@ interface MovingAverages {
   belowMa200Status: SignalStatus;
 }
 
-interface NewHighLow {
+export interface NewHighLow {
   newHighCount: number;
   newLowCount: number;
   net: number;
@@ -85,6 +94,25 @@ interface signalMetaItem {
   signalLabel: string;
 }
 
+export interface IndexCandle {
+  tradeDate: string;
+  open: number;
+  high: number;
+  low: number;
+  close: number;
+  change: number | null;
+  changeRate: number | null;
+  volume: string;
+
+  tradeTime: string | number;
+  indexPrice: number;
+}
+
+export interface MartketChart {
+  kospi: IndexCandle[];
+  kosdaq: IndexCandle[];
+}
+
 export interface MarketData {
   marketType: MarketType;
   tradeDate: string;
@@ -117,11 +145,16 @@ export interface OverallSummary {
   headline: string;
   guide: string;
   summary: string;
+  signalMeta: {
+    short: signalMetaItem;
+    long: signalMetaItem;
+  };
 }
 
 export interface MarketViewSummary {
   tradeDate: string;
   updatedAt: string;
+  chart: MartketChart;
   markets: MarketData[];
   overall: OverallSummary;
 }

@@ -5,16 +5,17 @@ import moment from "moment";
 export default function MarketSummary({ summary, updateTime }: { summary: OverallSummary | undefined; updateTime: string | undefined }) {
   const getSignalColor = (signal: string | undefined) => {
     switch (signal) {
-      case "RED":
+      case "rose":
         return "buy";
-      case "SLATE":
+      case "slate":
         return "neutral";
-      case "BLUE":
+      case "blue":
         return "sell";
       default:
-        return "neutral";
+        return "none";
     }
   };
+
   return (
     <section>
       <h3 className="sr-only">요약</h3>
@@ -30,8 +31,8 @@ export default function MarketSummary({ summary, updateTime }: { summary: Overal
         {/* gauge chart 영역 */}
         <div className="text-center md:text-left">
           {/* signal   "sell" | "neutral" | "buy"  */}
-          <GaugeChart label="단기" signal={getSignalColor(summary?.shortSignal)} />
-          <GaugeChart label="장기" signal={getSignalColor(summary?.longSignal)} />
+          <GaugeChart label="단기" signal={getSignalColor(summary?.signalMeta?.short?.inactiveColorClass)} />
+          <GaugeChart label="장기" signal={getSignalColor(summary?.signalMeta?.long?.inactiveColorClass)} />
         </div>
       </div>
     </section>

@@ -15,7 +15,7 @@ import gaugeChartBg from "@/assets/images/gaugeLabelBg.png";
  *   중립 비활성       → slate-200 (#e2e8f0)
  */
 
-export type Signal = "sell" | "neutral" | "buy";
+export type Signal = "sell" | "neutral" | "buy" | "none";
 
 interface SignalGaugeProps {
   signal?: Signal;
@@ -39,6 +39,10 @@ const COLORS: Record<Signal, ColorSet> = {
   buy: {
     active: "#f43f5e", // rose-500
     inactive: "#fecdd3", // rose-200
+  },
+  none: {
+    active: "",
+    inactive: "",
   },
 };
 
@@ -69,6 +73,7 @@ const NEEDLE_ANGLE: Record<Signal, number> = {
   sell: 30,
   neutral: 90,
   buy: 150,
+  none: 0,
 };
 
 const NEEDLE_LENGTH = 80;

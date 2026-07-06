@@ -4,7 +4,9 @@ import MaDecline from "./marketTabCardComp/MaDecline";
 import Highlight from "./marketTabCardComp/HighLow";
 import Adr from "./marketTabCardComp/Adr";
 
-export default function MarketTabCard() {
+import type { MarketData } from "@/types/api/marketView";
+
+export default function MarketTabCard({ kospi, kosdaq }: { kospi: MarketData | undefined; kosdaq: MarketData | undefined }) {
   const [activeTab, setActiveTab] = useState("maDecline");
   const tabInfo = {
     maDecline: {
@@ -12,7 +14,7 @@ export default function MarketTabCard() {
       description: "주가가 이동평균선 아래로 내려간 종목이 전체의 몇 % 인지 알 수 있어요.",
     },
     highLow: {
-      title: "신고가, 신저가",
+      title: "신고가 · 신저가",
       description: "오늘 52주 최고가 · 최저가를 새로 쓴 종목이 각각 몇개인지 알 수 있어요.",
     },
     adr: {
@@ -25,7 +27,7 @@ export default function MarketTabCard() {
       <div className="flex md:items-center md:flex-row gap-4 mb-2 flex-col items-start">
         <TabsList className="w-full md:w-fit">
           <TabsTrigger value="maDecline">MA하락률</TabsTrigger>
-          <TabsTrigger value="highLow">신고가, 신저가</TabsTrigger>
+          <TabsTrigger value="highLow">신고가 · 신저가</TabsTrigger>
           <TabsTrigger value="adr">ADR</TabsTrigger>
         </TabsList>
         <div className="flex items-center gap-1 text-muted-foreground">
@@ -35,13 +37,13 @@ export default function MarketTabCard() {
       </div>
 
       <TabsContent value="maDecline">
-        <MaDecline />
+        <MaDecline kospiMa={kospi?.movingAverages} kosdaqMa={kosdaq?.movingAverages} />
       </TabsContent>
       <TabsContent value="highLow">
-        <Highlight />
+        <Highlight kospiHighLow={kospi?.newHighLow} kosdaqHighLow={kosdaq?.newHighLow} />
       </TabsContent>
       <TabsContent value="adr">
-        <Adr />
+        <Adr kospiAdr={kospi?.breadth} kosdaqAdr={kosdaq?.breadth} />
       </TabsContent>
     </Tabs>
   );
