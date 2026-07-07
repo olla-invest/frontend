@@ -1,4 +1,4 @@
-import { createContext, useContext, useState, useEffect, type ReactNode } from "react";
+import { createContext, useContext, useState, useEffect, useRef, type ReactNode } from "react";
 import { getMarketViewSummary } from "@/api/marketView";
 import type { MarketViewSummary } from "@/types/api/marketView";
 
@@ -23,10 +23,24 @@ interface MarketViewProviderProps {
   children: ReactNode;
 }
 
+// 오늘(이미 지났다면 내일) 오후 4:30까지 남은 밀리초를 계산
+function getMsUntilNext430PM() {
+  const now = new Date();
+  const target = new Date(now);
+  target.setHours(16, 30, 0, 0);
+
+  if (target.getTime() <= now.getTime()) {
+    target.setDate(target.getDate() + 1);
+  }
+
+  return target.getTime() - now.getTime();
+}
+
 export function MarketViewProvider({ children }: MarketViewProviderProps) {
-  const [marketData, setMarketData] = useState<null>(null);
+  const [marketData, setMarketData] = useState<MarketViewSummary | null>(null);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<Error | null>(null);
+  const timerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   const fetchData = async () => {
     setIsLoading(true);
@@ -46,5 +60,24 @@ export function MarketViewProvider({ children }: MarketViewProviderProps) {
     fetchData();
   }, []);
 
-  return <MarketViewContext.Provider value={{ marketData: marketData, isLoading, error, refetch: fetchData }}>{children}</MarketViewContext.Provider>;
+  // 매일 오후 4:30이 되면 자동으로 재요청
+  useEffect(() => {
+    const schedule = () => {
+      const ms = getMsUntilNext430PM();
+      timerRef.current = setTimeout(() => {
+        fetchData();
+        schedule(); // 실행 후 다음 날 4:30을 위해 재예약
+      }, ms);
+    };
+
+    schedule();
+
+    return () => {
+      if (timerRef.current) {
+        clearTimeout(timerRef.current);
+      }
+    };
+  }, []);
+
+  return <MarketViewContext.Provider value={{ marketData, isLoading, error, refetch: fetchData }}>{children}</MarketViewContext.Provider>;
 }
