@@ -14,6 +14,10 @@ import { getChartTableDetailData, getChartGraphDetailData } from "@/api/chartDet
 import { TablePagination } from "@/components/TablePagination";
 import DetailChartGraph from "./DetailChartGraph";
 
+//소켓
+import { getChartSocket } from "@/soket/chartSocket";
+import type { TickPayload, SnapshotPayload } from "@/soket/socketTypes";
+
 export default function DetailChart({ stockCode }: { stockCode: string }) {
   const [tableData, setTableData] = useState<TableDetail | null>(null);
   const [graphData, setGraphData] = useState<GraphDetail | null>(null);
@@ -26,6 +30,8 @@ export default function DetailChart({ stockCode }: { stockCode: string }) {
   const [minutClick, setMinutClick] = useState(0);
   const [minute, setMinute] = useState("30");
   const minutes = ["1", "3", "5", "10", "15", "30", "60"];
+
+  const [tick, setTick] = useState<TickPayload | SnapshotPayload | null>(null);
 
   const handleChartPeriod = () => {
     if (minutClick === 0) {
@@ -97,6 +103,19 @@ export default function DetailChart({ stockCode }: { stockCode: string }) {
   useEffect(() => {
     getDetailTable();
   }, [period]);
+
+  useEffect(() => {
+    const socket = getChartSocket();
+    socket.emit("subscribe", { stockCode });
+    socket.on("tick", setTick);
+    socket.on("snapshot", setTick);
+
+    return () => {
+      socket.emit("unsubscribe", { stockCode });
+      socket.off("tick");
+      socket.off("snapshot");
+    };
+  }, [stockCode]);
 
   const columns: ColumnDef<TableDetailItem>[] = [
     {
@@ -218,7 +237,7 @@ export default function DetailChart({ stockCode }: { stockCode: string }) {
           </DropdownMenu>
         </div>
 
-        <DetailChartGraph data={graphData?.candles ?? []} chartPeriod={chartPeriod} />
+        <DetailChartGraph data={graphData?.candles ?? []} chartPeriod={chartPeriod} tick={tick} interval={chartPeriod === "minute" ? Number(minute) : undefined} />
       </div>
 
       <div className="py-2">

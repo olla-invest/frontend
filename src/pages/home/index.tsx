@@ -7,6 +7,8 @@ import MyWatch from "./components/MyWatch";
 
 import { useAuthStore } from "@/store/useAuthStore";
 import { toast } from "sonner";
+import { MarketView } from "./components/MarketView";
+import { MarketViewProvider } from "./context/marketViewContext";
 
 type TabItem = {
   name: string;
@@ -15,6 +17,7 @@ type TabItem = {
 
 const tabs: TabItem[] = [
   { name: "실시간 차트", value: "liveChart" },
+  { name: "마켓뷰", value: "marketView" },
   { name: "🔥 이슈 테마", value: "issueTheme" },
   { name: "내 관심", value: "myWatch" },
 ];
@@ -76,6 +79,12 @@ const Home: React.FC = () => {
 
           <TabsContent value="liveChart" className="h-full pt-2">
             <LiveChart />
+          </TabsContent>
+
+          <TabsContent value="marketView" className="h-full overflow-auto pt-8">
+            <MarketViewProvider>
+              <MarketView />
+            </MarketViewProvider>
           </TabsContent>
 
           <TabsContent value="issueTheme" className="h-full overflow-y-auto pt-4">

@@ -9,6 +9,7 @@ import type { StockBasicDataResponse } from "@/types/api/chartDetails";
 import { isInWatchList, toggleWatchStockList } from "@/hooks/useToggleWatchList";
 import { useWatchStockListStore } from "@/store/WatchListStore";
 import type { StockDetailInfo } from "./stockDetailTypes";
+import { useLiveStore } from "@/store/liveChartStore";
 
 const BASE_URL = import.meta.env.VITE_API_BASE_URL;
 
@@ -35,6 +36,7 @@ interface LiveChartDetailContentProps {
 
 export default function LiveChartDetailContent({ detailInfo, variant = "modal" }: LiveChartDetailContentProps) {
   const [basicData, setBasicData] = useState<StockBasicDataResponse | null>();
+  const livePrice = useLiveStore((s) => s.prices[detailInfo.id]);
 
   const isPage = variant === "page";
   const horizontalPadding = isPage ? "px-4 sm:px-6" : "px-6";
@@ -100,6 +102,8 @@ export default function LiveChartDetailContent({ detailInfo, variant = "modal" }
     ];
   }, [basicData]);
 
+  const currentPrice = livePrice?.price ?? basicData?.currentPrice ?? detailInfo.currentPrice;
+
   return (
     <div className={isPage ? "py-4" : undefined}>
       <div className={`py-2 ${horizontalPadding} flex w-full flex-col gap-4 lg:flex-row lg:justify-between`}>
@@ -119,7 +123,7 @@ export default function LiveChartDetailContent({ detailInfo, variant = "modal" }
               </button>
             </div>
             <div className="flex flex-wrap gap-2 items-center">
-              <span className="text-2xl font-semibold">{detailInfo.currentPrice.toLocaleString()}원</span>
+              <span className="text-2xl font-semibold">{currentPrice?.toLocaleString()}원</span>
               {compareInfo && (
                 <div className="text-sm flex gap-1">
                   <span className="text-muted-foreground">전일 대비</span>
