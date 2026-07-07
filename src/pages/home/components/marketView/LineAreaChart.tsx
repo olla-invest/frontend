@@ -7,29 +7,40 @@ interface LineAreaChartProps {
   data: IndexCandle[];
 }
 
-// ✅ tradeTime/indexPrice가 아직 없는 데이터(undefined)는 걸러내고, 유효한 것만 변환
+// tradeTime/indexPrice가 아직 없는 데이터(undefined)는 걸러내고, 유효한 것만 변환
 const toAreaData = (data: IndexCandle[]) => {
-  return (
-    data
-      .map((d) => {
-        // tradeTime, indexPrice가 옵셔널 필드라 아직 없을 수 있음 (추후 API 추가 예정)
-        const rawTime = (d as { tradeTime?: string }).tradeTime;
-        const rawValue = (d as { indexPrice?: number }).indexPrice;
+  return data
+    .map((d) => {
+      const rawTime = (d as { tradeTime?: string }).tradeTime;
+      const rawValue = (d as { indexPrice?: number }).indexPrice;
 
-        const time = rawTime ? Math.floor(new Date(rawTime).getTime() / 1000) : NaN;
-        const value = rawValue;
+      let time = NaN;
+      if (rawTime) {
+        // "HH:mm" 형식 파싱 (예: "09:00")
+        const match = /^(\d{1,2}):(\d{2})$/.exec(rawTime);
+        if (match) {
+          const [, hh, mm] = match;
+          const now = new Date();
+          const d2 = new Date(now.getFullYear(), now.getMonth(), now.getDate(), Number(hh), Number(mm), 0, 0);
+          time = Math.floor(d2.getTime() / 1000);
+        } else {
+          // ISO 문자열 등 다른 포맷 대비 fallback
+          const parsed = new Date(rawTime).getTime();
+          time = Number.isFinite(parsed) ? Math.floor(parsed / 1000) : NaN;
+        }
+      }
 
-        return { time, value } as { time: number; value: number | undefined };
-      })
-      // ✅ time/value가 유효한(NaN 아니고 undefined 아닌) 데이터만 남김
-      .filter((item): item is { time: number; value: number } => Number.isFinite(item.time) && typeof item.value === "number" && Number.isFinite(item.value))
-      .map((item) => ({ time: item.time as UTCTimestamp, value: item.value }))
-      .sort((a, b) => Number(a.time) - Number(b.time))
-      .filter((item, index, arr) => {
-        if (index === 0) return true;
-        return item.time !== arr[index - 1].time; // 중복 time 제거
-      })
-  );
+      const value = rawValue;
+
+      return { time, value } as { time: number; value: number | undefined };
+    })
+    .filter((item): item is { time: number; value: number } => Number.isFinite(item.time) && typeof item.value === "number" && Number.isFinite(item.value))
+    .map((item) => ({ time: item.time as UTCTimestamp, value: item.value }))
+    .sort((a, b) => Number(a.time) - Number(b.time))
+    .filter((item, index, arr) => {
+      if (index === 0) return true;
+      return item.time !== arr[index - 1].time;
+    });
 };
 
 export default function LineAreaChart({ colorType, data }: LineAreaChartProps) {
@@ -83,7 +94,19 @@ export default function LineAreaChart({ colorType, data }: LineAreaChartProps) {
         vertLines: { visible: false },
         horzLines: { visible: false },
       },
+      crosshair: {
+        vertLine: {
+          visible: false,
+          labelVisible: false,
+        },
+        horzLine: {
+          visible: false,
+          labelVisible: false,
+        },
+      },
       width: containerRef.current.clientWidth,
+      handleScroll: false, // 드래그로 스크롤 안 되게
+      handleScale: false, // 휠/핀치로 확대축소 안 되게
       height: 56,
     });
 
@@ -91,6 +114,7 @@ export default function LineAreaChart({ colorType, data }: LineAreaChartProps) {
       ...chartColorMap(),
       lineWidth: 1,
       lineType: 2,
+      crosshairMarkerVisible: false,
     });
 
     areaSeries.setData(areaData);

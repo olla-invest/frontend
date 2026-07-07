@@ -95,16 +95,7 @@ interface signalMetaItem {
 }
 
 export interface IndexCandle {
-  tradeDate: string;
-  open: number;
-  high: number;
-  low: number;
-  close: number;
-  change: number | null;
-  changeRate: number | null;
-  volume: string;
-
-  tradeTime: string | number;
+  tradeTime: string;
   indexPrice: number;
 }
 
