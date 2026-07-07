@@ -10,9 +10,9 @@ const getCardLabel = (marketState: string) => {
     case "압박받는 상승 중":
       return "bg-slate-50 text-slate-700";
     case "안정적으로 상승중":
-      return "bg-blue-50 text-blue-500";
-    case "조정 중":
       return "bg-rose-50 text-rose-500";
+    case "조정 중":
+      return "bg-blue-50 text-blue-500";
     default:
       return "bg-slate-50 text-slate-700";
   }
@@ -25,9 +25,9 @@ const getCardDot = (marketState: string) => {
     case "압박받는 상승 중":
       return "bg-slate-500";
     case "안정적으로 상승중":
-      return "bg-blue-500";
-    case "조정 중":
       return "bg-rose-500";
+    case "조정 중":
+      return "bg-blue-500";
     default:
       return "bg-slate-500";
   }
