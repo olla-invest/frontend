@@ -9,7 +9,7 @@ export default function HighLow({ kospiHighLow, kosdaqHighLow }: { kospiHighLow:
     if (value > 0) {
       return { color: "rose", barColor: "bg-linear-to-r from-slate-200 to-rose-500" };
     } else if (value < 0) {
-      return { color: "blue", barColor: "bg-linear-to-r from-slate-200 to-blue-500" };
+      return { color: "blue", barColor: "bg-linear-to-r from-blue-500 to-slate-200" };
     } else {
       return { color: "slate", barColor: "bg-linear-to-r from-slate-200 to-slate-500" };
     }
@@ -40,7 +40,7 @@ export default function HighLow({ kospiHighLow, kosdaqHighLow }: { kospiHighLow:
     },
   ];
 
-  const GRAPH_MAX = 50;
+  const GRAPH_MAX = totalNewHigh + totalNewLow;
 
   const getGraphWidth = (value: number) => {
     const ratio = Math.min(Math.abs(value) / GRAPH_MAX, 1);
@@ -71,14 +71,14 @@ export default function HighLow({ kospiHighLow, kosdaqHighLow }: { kospiHighLow:
       <div className="flex flex-col gap-2">
         <div className="w-full h-8 relative overflow-hidden rounded-md bg-slate-200">
           {/* 중앙 기준선 */}
-          <div className="absolute top-0 left-1/2 w-px h-full bg-slate-400 z-10" />
+          <div className="absolute top-0 left-1/2 w-px h-full z-10" />
 
           {!isZero && (
             <div
               className={`absolute top-0 h-full ${netColors.barColor} flex items-center transition-all`}
               style={isPositive ? { left: "50%", width: `${netWidth}%` } : { right: "50%", width: `${netWidth}%` }}
             >
-              <span className={`absolute top-1/2 -translate-y-1/2 text-sm text-white ${isPositive ? "right-1" : "left-1"}`}>{isPositive ? `+${netValue}` : netValue}</span>
+              <span className={`font-medium absolute top-1/2 -translate-y-1/2 text-sm text-white ${isPositive ? "right-2" : "left-2"}`}>{isPositive ? `+${netValue}` : netValue}</span>
             </div>
           )}
         </div>
