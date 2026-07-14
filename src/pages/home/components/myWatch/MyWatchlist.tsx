@@ -28,10 +28,10 @@ export default function MyWatchlist({ item, bookmarks, handleStockModal, handleT
             <span className="truncate text-sm font-semibold">{item.companyName}</span>
           </div>
           <div className="flex flex-col text-sm items-end py-1">
-            <span className="text-slate-800 font-semibold">{item.closePrice.toLocaleString()}원</span>
+            <span className="text-slate-800 font-semibold">{item.closePrice ? item.closePrice.toLocaleString() : "-"}원</span>
             <span className={`text-xs ${item.priceChange1d > 0 ? "text-rose-500" : "text-blue-500"}`}>
               {item.priceChange1d > 0 ? "+" + item.priceChange1d?.toLocaleString() : item.priceChange1d?.toLocaleString()}원{" "}
-              {item.priceChange1d > 0 ? "+" + item.priceChangeRate1d.toFixed(1) : item.priceChangeRate1d.toFixed(1)}%
+              {item.priceChange1d > 0 ? "+" + item.priceChangeRate1d?.toFixed(1) : item.priceChangeRate1d?.toFixed(1)}%
             </span>
           </div>
         </div>
@@ -44,9 +44,9 @@ export default function MyWatchlist({ item, bookmarks, handleStockModal, handleT
             <span className="truncate text-sm font-semibold">{item.themeName}</span>
           </div>
           <div className="flex gap-2 text-slate-700 text-sm items-center">
-            <span>{item.totalCount}개 중</span>
+            <span>{item.totalCount ?? "-"}개 중</span>
             <span>
-              <span className="text-rose-500">{item.upCount}</span>
+              <span className="text-rose-500">{item.upCount ?? "-"}</span>
               상승
             </span>
           </div>
