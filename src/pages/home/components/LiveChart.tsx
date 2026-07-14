@@ -42,6 +42,7 @@ import LiveChartDetail from "./liveChart/LiveChartDetail";
 import { getStockDetailUrl, openStockDetailInNewTab, resolveStockDetailPageTarget, type StockDetailOpenMode, type StockDetailPageTarget } from "./liveChart/stockDetailTypes";
 import { useIsMobile } from "@/hooks/use-mobile";
 import { popFilterFromSession, saveFilterForDetailNav } from "@/utils/filterStorage";
+import { InputGroup, InputGroupAddon, InputGroupInput } from "@/components/ui/input-group";
 
 /* page: 상세 정보 페이지 모드 | modal: 상세 정보 모달 모드 */
 const STOCK_DETAIL_OPEN_MODE: StockDetailOpenMode = "page";
@@ -219,7 +220,19 @@ const columns: ColumnDef<StockRankingApiItem>[] = [
   },
   {
     id: "investmentIndicatorsDtl",
-    header: () => <div className="text-right min-w-32">투자 주요지표</div>,
+    header: () => (
+      <div className="text-right min-w-32 flex gap-1 items-center justify-end">
+        투자 주요지표
+        <Dialog>
+          <DialogTrigger asChild>
+            <i className="icon icon-info-gray" />
+          </DialogTrigger>
+          <DialogContent className="w-full sm:max-w-lg md:max-w-2xl">
+            <InvestmentIndicatorGuide />
+          </DialogContent>
+        </Dialog>
+      </div>
+    ),
     cell: ({ row }) => <div className="text-right">{renderIndicators(row)}</div>,
   },
   {
@@ -309,6 +322,10 @@ export function LiveChart() {
   //페이지 네이션 (데스크톱)
   const [page, setPage] = useState(1); // 1-based
   const [pageSize, setPageSize] = useState(DESKTOP_DEFAULT_PAGE_SIZE);
+  //정렬 기준
+  const [sortOption, setSortOption] = useState("RS 점수 높은 순");
+  //검색어
+  const [search, setSearch] = useState("");
 
   //로딩 상태관리
   const [loading, setLoading] = useState(true);
@@ -513,17 +530,62 @@ export function LiveChart() {
             <span className="text-sm">전체 {tableData?.totalCount?.toLocaleString() ?? 0}건</span>
           </div>
           <div className="flex gap-2 items-center max-h-8">
-            <Dialog>
-              <DialogTrigger asChild>
+            <InputGroup className="h-8 w-80">
+              <InputGroupAddon align="inline-start" className="mr-0!">
+                <button
+                  type="button"
+                  onClick={() => {
+                    setSearch("");
+                  }}
+                  className="cursor-pointer mb-1"
+                >
+                  <i className="icon icon-search" />
+                </button>
+              </InputGroupAddon>
+              <InputGroupInput
+                placeholder="종목명을 입력해주세요."
+                onChange={(e) => {
+                  setSearch(e.target.value);
+                }}
+                value={search}
+              />
+              {search.length > 0 && (
+                <InputGroupAddon align="inline-end" className="mr-0!">
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setSearch("");
+                    }}
+                    className="cursor-pointer mb-1"
+                  >
+                    <i className="icon icon-circle-x" />
+                  </button>
+                </InputGroupAddon>
+              )}
+            </InputGroup>
+            <DropdownMenu>
+              <DropdownMenuTrigger asChild>
                 <Button variant="outline" size="sm">
-                  <i className="icon icon-info" />
-                  투자 주요지표 안내
+                  RS점수 높은 순
+                  <ChevronDown />
                 </Button>
-              </DialogTrigger>
-              <DialogContent className="w-full sm:max-w-lg md:max-w-2xl">
-                <InvestmentIndicatorGuide />
-              </DialogContent>
-            </Dialog>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent align="end">
+                <DropdownMenuGroup>
+                  {["RS점수 높은 순", "등락률 높은 순", "등락률 낮은 순", "거래대금 많은 순", "거래대금 적은 순", "순위변동 높은 순", "순위변동 낮은 순"].map((option) => (
+                    <DropdownMenuCheckboxItem
+                      key={option}
+                      checked={sortOption === option}
+                      onCheckedChange={() => {
+                        setSortOption(option);
+                      }}
+                    >
+                      {option}
+                    </DropdownMenuCheckboxItem>
+                  ))}
+                </DropdownMenuGroup>
+              </DropdownMenuContent>
+            </DropdownMenu>
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
                 <Button variant="outline" size="sm">

@@ -1,7 +1,6 @@
 import { useState, useEffect, useCallback, useRef } from "react";
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Button } from "@/components/ui/button";
-import { ButtonGroup, ButtonGroupText } from "@/components/ui/button-group";
 import { Input } from "@/components/ui/input";
 import {
   DropdownMenu,
@@ -36,6 +35,37 @@ interface ChartFilterProps {
   onSearch: (filter: ChartFilterState) => void;
 }
 
+// RS 기간 프리셋 (영업일 기준)
+const RS_PERIOD_PRESETS = [
+  { key: "1w", label: "1주일", days: 5 },
+  { key: "1m", label: "1개월", days: 21 },
+  { key: "3m", label: "3개월", days: 63 },
+  { key: "12m", label: "12개월", days: 252 },
+  { key: "custom", label: "직접 설정", days: null },
+] as const;
+
+type RsPresetKey = (typeof RS_PERIOD_PRESETS)[number]["key"];
+
+//거래대금 프리셋
+const PRICE_PRESETS = [
+  { value: 1000000000, label: "10억" },
+  { value: 5000000000, label: "50억" },
+  { value: 10000000000, label: "100억" },
+  { value: 30000000000, label: "300억" },
+  { value: 50000000000, label: "500억" },
+  { value: 100000000000, label: "1000억" },
+];
+
+function buildPresetPeriod(days: number): RSPeriod[] {
+  return [
+    {
+      id: uuid(),
+      date: getDefaultRSRange(days),
+      ratio: 100,
+    },
+  ];
+}
+
 function getThemeLabel(themes: ({ code: number; name: string } | null)[]) {
   const validThemes = themes.filter(Boolean) as { code: number; name: string }[];
 
@@ -47,6 +77,24 @@ function getThemeLabel(themes: ({ code: number; name: string } | null)[]) {
 function getHighPriceLabel(value: { value: string; name: string } | null) {
   if (!value) return "전체";
   return value.name;
+}
+
+/**
+ * 실제로 조회까지 적용된 거래대금 값이 있을 때만 라벨을 보여준다.
+ * 프리셋과 값이 일치하면 프리셋 라벨("10억" 등)을, 아니면 직접 입력한 숫자를 "원" 단위로 보여준다.
+ */
+function getPriceLabel(price: number | null) {
+  if (price === null || price === undefined) return null;
+  const preset = PRICE_PRESETS.find((p) => p.value === price);
+  if (preset) return preset.label;
+  return `${price.toLocaleString()}원`;
+}
+
+/** 실제로 적용(조회)된 RS 값이 있을 때만 프리셋 라벨을 보여준다. 없으면 null(=전체 취급). */
+function getRsLabel(rs: RSFilterValue[] | null, presetKey: RsPresetKey | null) {
+  if (!rs || rs.length === 0) return null;
+  const preset = RS_PERIOD_PRESETS.find((p) => p.key === presetKey);
+  return preset?.label ?? RS_PERIOD_PRESETS.find((p) => p.key === "custom")!.label;
 }
 
 const formatWithComma = (value: string) => value.replace(/\B(?=(\d{3})+(?!\d))/g, ",");
@@ -75,6 +123,9 @@ export default function ChartFilter(props: ChartFilterProps) {
   const filterSetter = props.setFilter;
   const [priceInput, setPriceInput] = useState(DEFAULT_PRICE_INPUT);
   const [priceChange, setPriceChange] = useState(false);
+  const [priceOpen, setPriceOpen] = useState(false);
+  // 실제로 "조회" 버튼을 눌러 반영된 거래대금 값만 추적한다. (입력/프리셋 클릭만으로는 갱신하지 않음)
+  const [committedPrice, setCommittedPrice] = useState<number | null>(null);
   const [rsOpen, setRsOpen] = useState(false);
 
   const [mobileRsOpen, setMobileRsOpen] = useState(false);
@@ -90,6 +141,24 @@ export default function ChartFilter(props: ChartFilterProps) {
       ratio: 100,
     },
   ]);
+  const [rsPresetKey, setRsPresetKey] = useState<RsPresetKey>("3m");
+
+  // (직접입력은 조회 버튼을 눌러야 반영되므로, 버튼 라벨이 미리 바뀌는 걸 방지)
+  const [committedRsPresetKey, setCommittedRsPresetKey] = useState<RsPresetKey | null>(null);
+
+  // 프리셋 변경 핸들러
+  const handleRsPresetChange = (key: string) => {
+    const nextKey = key as RsPresetKey;
+    setRsPresetKey(nextKey);
+
+    const preset = RS_PERIOD_PRESETS.find((p) => p.key === nextKey);
+    if (!preset || preset.days === null) return;
+
+    const periods = buildPresetPeriod(preset.days);
+    setRsPeriods(periods);
+    commitRsFilter(periods, true);
+    setCommittedRsPresetKey(nextKey);
+  };
 
   const convertRsToPeriods = (rs: RSFilterValue[]): RSPeriod[] =>
     rs.map((item) => ({
@@ -102,6 +171,7 @@ export default function ChartFilter(props: ChartFilterProps) {
     }));
 
   const [draftRsPeriods, setDraftRsPeriods] = useState<RSPeriod[]>(rsPeriods);
+  const [mobileRsPresetKey, setMobileRsPresetKey] = useState<RsPresetKey>("3m");
   const [draftFilters, setDraftFilters] = useState<MobileFilterDraft>({
     isHighPrice: null,
     theme: [],
@@ -109,6 +179,16 @@ export default function ChartFilter(props: ChartFilterProps) {
     priceInput: DEFAULT_PRICE_INPUT,
     priceChange: false,
   });
+
+  const handleMobileRsPresetChange = (key: string) => {
+    const nextKey = key as RsPresetKey;
+    setMobileRsPresetKey(nextKey);
+
+    const preset = RS_PERIOD_PRESETS.find((p) => p.key === nextKey);
+    if (!preset || preset.days === null) return;
+
+    setDraftRsPeriods(buildPresetPeriod(preset.days));
+  };
 
   const createFilterDraft = useCallback(
     (): MobileFilterDraft => ({
@@ -130,6 +210,7 @@ export default function ChartFilter(props: ChartFilterProps) {
 
   const openMobileRs = () => {
     setDraftRsPeriods(filterValue.rs ? convertRsToPeriods(filterValue.rs) : draftRsPeriods);
+    setMobileRsPresetKey(rsPresetKey);
     setMobileRsOpen(true);
   };
 
@@ -147,6 +228,7 @@ export default function ChartFilter(props: ChartFilterProps) {
   const applyMobileFilters = () => {
     setPriceInput(draftFilters.priceInput);
     setPriceChange(draftFilters.priceChange);
+    setCommittedPrice(draftFilters.price ?? null);
     const nextFilter: ChartFilterState = {
       ...props.filter,
       isHighPrice: draftFilters.isHighPrice,
@@ -202,27 +284,60 @@ export default function ChartFilter(props: ChartFilterProps) {
       <DropdownMenu open={rsOpen} onOpenChange={setRsOpen}>
         <DropdownMenuTrigger asChild>
           <Button variant="outline" className={filterTriggerClass(!!filterValue.rs)}>
-            RS 상세설정 <ChevronDown />
+            RS 기준
+            {getRsLabel(filterValue.rs, committedRsPresetKey) && (
+              <>
+                <div className="size-0.5 bg-muted-foreground rounded-full" />
+                <span className="text-muted-foreground">{getRsLabel(filterValue.rs, committedRsPresetKey)}</span>
+              </>
+            )}
+            <ChevronDown />
           </Button>
         </DropdownMenuTrigger>
         <DropdownMenuContent className="w-93.75 p-0" align="start">
           <DropdownMenuGroup>
-            <DropdownMenuLabel className="border-b p-4">
-              <div className="text-base font-medium mb-2">RS 상세 설정</div>
-              <div className="text-sm text-muted-foreground">시장 대비 강도 기간 및 비중을 설정할 수 있습니다.</div>
+            <DropdownMenuLabel className="border-b p-1">
+              <div className="text-sm px-2 py-1.5 font-medium">RS 기준</div>
             </DropdownMenuLabel>
 
-            <RSSetting value={rsPeriods} onChange={setRsPeriods} />
-            <div className="p-4 text-right">
-              <Button
-                onClick={() => {
-                  commitRsFilter(rsPeriods, false);
-                  setRsOpen(false);
-                }}
-              >
-                적용
-              </Button>
+            <div className="px-2 py-1.5 flex flex-col gap-1">
+              <DropdownMenuRadioGroup value={rsPresetKey} onValueChange={handleRsPresetChange}>
+                {RS_PERIOD_PRESETS.map((preset) => (
+                  <DropdownMenuRadioItem
+                    key={preset.key}
+                    value={preset.key}
+                    onSelect={(e) => {
+                      // "직접입력"을 선택했을 때는 드롭다운이 자동으로 닫히지 않도록 막음
+                      if (preset.key === "custom") {
+                        e.preventDefault();
+                      }
+                    }}
+                  >
+                    {preset.label}
+                  </DropdownMenuRadioItem>
+                ))}
+              </DropdownMenuRadioGroup>
             </div>
+
+            {rsPresetKey === "custom" && (
+              <div className="px-3 pt-0">
+                <RSSetting value={rsPeriods} onChange={setRsPeriods} />
+              </div>
+            )}
+
+            {rsPresetKey === "custom" && (
+              <div className="p-4 text-right">
+                <Button
+                  onClick={() => {
+                    commitRsFilter(rsPeriods, true);
+                    setCommittedRsPresetKey("custom");
+                    setRsOpen(false);
+                  }}
+                >
+                  조회
+                </Button>
+              </div>
+            )}
           </DropdownMenuGroup>
         </DropdownMenuContent>
       </DropdownMenu>
@@ -231,24 +346,27 @@ export default function ChartFilter(props: ChartFilterProps) {
         <DropdownMenuTrigger asChild>
           <Button variant="outline" className={filterTriggerClass(!!filterValue.isHighPrice)}>
             신고가 여부 <div className="size-0.5 bg-muted-foreground rounded-full" />
-            <span className="text-primary">{getHighPriceLabel(filterValue.isHighPrice)}</span> <ChevronDown />
+            <span className="text-muted-foreground">{getHighPriceLabel(filterValue.isHighPrice)}</span> <ChevronDown />
           </Button>
         </DropdownMenuTrigger>
 
         <DropdownMenuContent className="w-52 p-0" align="start">
           <DropdownMenuLabel className="border-b p-1">
-            <div className="px-2 py-1.5">신고가 여부</div>
+            <div className="px-2 py-1.5 text-sm font-medium">신고가 여부</div>
           </DropdownMenuLabel>
 
           <DropdownMenuRadioGroup
             value={filterValue.isHighPrice?.value ?? "all"}
             onValueChange={(value) => {
+              let nextFilter: ChartFilterState;
               if (value === "all") {
-                filterSetter((prev) => ({ ...prev, isHighPrice: null }));
-                return;
+                nextFilter = { ...props.filter, isHighPrice: null };
+              } else {
+                const selected = HIGH_PRICE_OPTIONS.find((o) => o.value === value);
+                nextFilter = { ...props.filter, isHighPrice: selected ?? null };
               }
-              const selected = HIGH_PRICE_OPTIONS.find((o) => o.value === value);
-              filterSetter((prev) => ({ ...prev, isHighPrice: selected ?? null }));
+              filterSetter(nextFilter);
+              props.onSearch(nextFilter);
             }}
           >
             <div className="px-2 py-1.5 flex flex-col gap-1">
@@ -268,18 +386,25 @@ export default function ChartFilter(props: ChartFilterProps) {
           <Button variant="outline" className={filterTriggerClass(filterValue.theme.length !== 0)}>
             테마
             <div className="size-0.5 bg-muted-foreground rounded-full" />
-            <span className="text-primary">{getThemeLabel(filterValue.theme)}</span> <ChevronDown />
+            <span className="text-muted-foreground">{getThemeLabel(filterValue.theme)}</span> <ChevronDown />
           </Button>
         </DropdownMenuTrigger>
 
         <DropdownMenuContent className="w-52 p-0" align="start">
           <DropdownMenuGroup>
             <DropdownMenuLabel className="border-b p-1">
-              <div className="px-2 py-1.5">테마</div>
+              <div className="px-2 py-1.5 text-sm font-medium">테마</div>
             </DropdownMenuLabel>
 
             <div className="px-2 py-1.5 flex flex-col gap-1 max-h-62.5 overflow-y-auto">
-              <DropdownMenuCheckboxItem checked={filterValue.theme.length === 0} onCheckedChange={() => filterSetter((prev) => ({ ...prev, theme: [] }))}>
+              <DropdownMenuCheckboxItem
+                checked={filterValue.theme.length === 0}
+                onCheckedChange={() => {
+                  const nextFilter: ChartFilterState = { ...props.filter, theme: [] };
+                  filterSetter(nextFilter);
+                  props.onSearch(nextFilter);
+                }}
+              >
                 전체
               </DropdownMenuCheckboxItem>
 
@@ -290,19 +415,19 @@ export default function ChartFilter(props: ChartFilterProps) {
                     key={theme.themeCode}
                     checked={checked}
                     onCheckedChange={(isChecked) => {
-                      filterSetter((prev) => ({
-                        ...prev,
-                        theme: isChecked
-                          ? [
-                              ...prev.theme,
-                              {
-                                code: theme.themeCode,
-                                name: theme.themeName,
-                                description: "",
-                              },
-                            ]
-                          : prev.theme.filter((t) => t?.code !== theme.themeCode),
-                      }));
+                      const nextTheme = isChecked
+                        ? [
+                            ...filterValue.theme,
+                            {
+                              code: theme.themeCode,
+                              name: theme.themeName,
+                              description: "",
+                            },
+                          ]
+                        : filterValue.theme.filter((t) => t?.code !== theme.themeCode);
+                      const nextFilter: ChartFilterState = { ...props.filter, theme: nextTheme };
+                      filterSetter(nextFilter);
+                      props.onSearch(nextFilter);
                     }}
                   >
                     {theme.themeName}
@@ -314,49 +439,113 @@ export default function ChartFilter(props: ChartFilterProps) {
         </DropdownMenuContent>
       </DropdownMenu>
 
-      <ButtonGroup>
-        <ButtonGroupText className="bg-white text-foreground shrink-0">거래대금</ButtonGroupText>
-        <Input
-          className={`${priceChange ? "text-foreground" : "text-muted-foreground"} text-right min-w-35 shrink-0`}
-          placeholder="금액을 입력해 주세요"
-          inputMode="numeric"
-          pattern="[0-9]*"
-          value={priceInput}
-          onChange={(e) => {
-            setPriceChange(true);
-            const raw = e.target.value.replace(/[^0-9]/g, "");
-            const formatted = formatWithComma(raw);
-            setPriceInput(formatted);
-            filterSetter((prev) => ({
-              ...prev,
-              price: raw === "" ? null : Number(raw),
-            }));
-          }}
-        />
-        <ButtonGroupText className="bg-white text-foreground">원</ButtonGroupText>
-      </ButtonGroup>
+      <DropdownMenu open={priceOpen} onOpenChange={setPriceOpen}>
+        <DropdownMenuTrigger asChild>
+          <Button variant="outline" className={filterTriggerClass(committedPrice !== null)}>
+            거래 대금
+            {getPriceLabel(committedPrice) && (
+              <>
+                <div className="size-0.5 bg-muted-foreground rounded-full" />
+                <span className="text-muted-foreground">{getPriceLabel(committedPrice)}</span>
+              </>
+            )}
+            <ChevronDown />
+          </Button>
+        </DropdownMenuTrigger>
+
+        <DropdownMenuContent className="w-93.75 p-0" align="start">
+          <DropdownMenuLabel className="border-b p-1">
+            <div className="px-2 py-1.5 text-sm font-medium">거래 대금</div>
+          </DropdownMenuLabel>
+          <div className="flex flex-col p-3 gap-4">
+            <Input
+              className={`${priceChange ? "text-foreground" : "text-muted-foreground"} min-w-35 shrink-0`}
+              placeholder="금액을 입력해 주세요"
+              inputMode="numeric"
+              pattern="[0-9]*"
+              value={priceInput}
+              onChange={(e) => {
+                setPriceChange(true);
+                const raw = e.target.value.replace(/[^0-9]/g, "");
+                const formatted = formatWithComma(raw);
+                setPriceInput(formatted);
+                filterSetter((prev) => ({
+                  ...prev,
+                  price: raw === "" ? null : Number(raw),
+                }));
+              }}
+            />
+            <div className="grid grid-cols-3 gap-2">
+              {PRICE_PRESETS.map((preset) => (
+                <Button
+                  key={preset.value}
+                  variant="secondary"
+                  className="cursor-pointer shadow-xs"
+                  onClick={() => {
+                    setPriceChange(true);
+                    const raw = preset.value.toString();
+                    setPriceInput(formatWithComma(raw));
+                    filterSetter((prev) => ({
+                      ...prev,
+                      price: preset.value,
+                    }));
+                  }}
+                >
+                  {preset.label}
+                </Button>
+              ))}
+            </div>
+            <div className="flex justify-end">
+              <Button
+                className="w-fit cursor-pointer"
+                onClick={() => {
+                  props.onSearch({ ...props.filter });
+                  setCommittedPrice(props.filter.price ?? null);
+                  setPriceOpen(false);
+                }}
+              >
+                조회
+              </Button>
+            </div>
+          </div>
+        </DropdownMenuContent>
+      </DropdownMenu>
     </>
   );
 
   const renderMobileFilterButtons = () => (
     <>
       <Button type="button" variant="outline" className={filterTriggerClass(!!filterValue.rs)} onClick={openMobileRs}>
-        RS 상세설정 <ChevronDown />
+        RS 기준
+        {getRsLabel(filterValue.rs, committedRsPresetKey) && (
+          <>
+            <div className="size-0.5 bg-muted-foreground rounded-full" />
+            <span className="text-muted-foreground">{getRsLabel(filterValue.rs, committedRsPresetKey)}</span>
+          </>
+        )}
+        <ChevronDown />
       </Button>
 
       <Button type="button" variant="outline" className={filterTriggerClass(!!filterValue.isHighPrice)} onClick={() => openMobileFilters("highPrice")}>
         신고가 여부 <div className="size-0.5 bg-muted-foreground rounded-full" />
-        <span className="text-primary">{getHighPriceLabel(filterValue.isHighPrice)}</span> <ChevronDown />
+        <span className="text-muted-foreground">{getHighPriceLabel(filterValue.isHighPrice)}</span> <ChevronDown />
       </Button>
 
       <Button type="button" variant="outline" className={filterTriggerClass(filterValue.theme.length !== 0)} onClick={() => openMobileFilters("theme")}>
         테마
         <div className="size-0.5 bg-muted-foreground rounded-full" />
-        <span className="text-primary">{getThemeLabel(filterValue.theme)}</span> <ChevronDown />
+        <span className="text-muted-foreground">{getThemeLabel(filterValue.theme)}</span> <ChevronDown />
       </Button>
 
-      <Button type="button" variant="outline" className={filterTriggerClass(!!filterValue.price || priceChange)} onClick={() => openMobileFilters("price")}>
-        거래대금 <ChevronDown />
+      <Button type="button" variant="outline" className={filterTriggerClass(committedPrice !== null)} onClick={() => openMobileFilters("price")}>
+        거래대금
+        {getPriceLabel(committedPrice) && (
+          <>
+            <div className="size-0.5 bg-muted-foreground rounded-full" />
+            <span className="text-muted-foreground">{getPriceLabel(committedPrice)}</span>
+          </>
+        )}
+        <ChevronDown />
       </Button>
     </>
   );
@@ -370,10 +559,8 @@ export default function ChartFilter(props: ChartFilterProps) {
           value={filterValue.market}
           onValueChange={(value) => {
             const nextFilter: ChartFilterState = { ...props.filter, market: value };
-            filterSetter((prev) => ({ ...prev, market: value }));
-            if (isMobile) {
-              props.onSearch(nextFilter);
-            }
+            filterSetter(nextFilter);
+            props.onSearch(nextFilter);
           }}
           className="w-full flex-1 md:flex-none md:w-fit "
         >
@@ -384,13 +571,7 @@ export default function ChartFilter(props: ChartFilterProps) {
           </TabsList>
         </Tabs>
 
-        <div className="flex gap-2 overflow-x-auto md:flex-wrap">
-          {isMobile ? renderMobileFilterButtons() : renderDesktopFilters()}
-
-          <Button type="button" variant="outline" className="text-primary hidden md:block" onClick={() => props.onSearch({ ...props.filter })}>
-            조회
-          </Button>
-        </div>
+        <div className="flex gap-2 overflow-x-auto md:flex-wrap">{isMobile ? renderMobileFilterButtons() : renderDesktopFilters()}</div>
       </form>
 
       {isMobile && (
@@ -398,16 +579,38 @@ export default function ChartFilter(props: ChartFilterProps) {
           <ChartFilterBottomSheet
             open={mobileRsOpen}
             onOpenChange={(open) => {
-              if (!open) setDraftRsPeriods(rsPeriods);
+              if (!open) {
+                setDraftRsPeriods(rsPeriods);
+                setMobileRsPresetKey(rsPresetKey);
+              }
               setMobileRsOpen(open);
             }}
             height={90}
-            title="RS 상세 설정"
+            title="RS 기준"
             description="시장 대비 강도 기간 및 비중을 설정할 수 있습니다."
-            onCancel={() => setDraftRsPeriods(rsPeriods)}
-            onApply={() => commitRsFilter(draftRsPeriods, true)}
+            onCancel={() => {
+              setDraftRsPeriods(rsPeriods);
+              setMobileRsPresetKey(rsPresetKey);
+            }}
+            onApply={() => {
+              setRsPresetKey(mobileRsPresetKey);
+              commitRsFilter(draftRsPeriods, true);
+              setCommittedRsPresetKey(mobileRsPresetKey);
+            }}
           >
-            <RSSetting value={draftRsPeriods} onChange={setDraftRsPeriods} isOnModal />
+            <div className="p-4 border-b">
+              <Tabs value={mobileRsPresetKey} onValueChange={handleMobileRsPresetChange}>
+                <TabsList className="w-full flex-wrap h-auto">
+                  {RS_PERIOD_PRESETS.map((preset) => (
+                    <TabsTrigger key={preset.key} value={preset.key} className="flex-1">
+                      {preset.label}
+                    </TabsTrigger>
+                  ))}
+                </TabsList>
+              </Tabs>
+            </div>
+
+            {mobileRsPresetKey === "custom" && <RSSetting value={draftRsPeriods} onChange={setDraftRsPeriods} isOnModal />}
           </ChartFilterBottomSheet>
 
           <ChartFilterBottomSheet
