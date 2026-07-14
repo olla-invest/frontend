@@ -26,6 +26,7 @@ import { Badge } from "@/components/ui/badge";
 import { Dialog, DialogContent, DialogTrigger } from "@/components/ui/dialog";
 import { DropdownMenu, DropdownMenuCheckboxItem, DropdownMenuContent, DropdownMenuGroup, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
+import { InputGroup, InputGroupAddon, InputGroupInput } from "@/components/ui/input-group";
 
 import type { StockRankingApiResponse, StockRankingApiItem } from "@/types/api/stocks";
 import type { GetRealTimeChartRequest } from "@/api/stocks";
@@ -42,7 +43,7 @@ import LiveChartDetail from "./liveChart/LiveChartDetail";
 import { getStockDetailUrl, openStockDetailInNewTab, resolveStockDetailPageTarget, type StockDetailOpenMode, type StockDetailPageTarget } from "./liveChart/stockDetailTypes";
 import { useIsMobile } from "@/hooks/use-mobile";
 import { popFilterFromSession, saveFilterForDetailNav } from "@/utils/filterStorage";
-import { InputGroup, InputGroupAddon, InputGroupInput } from "@/components/ui/input-group";
+import ChartFilterMobileSearch from "./liveChart/ChartFilterMobileSearch";
 
 /* page: 상세 정보 페이지 모드 | modal: 상세 정보 모달 모드 */
 const STOCK_DETAIL_OPEN_MODE: StockDetailOpenMode = "page";
@@ -612,6 +613,8 @@ export function LiveChart() {
             </DropdownMenu>
           </div>
         </div>
+
+        {isMobile && <ChartFilterMobileSearch />}
         <div className="flex flex-col gap-4 justify-between bg-white pt-4 shrink-0">
           <Table className={`${isMobile ? "w-full" : "min-w-max"}`}>
             <TableHeader className="bg-white shadow-[0_1px_0_0_rgba(0,0,0,0.1)]">

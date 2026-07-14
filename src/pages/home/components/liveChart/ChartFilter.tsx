@@ -24,6 +24,8 @@ import { useIsMobile } from "@/hooks/use-mobile";
 import ChartFilterBottomSheet from "./ChartFilterBottomSheet";
 import ChartFilterMobilePanels, { type MobileFilterDraft, type MobileFilterTab } from "./ChartFilterMobilePanels";
 
+import { FilterCheckMenuItem } from "./ChartFilterMobilePanels";
+
 interface ChartFilterProps {
   filter: ChartFilterState;
   themeList?: {
@@ -573,7 +575,6 @@ export default function ChartFilter(props: ChartFilterProps) {
 
         <div className="flex gap-2 overflow-x-auto md:flex-wrap">{isMobile ? renderMobileFilterButtons() : renderDesktopFilters()}</div>
       </form>
-
       {isMobile && (
         <>
           <ChartFilterBottomSheet
@@ -598,19 +599,19 @@ export default function ChartFilter(props: ChartFilterProps) {
               setCommittedRsPresetKey(mobileRsPresetKey);
             }}
           >
-            <div className="p-4 border-b">
-              <Tabs value={mobileRsPresetKey} onValueChange={handleMobileRsPresetChange}>
-                <TabsList className="w-full flex-wrap h-auto">
-                  {RS_PERIOD_PRESETS.map((preset) => (
-                    <TabsTrigger key={preset.key} value={preset.key} className="flex-1">
-                      {preset.label}
-                    </TabsTrigger>
-                  ))}
-                </TabsList>
-              </Tabs>
+            <div className="px-2 py-1.5 flex flex-col gap-1" role="radiogroup" aria-label="RS 기준">
+              {RS_PERIOD_PRESETS.map((preset) => (
+                <FilterCheckMenuItem key={preset.key} role="radio" selected={mobileRsPresetKey === preset.key} onClick={() => handleMobileRsPresetChange(preset.key)}>
+                  {preset.label}
+                </FilterCheckMenuItem>
+              ))}
             </div>
 
-            {mobileRsPresetKey === "custom" && <RSSetting value={draftRsPeriods} onChange={setDraftRsPeriods} isOnModal />}
+            {mobileRsPresetKey === "custom" && (
+              <div className="px-3 pt-0">
+                <RSSetting value={draftRsPeriods} onChange={setDraftRsPeriods} isOnModal />
+              </div>
+            )}
           </ChartFilterBottomSheet>
 
           <ChartFilterBottomSheet
