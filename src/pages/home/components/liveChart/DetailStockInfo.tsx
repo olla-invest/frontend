@@ -50,9 +50,12 @@ export default function DetailStockInfo({ stockCode }: Props) {
     return `${date.slice(0, 4)}-${date.slice(4, 6)}-${date.slice(6, 8)}`;
   };
 
+  const themeNames =
+    detailInfo?.overview?.themes && detailInfo?.overview?.themes?.length > 0 ? detailInfo?.overview.themes?.map((theme) => theme.themeName).join(" / ") : (detailInfo?.overview.theme ?? "-");
+
   const sampleBasicInfo1 = [
     { title: "업종", content: detailInfo?.overview.industryName },
-    { title: "테마", content: detailInfo?.overview.theme },
+    { title: "테마", content: themeNames },
     { title: "상장일", content: formatDate(detailInfo?.overview.establishedDate) },
     { title: "시가총액", content: formatAmount(detailInfo?.overview.marketCap) },
   ];
