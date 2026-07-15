@@ -86,15 +86,15 @@ function getHighPriceLabel(value: { value: string; name: string } | null) {
  * 프리셋과 값이 일치하면 프리셋 라벨("10억" 등)을, 아니면 직접 입력한 숫자를 "원" 단위로 보여준다.
  */
 function getPriceLabel(price: number | null) {
-  if (price === null || price === undefined) return null;
+  if (price === null || price === undefined) return "10억원";
   const preset = PRICE_PRESETS.find((p) => p.value === price);
   if (preset) return preset.label;
   return `${price.toLocaleString()}원`;
 }
 
-/** 실제로 적용(조회)된 RS 값이 있을 때만 프리셋 라벨을 보여준다. 없으면 null(=전체 취급). */
+/** 실제로 적용(조회)된 RS 값이 있을 때만 프리셋 라벨을 보여준다. */
 function getRsLabel(rs: RSFilterValue[] | null, presetKey: RsPresetKey | null) {
-  if (!rs || rs.length === 0) return null;
+  if (!rs || rs.length === 0) return "3개월";
   const preset = RS_PERIOD_PRESETS.find((p) => p.key === presetKey);
   return preset?.label ?? RS_PERIOD_PRESETS.find((p) => p.key === "custom")!.label;
 }
@@ -519,12 +519,8 @@ export default function ChartFilter(props: ChartFilterProps) {
     <>
       <Button type="button" variant="outline" className={filterTriggerClass(!!filterValue.rs)} onClick={openMobileRs}>
         RS 기준
-        {getRsLabel(filterValue.rs, committedRsPresetKey) && (
-          <>
-            <div className="size-0.5 bg-muted-foreground rounded-full" />
-            <span className="text-muted-foreground">{getRsLabel(filterValue.rs, committedRsPresetKey)}</span>
-          </>
-        )}
+        <div className="size-0.5 bg-muted-foreground rounded-full" />
+        <span className="text-muted-foreground">{getRsLabel(filterValue.rs, committedRsPresetKey)}</span>
         <ChevronDown />
       </Button>
 
