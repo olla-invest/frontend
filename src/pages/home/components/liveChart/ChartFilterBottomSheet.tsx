@@ -2,7 +2,7 @@ import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetDescription, SheetFo
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 
-export type BottomSheetHeight = 70 | 90;
+export type BottomSheetHeight = 60 | 70 | 90;
 
 interface ChartFilterBottomSheetProps {
   open: boolean;

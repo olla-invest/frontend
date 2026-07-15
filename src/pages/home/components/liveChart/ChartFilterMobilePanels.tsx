@@ -11,10 +11,10 @@ const HIGH_PRICE_OPTIONS = [
   { value: "false", name: "신고가 미해당(-표시)" },
 ];
 
-const filterMenuItemClass =
-  "focus:bg-accent focus:text-accent-foreground hover:bg-accent hover:text-accent-foreground relative flex w-full cursor-default items-center gap-2 rounded-sm py-1.5 pr-2 pl-8 text-sm outline-hidden select-none text-left";
+export const filterMenuItemClass =
+  "focus:text-accent-foreground hover:bg-accent hover:text-accent-foreground relative flex w-full cursor-default items-center gap-2 rounded-sm py-1.5 pr-2 pl-8 text-sm outline-hidden select-none text-left";
 
-function FilterCheckMenuItem({ selected, onClick, role, children }: { selected: boolean; onClick: () => void; role: "radio" | "menuitemcheckbox"; children: React.ReactNode }) {
+export function FilterCheckMenuItem({ selected, onClick, role, children }: { selected: boolean; onClick: () => void; role: "radio" | "menuitemcheckbox"; children: React.ReactNode }) {
   return (
     <button type="button" role={role} aria-checked={selected} className={filterMenuItemClass} onClick={onClick}>
       <span className="pointer-events-none absolute left-2 flex size-3.5 items-center justify-center">{selected ? <CheckIcon className="size-4" /> : null}</span>

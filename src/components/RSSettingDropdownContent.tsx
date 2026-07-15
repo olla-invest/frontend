@@ -76,7 +76,7 @@ export default function RSSetting({ value, onChange, isOnModal }: RSSettingProps
   };
 
   return (
-    <div className="p-4 flex flex-col gap-4 border-b">
+    <div className="p-4 flex flex-col gap-4 bg-muted rounded-md">
       {value.map((period, idx) => {
         const isLast = idx === value.length - 1;
 
@@ -125,7 +125,7 @@ export default function RSSetting({ value, onChange, isOnModal }: RSSettingProps
               </Popover>
 
               <div className="relative max-w-18">
-                <Input type="number" min={0} max={100} disabled={isLast} value={period.ratio} onChange={(e) => updateRatio(period.id, Number(e.target.value))} className="pr-7" />
+                <Input type="number" min={0} max={100} disabled={isLast} value={period.ratio} onChange={(e) => updateRatio(period.id, Number(e.target.value))} className="pr-7 bg-white" />
                 <span className="absolute right-4 top-1/2 -translate-y-1/2 text-sm">%</span>
               </div>
             </div>

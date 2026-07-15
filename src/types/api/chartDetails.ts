@@ -114,6 +114,11 @@ export interface Overview {
   settlementMonth: string;
   stockCode: string;
   theme: string;
+  themes?: {
+    inclusionReason: string;
+    themeCode: number;
+    themeName: string;
+  }[];
 }
 
 export interface Income {
