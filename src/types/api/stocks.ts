@@ -18,6 +18,10 @@ export interface StockRankingApiResponse {
     themeCode: number;
     themeName: string;
   }[];
+  search?: string;
+  sortBy?: string | "rs" | "changeRate" | "tradingValue" | "rankChange";
+  sortOrder?: "desc" | "asc";
+  suggest?: boolean;
 }
 
 export interface StockRankingApiItem {

@@ -34,7 +34,8 @@ import type { MetricsUpdatedPayload } from "@/soket/socketTypes";
 
 import { format } from "date-fns";
 
-import { getRealTimeChart } from "@/api/stocks";
+import { getRealTimeChart, getStockSuggestions } from "@/api/stocks";
+import type { StockSuggestItem } from "@/api/stocks";
 import { LoadingUi } from "@/components/LoadingUi";
 
 import InvestmentIndicatorGuide from "./liveChart/InvestmentIndicatorGuideDialog";
@@ -57,6 +58,20 @@ const MOBILE_COLUMN_KEYS = new Set(["rank", "companyName", "currentPrice", "rela
 
 const BASE_URL = import.meta.env.VITE_API_BASE_URL;
 
+export const SORT_OPTIONS = ["RS점수 높은 순", "등락률 높은 순", "등락률 낮은 순", "거래대금 많은 순", "거래대금 적은 순", "순위변동 높은 순", "순위변동 낮은 순"] as const;
+
+export type SortOption = (typeof SORT_OPTIONS)[number];
+
+export const SORT_OPTION_PARAMS: Record<SortOption, Pick<GetRealTimeChartRequest, "sortBy" | "sortOrder">> = {
+  "RS점수 높은 순": { sortBy: "rs", sortOrder: "desc" },
+  "등락률 높은 순": { sortBy: "changeRate", sortOrder: "desc" },
+  "등락률 낮은 순": { sortBy: "changeRate", sortOrder: "asc" },
+  "거래대금 많은 순": { sortBy: "tradingValue", sortOrder: "desc" },
+  "거래대금 적은 순": { sortBy: "tradingValue", sortOrder: "asc" },
+  "순위변동 높은 순": { sortBy: "rankChange", sortOrder: "desc" },
+  "순위변동 낮은 순": { sortBy: "rankChange", sortOrder: "asc" },
+};
+
 const getStockImageUrl = (stockCode: string) => {
   return `${BASE_URL}/stock-image/${stockCode}.png`;
 };
@@ -78,6 +93,10 @@ export interface ChartFilterState {
   isHighPrice: { value: string; name: string } | null;
   theme: ({ code: number; name: string; description: string } | null)[];
   price: number | null;
+  search?: string;
+  sortBy?: string | "rs" | "changeRate" | "tradingValue" | "rankChange";
+  sortOrder?: "desc" | "asc";
+  suggest?: boolean;
 }
 interface LivePriceCellProps {
   stockCode: string;
@@ -118,7 +137,7 @@ function LivePriceCell({ stockCode, basePrice, baseRate }: LivePriceCellProps) {
 
     timeoutRef.current = setTimeout(() => {
       setHighlight(null);
-    }, 300);
+    }, 100);
 
     return () => {
       if (timeoutRef.current) clearTimeout(timeoutRef.current);
@@ -324,9 +343,32 @@ export function LiveChart() {
   const [page, setPage] = useState(1); // 1-based
   const [pageSize, setPageSize] = useState(DESKTOP_DEFAULT_PAGE_SIZE);
   //정렬 기준
-  const [sortOption, setSortOption] = useState("RS 점수 높은 순");
+  const [sortOption, setSortOption] = useState<SortOption>("RS점수 높은 순");
   //검색어
   const [search, setSearch] = useState("");
+
+  // API 요청에 실제로 반영되는 디바운스된 검색어 (타이핑 중 매 요청마다 조회하지 않도록)
+  const [debouncedSearch, setDebouncedSearch] = useState("");
+
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      setDebouncedSearch(search.trim());
+    }, 100);
+    return () => clearTimeout(timer);
+  }, [search]);
+
+  const [appliedSearch, setAppliedSearch] = useState("");
+
+  // 검색어 또는 정렬 기준이 바뀌면 1페이지부터 다시 조회
+  useEffect(() => {
+    setPage(1);
+  }, [appliedSearch, sortOption]);
+
+  // 자동완성
+  const [suggestions, setSuggestions] = useState<StockSuggestItem[]>([]);
+  const [suggestOpen, setSuggestOpen] = useState(false);
+  const [suggestLoading, setSuggestLoading] = useState(false);
+  const searchWrapperRef = useRef<HTMLDivElement>(null);
 
   //로딩 상태관리
   const [loading, setLoading] = useState(true);
@@ -343,6 +385,10 @@ export function LiveChart() {
     isHighPrice: null,
     theme: [],
     price: null,
+    search: "",
+    sortBy: "rs",
+    sortOrder: "desc",
+    suggest: false,
   };
 
   const restored = popFilterFromSession();
@@ -370,11 +416,16 @@ export function LiveChart() {
 
   const buildRequest = (filter: ChartFilterState, targetPage: number): GetRealTimeChartRequest => {
     const themes = filter.theme.map((t) => t?.code).filter((v): v is number => Boolean(v));
+    const { sortBy, sortOrder } = SORT_OPTION_PARAMS[sortOption];
 
     return {
       marketType: filter.market === "0" ? "0" : filter.market,
       page: targetPage,
       pageSize: effectivePageSize,
+      search: appliedSearch ? appliedSearch : undefined,
+      sortBy,
+      sortOrder,
+      suggest: filter.suggest,
 
       filters:
         filter.isHighPrice !== null || themes.length > 0 || filter.price !== null
@@ -479,12 +530,73 @@ export function LiveChart() {
   useEffect(() => {
     if (isMobile) return;
     fetchData(appliedFilter, page);
-  }, [page, pageSize, appliedFilter, isMobile]);
+  }, [page, pageSize, appliedFilter, isMobile, sortOption, appliedSearch]);
 
   useEffect(() => {
     if (!isMobile) return;
     fetchData(appliedFilter, 1);
-  }, [appliedFilter, isMobile]);
+  }, [appliedFilter, isMobile, sortOption, appliedSearch]);
+
+  // 자동완성 (검색창 아래 박스) - 데스크톱 전용, suggest:true로 가벼운 조회
+  useEffect(() => {
+    const keyword = debouncedSearch;
+    if (!keyword) {
+      setSuggestions([]);
+      setSuggestOpen(false);
+      return;
+    }
+
+    let active = true;
+
+    (async () => {
+      try {
+        setSuggestLoading(true);
+        const res = await getStockSuggestions({
+          marketType: filter.market === "0" ? "0" : filter.market,
+          page: 1,
+          pageSize: 20,
+          search: keyword,
+          suggest: true,
+        });
+        if (!active) return;
+        setSuggestions(res.data.suggestions ?? []);
+        setSuggestOpen(true);
+      } catch (error) {
+        if (active) setSuggestions([]);
+        console.error("자동완성 조회 실패:", error);
+      } finally {
+        if (active) setSuggestLoading(false);
+      }
+    })();
+
+    return () => {
+      active = false;
+    };
+  }, [debouncedSearch, filter.market]);
+
+  // 검색창 바깥을 클릭하면 자동완성 박스 닫기
+  useEffect(() => {
+    const onClickOutside = (e: MouseEvent) => {
+      if (searchWrapperRef.current && !searchWrapperRef.current.contains(e.target as Node)) {
+        setSuggestOpen(false);
+      }
+    };
+    document.addEventListener("mousedown", onClickOutside);
+    return () => document.removeEventListener("mousedown", onClickOutside);
+  }, []);
+
+  // 자동완성 항목 선택 시 - 해당 종목 상세로 바로 이동 (page 모드에서만)
+  const handleSelectSuggestion = (item: StockSuggestItem) => {
+    setSearch(item.companyName);
+    setAppliedSearch(item.companyName);
+    setSuggestOpen(false);
+  };
+
+  // 검색어 확정 - Enter를 눌렀을 때만 실제 목록 조회에 반영
+  const commitSearch = (value?: string) => {
+    setAppliedSearch((value ?? search).trim());
+    setSuggestOpen(false);
+  };
 
   const table = useReactTable({
     data: tableData?.stocks ?? [],
@@ -531,27 +643,9 @@ export function LiveChart() {
             <span className="text-sm">전체 {tableData?.totalCount?.toLocaleString() ?? 0}건</span>
           </div>
           <div className="flex gap-2 items-center max-h-8">
-            <InputGroup className="h-8 w-80">
-              <InputGroupAddon align="inline-start" className="mr-0!">
-                <button
-                  type="button"
-                  onClick={() => {
-                    setSearch("");
-                  }}
-                  className="cursor-pointer mb-1"
-                >
-                  <i className="icon icon-search" />
-                </button>
-              </InputGroupAddon>
-              <InputGroupInput
-                placeholder="종목명을 입력해주세요."
-                onChange={(e) => {
-                  setSearch(e.target.value);
-                }}
-                value={search}
-              />
-              {search.length > 0 && (
-                <InputGroupAddon align="inline-end" className="mr-0!">
+            <div className="relative w-80" ref={searchWrapperRef}>
+              <InputGroup className="h-8 w-full">
+                <InputGroupAddon align="inline-start" className="mr-0!">
                   <button
                     type="button"
                     onClick={() => {
@@ -559,21 +653,91 @@ export function LiveChart() {
                     }}
                     className="cursor-pointer mb-1"
                   >
-                    <i className="icon icon-circle-x" />
+                    <i className="icon icon-search" />
                   </button>
                 </InputGroupAddon>
+                <InputGroupInput
+                  placeholder="종목명을 입력해주세요."
+                  className="focus:rounded-b-none!"
+                  onChange={(e) => {
+                    setSearch(e.target.value);
+                  }}
+                  onFocus={() => {
+                    setSuggestOpen(true);
+                  }}
+                  onKeyDown={(e) => {
+                    if (e.key === "Enter") {
+                      e.preventDefault();
+                      commitSearch();
+                      setSuggestOpen(false);
+                    } else if (e.key === "Escape") {
+                      setSuggestOpen(false);
+                    }
+                  }}
+                  value={search}
+                />
+                {search.length > 0 && (
+                  <InputGroupAddon align="inline-end" className="mr-0!">
+                    <button
+                      type="button"
+                      onClick={() => {
+                        setSearch("");
+                        commitSearch("");
+                        setSuggestions([]);
+                      }}
+                      className="cursor-pointer mb-1"
+                    >
+                      <i className="icon icon-circle-x" />
+                    </button>
+                  </InputGroupAddon>
+                )}
+              </InputGroup>
+
+              {suggestOpen && search.trim().length > 0 && (
+                <div className="absolute top-full left-0 right-0 mt-1 p-1 z-20 bg-white border rounded-md shadow-md max-h-80 overflow-y-auto">
+                  {suggestLoading ? (
+                    <div className="px-3 py-3 text-sm text-muted-foreground text-center">검색 중...</div>
+                  ) : (
+                    <div className="flex flex-col">
+                      <span className="py-1.5 px-2 text-xs text-muted-foreground font-medium">검색결과 - 종목명 '{search}'</span>
+                      {suggestions.length > 0 ? (
+                        suggestions.map((item) => (
+                          <button
+                            type="button"
+                            key={item.stockCode}
+                            onClick={() => handleSelectSuggestion(item)}
+                            disabled={!item.inRanking}
+                            className="w-full rounded-sm flex items-center gap-2 px-3 py-2 text-sm text-left hover:bg-muted cursor-pointer disabled:opacity-50 disabled:cursor-default disabled:hover:bg-transparent"
+                          >
+                            <span className="flex-1 truncate text-slate-800">{item.companyName}</span>
+                            {item.inRanking && (
+                              <>
+                                <span className="text-popover-foreground text-sm shrink-0">
+                                  RS {item.relativeStrengthScore} · {item.rank}위{" "}
+                                </span>
+                              </>
+                            )}
+                            {!item.inRanking && <span className="text-sm text-muted-foreground shrink-0">현재 조건 밖</span>}
+                          </button>
+                        ))
+                      ) : (
+                        <div className="px-3 py-3 text-sm text-muted-foreground text-center">검색 결과가 없습니다.</div>
+                      )}
+                    </div>
+                  )}
+                </div>
               )}
-            </InputGroup>
+            </div>
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
                 <Button variant="outline" size="sm">
-                  RS점수 높은 순
+                  {sortOption}
                   <ChevronDown />
                 </Button>
               </DropdownMenuTrigger>
               <DropdownMenuContent align="end">
                 <DropdownMenuGroup>
-                  {["RS점수 높은 순", "등락률 높은 순", "등락률 낮은 순", "거래대금 많은 순", "거래대금 적은 순", "순위변동 높은 순", "순위변동 낮은 순"].map((option) => (
+                  {SORT_OPTIONS.map((option) => (
                     <DropdownMenuCheckboxItem
                       key={option}
                       checked={sortOption === option}
@@ -614,7 +778,20 @@ export function LiveChart() {
           </div>
         </div>
 
-        {isMobile && <ChartFilterMobileSearch />}
+        {isMobile && (
+          <ChartFilterMobileSearch
+            search={search}
+            onSearchChange={setSearch}
+            onSearchCommit={commitSearch}
+            suggestions={suggestions}
+            suggestLoading={suggestLoading}
+            suggestOpen={suggestOpen}
+            onSuggestOpenChange={setSuggestOpen}
+            onSelectSuggestion={handleSelectSuggestion}
+            sortOption={sortOption}
+            onSortOptionChange={setSortOption}
+          />
+        )}
         <div className="flex flex-col gap-4 justify-between bg-white pt-4 shrink-0">
           <Table className={`${isMobile ? "w-full" : "min-w-max"}`}>
             <TableHeader className="bg-white shadow-[0_1px_0_0_rgba(0,0,0,0.1)]">
