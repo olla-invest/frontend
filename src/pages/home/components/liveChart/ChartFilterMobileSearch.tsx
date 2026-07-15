@@ -8,7 +8,8 @@ import type { SortOption } from "@/pages/home/components/LiveChart";
 
 import { useRef, useState } from "react";
 
-const SORT_OPTIONS: SortOption[] = ["RS점수 높은 순", "등락률 높은 순", "등락률 낮은 순", "거래대금 많은 순", "거래대금 적은 순", "순위변동 높은 순", "순위변동 낮은 순"];
+// const SORT_OPTIONS: SortOption[] = ["RS점수 높은 순", "등락률 높은 순", "등락률 낮은 순", "거래대금 많은 순", "거래대금 적은 순", "순위변동 높은 순", "순위변동 낮은 순"];
+const SORT_OPTIONS: SortOption[] = ["RS점수 높은 순", "등락률 높은 순", "등락률 낮은 순", "거래대금 많은 순", "거래대금 적은 순"];
 
 interface ChartFilterMobileSearchProps {
   search: string;
