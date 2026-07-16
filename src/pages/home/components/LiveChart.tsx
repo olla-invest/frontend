@@ -26,7 +26,7 @@ import { Badge } from "@/components/ui/badge";
 import { Dialog, DialogContent, DialogTrigger } from "@/components/ui/dialog";
 import { DropdownMenu, DropdownMenuCheckboxItem, DropdownMenuContent, DropdownMenuGroup, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
-import { InputGroup, InputGroupAddon, InputGroupInput } from "@/components/ui/input-group";
+import { InputGroup, InputGroupAddon } from "@/components/ui/input-group";
 
 import type { StockRankingApiResponse, StockRankingApiItem } from "@/types/api/stocks";
 import type { GetRealTimeChartRequest } from "@/api/stocks";
@@ -78,6 +78,26 @@ const getStockImageUrl = (stockCode: string) => {
 };
 
 export const formatNumber = (value?: number | string) => (value == null ? "-" : Number(value).toLocaleString());
+
+// 텍스트 중 검색어(keyword)와 일치하는 부분을 보라색으로 하이라이트해서 React 노드 배열로 반환
+export const highlightMatch = (text: string, keyword: string) => {
+  const trimmed = keyword.trim();
+  if (!trimmed) return text;
+
+  // 정규식 특수문자 이스케이프 처리
+  const escaped = trimmed.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+  const parts = text.split(new RegExp(`(${escaped})`, "gi"));
+
+  return parts.map((part, i) =>
+    part.toLowerCase() === trimmed.toLowerCase() ? (
+      <span key={i} className="text-primary">
+        {part}
+      </span>
+    ) : (
+      part
+    ),
+  );
+};
 
 /* =========================
   컬럼 정의
@@ -577,6 +597,7 @@ export function LiveChart() {
 
   // 검색창 바깥을 클릭하면 자동완성 박스 닫기
   useEffect(() => {
+    if (isMobile) return;
     const onClickOutside = (e: MouseEvent) => {
       if (searchWrapperRef.current && !searchWrapperRef.current.contains(e.target as Node)) {
         setSuggestOpen(false);
@@ -584,7 +605,7 @@ export function LiveChart() {
     };
     document.addEventListener("mousedown", onClickOutside);
     return () => document.removeEventListener("mousedown", onClickOutside);
-  }, []);
+  }, [isMobile]);
 
   // 자동완성 항목 선택 시 - 해당 종목 상세로 바로 이동 (page 모드에서만)
   const handleSelectSuggestion = (item: StockSuggestItem) => {
@@ -645,7 +666,7 @@ export function LiveChart() {
           </div>
           <div className="flex gap-2 items-center max-h-8">
             <div className="relative w-80" ref={searchWrapperRef}>
-              <InputGroup className="h-8 w-full">
+              <InputGroup className={`h-8 w-full ${suggestOpen && search.trim().length > 0 ? "rounded-b-none border-b-0" : ""}`}>
                 <InputGroupAddon align="inline-start" className="mr-0!">
                   <button
                     type="button"
@@ -657,9 +678,9 @@ export function LiveChart() {
                     <i className="icon icon-search" />
                   </button>
                 </InputGroupAddon>
-                <InputGroupInput
+                <input
                   placeholder="종목명을 입력해주세요."
-                  className="focus:rounded-b-none!"
+                  className="text-sm text-foreground placeholder:text-muted-foreground w-full"
                   onChange={(e) => {
                     setSearch(e.target.value);
                   }}
@@ -695,7 +716,7 @@ export function LiveChart() {
               </InputGroup>
 
               {suggestOpen && search.trim().length > 0 && (
-                <div className="absolute top-full left-0 right-0 mt-1 p-1 z-20 bg-white border rounded-md shadow-md max-h-80 overflow-y-auto">
+                <div className="absolute top-full left-0 right-0 p-1 z-20 bg-white border rounded-md rounded-t-none shadow-md max-h-80 overflow-y-auto">
                   {suggestLoading ? (
                     <div className="px-3 py-3 text-sm text-muted-foreground text-center">검색 중...</div>
                   ) : (
@@ -710,7 +731,7 @@ export function LiveChart() {
                             disabled={!item.inRanking}
                             className="w-full rounded-sm flex items-center gap-2 px-3 py-2 text-sm text-left hover:bg-muted cursor-pointer disabled:opacity-50 disabled:cursor-default disabled:hover:bg-transparent"
                           >
-                            <span className="flex-1 truncate text-slate-800">{item.companyName}</span>
+                            <span className="flex-1 truncate text-slate-800">{highlightMatch(item.companyName, search)}</span>
                             {item.inRanking && (
                               <>
                                 <span className="text-popover-foreground text-sm shrink-0">
