@@ -398,7 +398,7 @@ export default function ChartFilter(props: ChartFilterProps) {
               <div className="px-2 py-1.5 text-sm font-medium">테마</div>
             </DropdownMenuLabel>
 
-            <div className="px-2 py-1.5 flex flex-col gap-1 max-h-62.5 overflow-y-auto">
+            <div className="px-1 py-0.5 m-1 flex flex-col gap-1 max-h-84.75 overflow-y-auto custom-scrollbar">
               <DropdownMenuCheckboxItem
                 checked={filterValue.theme.length === 0}
                 onCheckedChange={() => {

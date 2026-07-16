@@ -1,10 +1,10 @@
 import { ChevronDown } from "lucide-react";
-import { InputGroup, InputGroupAddon, InputGroupInput } from "@/components/ui/input-group";
+import { InputGroup, InputGroupAddon } from "@/components/ui/input-group";
 import { Button } from "@/components/ui/button";
 import ChartFilterBottomSheet from "./ChartFilterBottomSheet";
 import { FilterCheckMenuItem } from "./ChartFilterMobilePanels";
 import type { StockSuggestItem } from "@/api/stocks";
-import type { SortOption } from "@/pages/home/components/LiveChart";
+import { highlightMatch, type SortOption } from "@/pages/home/components/LiveChart";
 
 import { useRef, useState } from "react";
 
@@ -36,13 +36,12 @@ export default function ChartFilterMobileSearch({
   onSortOptionChange,
 }: ChartFilterMobileSearchProps) {
   const [sortoptionOpen, setSortoptionOpen] = useState(false);
-  const [isSearchFocused, setIsSearchFocused] = useState(false);
   const searchWrapperRef = useRef<HTMLDivElement>(null);
 
   return (
     <div className="flex gap-2 items-center max-h-9">
       <div className="relative flex-1 min-w-0" ref={searchWrapperRef}>
-        <InputGroup className="h-9 w-full">
+        <InputGroup className={`h-9 w-full ${suggestOpen && search.trim().length > 0 ? "rounded-b-none border-b-0" : ""}`}>
           <InputGroupAddon align="inline-start" className="mr-0!">
             <button
               type="button"
@@ -54,17 +53,14 @@ export default function ChartFilterMobileSearch({
               <i className="icon icon-search" />
             </button>
           </InputGroupAddon>
-          <InputGroupInput
+          <input
             placeholder="종목명을 입력해주세요."
+            className="text-sm text-foreground placeholder:text-muted-foreground w-full"
             onChange={(e) => {
               onSearchChange(e.target.value);
             }}
             onFocus={() => {
-              setIsSearchFocused(true);
               onSuggestOpenChange(true);
-            }}
-            onBlur={() => {
-              setIsSearchFocused(false);
             }}
             onKeyDown={(e) => {
               if (e.key === "Enter") {
@@ -75,7 +71,6 @@ export default function ChartFilterMobileSearch({
               }
             }}
             value={search}
-            className="text-sm"
           />
           {search.length > 0 && (
             <InputGroupAddon align="inline-end" className="mr-0!">
@@ -94,7 +89,7 @@ export default function ChartFilterMobileSearch({
         </InputGroup>
 
         {suggestOpen && search.trim().length > 0 && (
-          <div className="absolute top-full left-0 right-0 mt-1 z-20 bg-white border rounded-md shadow-md max-h-72 overflow-y-auto">
+          <div className="absolute top-full left-0 right-0 p-1 z-20 bg-white border rounded-md rounded-t-none shadow-md max-h-80 overflow-y-auto">
             {suggestLoading ? (
               <div className="px-3 py-3 text-sm text-muted-foreground text-center">검색 중...</div>
             ) : (
@@ -109,7 +104,7 @@ export default function ChartFilterMobileSearch({
                       disabled={!item.inRanking}
                       className="w-full rounded-sm flex items-center gap-2 px-3 py-2 text-sm text-left hover:bg-muted cursor-pointer disabled:opacity-50 disabled:cursor-default disabled:hover:bg-transparent"
                     >
-                      <span className="flex-1 truncate text-slate-800">{item.companyName}</span>
+                      <span className="flex-1 truncate text-slate-800">{highlightMatch(item.companyName, search)}</span>
                       {item.inRanking && (
                         <>
                           <span className="text-popover-foreground text-sm shrink-0">
@@ -128,7 +123,7 @@ export default function ChartFilterMobileSearch({
           </div>
         )}
       </div>
-      {!isSearchFocused && (
+      {!suggestOpen && (
         <Button type="button" variant="outline" className="shrink-0" onClick={() => setSortoptionOpen((p) => !p)}>
           {sortOption}
           <ChevronDown />
