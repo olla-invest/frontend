@@ -13,7 +13,7 @@ export interface IssueThemeApiResponse {
   total: number;
   page: number;
   display: number;
-  themes: IssueTheme[];
+  items: IssueTheme[];
 }
 
 //이슈 상세
