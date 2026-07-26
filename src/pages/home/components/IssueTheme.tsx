@@ -63,7 +63,7 @@ export function IssueTheme() {
       const probe = await getIssueTheme(1, 1);
       const res = await getIssueTheme(probe.total, 1);
       setBasicData(res);
-      setRows(mapToRows(res.themes));
+      setRows(mapToRows(res.items));
     } catch (err) {
       console.log(err);
     } finally {
@@ -81,7 +81,7 @@ export function IssueTheme() {
 
       const mobilePageSize = 20;
       const res = await getIssueTheme(mobilePageSize, nextPage);
-      const mapped = mapToRows(res.themes);
+      const mapped = mapToRows(res.items);
 
       setMobileRows((prev) => [...prev, ...mapped]);
       mobilePageRef.current = nextPage;
