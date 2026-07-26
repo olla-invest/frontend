@@ -40,7 +40,7 @@ export default function IssueDetailContent({ selectIssue }: ContentProps) {
       }
     };
     getIssueDetailData();
-  }, []);
+  }, [selectIssue]);
 
   const getStockImageUrl = (stockCode: string) => {
     return `${BASE_URL}/stock-image/${stockCode}.png`;
@@ -152,9 +152,9 @@ export default function IssueDetailContent({ selectIssue }: ContentProps) {
                     <TableHead className="md:static sticky left-0 z-10 bg-background w-12 text-muted-foreground">순위</TableHead>
                     {/* 기업명 - 모바일 sticky */}
                     <TableHead className="md:static sticky left-12 z-10 bg-background text-muted-foreground">기업</TableHead>
-                    <TableHead className="text-right text-muted-foreground">현재가</TableHead>
-                    <TableHead className="text-right text-muted-foreground whitespace-pre-line">{isMobile ? "시장대비\n강도 점수" : "시장대비강도 점수"}</TableHead>
-                    <TableHead className="text-right text-muted-foreground whitespace-pre-line">{isMobile ? "거래대금\n변화" : "거래대금 변화"}</TableHead>
+                    <TableHead className="text-right text-muted-foreground bg-background">현재가</TableHead>
+                    <TableHead className="text-right text-muted-foreground whitespace-pre-line bg-background">{isMobile ? "시장대비\n강도 점수" : "시장대비강도 점수"}</TableHead>
+                    <TableHead className="text-right text-muted-foreground whitespace-pre-line bg-background">{isMobile ? "거래대금\n변화" : "거래대금 변화"}</TableHead>
                   </TableRow>
                 </TableHeader>
 

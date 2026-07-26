@@ -58,8 +58,7 @@ const MOBILE_COLUMN_KEYS = new Set(["rank", "companyName", "currentPrice", "rela
 
 const BASE_URL = import.meta.env.VITE_API_BASE_URL;
 
-// export const SORT_OPTIONS = ["RS점수 높은 순", "등락률 높은 순", "등락률 낮은 순", "거래대금 많은 순", "거래대금 적은 순", "순위변동 높은 순", "순위변동 낮은 순"] as const;
-export const SORT_OPTIONS = ["RS점수 높은 순", "등락률 높은 순", "등락률 낮은 순", "거래대금 많은 순", "거래대금 적은 순"] as const;
+export const SORT_OPTIONS = ["RS점수 높은 순", "등락률 높은 순", "등락률 낮은 순", "거래대금 많은 순", "거래대금 적은 순", "순위변동 높은 순", "순위변동 낮은 순"] as const;
 
 export type SortOption = (typeof SORT_OPTIONS)[number];
 
@@ -69,8 +68,8 @@ export const SORT_OPTION_PARAMS: Record<SortOption, Pick<GetRealTimeChartRequest
   "등락률 낮은 순": { sortBy: "changeRate", sortOrder: "asc" },
   "거래대금 많은 순": { sortBy: "tradingValue", sortOrder: "desc" },
   "거래대금 적은 순": { sortBy: "tradingValue", sortOrder: "asc" },
-  // "순위변동 높은 순": { sortBy: "rankChange", sortOrder: "desc" },
-  // "순위변동 낮은 순": { sortBy: "rankChange", sortOrder: "asc" },
+  "순위변동 높은 순": { sortBy: "rankChange", sortOrder: "desc" },
+  "순위변동 낮은 순": { sortBy: "rankChange", sortOrder: "asc" },
 };
 
 const getStockImageUrl = (stockCode: string) => {

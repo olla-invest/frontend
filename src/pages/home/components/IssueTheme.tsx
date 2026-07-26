@@ -1,6 +1,6 @@
 import { useEffect, useState, useRef, useCallback } from "react";
 
-import { Table, TableBody, TableCell, TableRow } from "@/components/ui/table";
+import { Table, TableBody, TableCell, TableHeader, TableHead, TableRow } from "@/components/ui/table";
 import { getCoreRowModel, useReactTable, flexRender, type ColumnDef } from "@tanstack/react-table";
 
 import IssueDetailModal from "./issueTheme/IssueDetailModal";
@@ -9,12 +9,15 @@ import { format } from "date-fns";
 import { getIssueTheme } from "@/api/issueTheme";
 import type { IssueThemeApiResponse, IssueTheme } from "@/types/api/issueTheme";
 
-import { useWatchThemeStore } from "@/store/WatchListStore";
-import { toggleWatchThemeList, isInWatchThemeList } from "@/hooks/useToggleWatchList";
+// import { useWatchThemeStore } from "@/store/WatchListStore";
+// import { toggleWatchThemeList, isInWatchThemeList } from "@/hooks/useToggleWatchList";
 import { useIsMobile } from "@/hooks/use-mobile";
 import { useNavigate } from "react-router-dom";
 import { LoadingUi } from "@/components/LoadingUi";
 import { getThemeIcon } from "@/utils/ThemeIcon";
+import IssueThemeFilter from "./issueTheme/IssueThemeFilter";
+import IssueDetailContent from "./issueTheme/IssueDetailContent";
+// import TreeMapView from "./issueTheme/TreeMapView";
 
 interface IssueThemeRow {
   themeCode: number;
@@ -25,7 +28,7 @@ interface IssueThemeRow {
 }
 
 export function IssueTheme() {
-  const themeList = useWatchThemeStore((state) => state.themeList);
+  // const themeList = useWatchThemeStore((state) => state.themeList);
   const navigate = useNavigate();
   const [isLoading, setIsLoading] = useState(false);
 
@@ -45,7 +48,7 @@ export function IssueTheme() {
   const mobilePageRef = useRef(1);
 
   const [detailOpen, setDetailOpen] = useState(false);
-  const [selectIssue, setSelectIssue] = useState<IssueTheme>();
+  const [selectIssue, setSelectIssue] = useState<IssueTheme | null>();
 
   const mapToRows = (themes: IssueTheme[]): IssueThemeRow[] =>
     themes.map((item) => ({
@@ -63,7 +66,7 @@ export function IssueTheme() {
       const probe = await getIssueTheme(1, 1);
       const res = await getIssueTheme(probe.total, 1);
       setBasicData(res);
-      setRows(mapToRows(res.themes));
+      setRows(mapToRows(res.items));
     } catch (err) {
       console.log(err);
     } finally {
@@ -81,7 +84,7 @@ export function IssueTheme() {
 
       const mobilePageSize = 20;
       const res = await getIssueTheme(mobilePageSize, nextPage);
-      const mapped = mapToRows(res.themes);
+      const mapped = mapToRows(res.items);
 
       setMobileRows((prev) => [...prev, ...mapped]);
       mobilePageRef.current = nextPage;
@@ -134,30 +137,30 @@ export function IssueTheme() {
     [isMobile, getMobileData],
   );
 
-  const bookmarkColumn: ColumnDef<IssueThemeRow> = {
-    id: "bookmark",
-    header: "즐겨찾기",
-    cell: ({ row }) => {
-      const themeCode = row.original.themeCode;
-      const isBookmarked = themeList && isInWatchThemeList(themeList, themeCode);
-      return (
-        <div className="w-8 flex justify-center">
-          <button
-            onClick={async (e) => {
-              e.stopPropagation();
-              const success = await toggleWatchThemeList(themeCode);
-              if (!success) return;
-            }}
-          >
-            <i className={`icon ${isBookmarked ? "icon-star-fill" : "icon-star"}`} />
-          </button>
-        </div>
-      );
-    },
-  };
+  // const bookmarkColumn: ColumnDef<IssueThemeRow> = {
+  //   id: "bookmark",
+  //   header: "즐겨찾기",
+  //   cell: ({ row }) => {
+  //     const themeCode = row.original.themeCode;
+  //     const isBookmarked = themeList && isInWatchThemeList(themeList, themeCode);
+  //     return (
+  //       <div className="w-8 flex justify-center">
+  //         <button
+  //           onClick={async (e) => {
+  //             e.stopPropagation();
+  //             const success = await toggleWatchThemeList(themeCode);
+  //             if (!success) return;
+  //           }}
+  //         >
+  //           <i className={`icon ${isBookmarked ? "icon-star-fill" : "icon-star"}`} />
+  //         </button>
+  //       </div>
+  //     );
+  //   },
+  // };
 
   const columns: ColumnDef<IssueThemeRow>[] = [
-    ...(!isMobile ? [bookmarkColumn] : []),
+    // ...(!isMobile ? [bookmarkColumn] : []),
     {
       accessorKey: "rank",
       header: "순위",
@@ -168,31 +171,35 @@ export function IssueTheme() {
       accessorKey: "themeName",
       header: "테마명",
       cell: ({ row }) => (
-        <div className="flex items-center gap-2">
+        <div className="flex items-center gap-2 md:w-60 w-30">
           {!isMobile && (
             <div className="size-8 rounded-md bg-[#D9D9D9] overflow-hidden shrink-0">
               <img src={getThemeIcon(row.original.themeCode)} alt={row.original.themeName} className="w-full" />
             </div>
           )}
-          <div className="w-30 line-clamp-2 md:line-clamp-1 md:w-full text-slate-800 font-semibold">{row.getValue("themeName")}</div>
+          <div className="w-30 md:w-full line-clamp-2 md:line-clamp-1 text-slate-800 font-semibold">{row.getValue("themeName")}</div>
         </div>
       ),
     },
-    {
-      accessorKey: "stats",
-      header: "현황",
-      cell: ({ row }) => {
-        const value = row.getValue("stats") as number[];
-        return (
-          <div className="flex items-center text-sm md:min-w-50">
-            <span className="md:block hidden">{value[0]}개중</span>
-            <span className="text-red-500 ml-2">{value[1]}</span>상승
-            <span className="text-muted-foreground ml-2">{value[2]}</span>보합
-            <span className="text-blue-500 ml-2">{value[3]}</span>하락
-          </div>
-        );
-      },
-    },
+    { accessorKey: "rsScore", header: "RS 점수", cell: ({ row }) => <div className="w-16">{row.original.rank}</div> },
+    { accessorKey: "shortRs", header: "단기 RS", cell: ({ row }) => <div className="w-16">{row.original.rank}</div> },
+    { accessorKey: "upDown", header: "등락률", cell: ({ row }) => <div className="w-20">{row.original.rank}</div> },
+    { accessorKey: "stockList", header: "주요종목", cell: () => <div className="text-slate-700">LG전자 · 로보스타 · 두산로보틱스</div> },
+    // {
+    //   accessorKey: "stats",
+    //   header: "현황",
+    //   cell: ({ row }) => {
+    //     const value = row.getValue("stats") as number[];
+    //     return (
+    //       <div className="flex items-center text-sm md:min-w-50">
+    //         <span className="md:block hidden">{value[0]}개중</span>
+    //         <span className="text-red-500 ml-2">{value[1]}</span>상승
+    //         <span className="text-muted-foreground ml-2">{value[2]}</span>보합
+    //         <span className="text-blue-500 ml-2">{value[3]}</span>하락
+    //       </div>
+    //     );
+    //   },
+    // },
   ];
 
   // 데스크탑용 테이블
@@ -200,18 +207,14 @@ export function IssueTheme() {
   // 모바일용 테이블
   const mobileTable = useReactTable({ data: mobileRows, columns, getCoreRowModel: getCoreRowModel() });
 
-  const allRows = table.getRowModel().rows;
-  const leftRows = allRows.filter((_, i) => i % 2 === 0);
-  const rightRows = allRows.filter((_, i) => i % 2 === 1);
-
   const renderRows = (rowList: ReturnType<typeof table.getRowModel>["rows"]) =>
     rowList.map((row) => (
       <TableRow
         key={row.id}
-        className="h-12.25 flex items-center"
+        className="h-12.25"
         onClick={() => {
           if (!isMobile) {
-            setDetailOpen(true);
+            // setDetailOpen(true);
             setSelectIssue(row.original.original);
           } else {
             navigate(`/themeDetail/${row.original.themeCode}`, { state: { theme: row.original.original } });
@@ -219,7 +222,7 @@ export function IssueTheme() {
         }}
       >
         {row.getVisibleCells().map((cell) => (
-          <TableCell key={cell.id} className={cell.column.id === "themeName" ? "whitespace-normal w-full" : ""}>
+          <TableCell key={cell.id} className={cell.column.id === "themeName" ? "whitespace-normal w-60" : cell.column.id === "stockList" ? "w-full" : ""}>
             {flexRender(cell.column.columnDef.cell, cell.getContext())}
           </TableCell>
         ))}
@@ -227,7 +230,8 @@ export function IssueTheme() {
     ));
 
   return (
-    <div className="flex flex-col md:h-[calc(100%-36px)]">
+    <div className="flex flex-col md:h-[calc(100vh-244px)] h-full">
+      {!isMobile && <IssueThemeFilter />}
       <div className="flex justify-between gap-4 mb-4">
         <div className="flex gap-2 items-center max-h-8 text-muted-foreground text-xs">
           <div className="bg-muted p-2 rounded-xs flex align-middle gap-1">
@@ -237,7 +241,7 @@ export function IssueTheme() {
         </div>
       </div>
 
-      <div className="overflow-x-auto w-full border-t">
+      <div className="w-full border-t h-full overflow-hidden">
         {/* 모바일: 무한 스크롤 단일 테이블 */}
         <div className="md:hidden w-full">
           {isLoading ? (
@@ -254,21 +258,48 @@ export function IssueTheme() {
           )}
         </div>
 
-        {/* 데스크탑: 2컬럼 */}
-        <div className="hidden md:flex w-full md:min-h-112.5">
+        {/* 데스크탑: 단일 테이블 */}
+        <div className="hidden md:flex w-full h-full overflow-hidden">
           {isLoading ? (
             <div className="w-full h-full flex items-center justify-center md:min-h-112.5">
               <LoadingUi message="이슈 테마 데이터를 불러오는 중입니다..." />
             </div>
           ) : (
-            <>
-              <Table className="flex-1">
-                <TableBody>{renderRows(leftRows)}</TableBody>
-              </Table>
-              <Table className="flex-1">
-                <TableBody>{renderRows(rightRows)}</TableBody>
-              </Table>
-            </>
+            <div className="flex w-full pt-2">
+              <div className="flex-1 pr-4 overflow-y-auto">
+                <Table>
+                  <TableHeader>
+                    {table.getHeaderGroups().map((hg) => (
+                      <TableRow key={hg.id} className="hover:bg-transparent">
+                        {hg.headers.map((header) => (
+                          <TableHead key={header.id} className={`text-muted-foreground!`}>
+                            {flexRender(header.column.columnDef.header, header.getContext())}
+                          </TableHead>
+                        ))}
+                      </TableRow>
+                    ))}
+                  </TableHeader>
+
+                  <TableBody>{renderRows(table.getRowModel().rows)}</TableBody>
+                </Table>
+              </div>
+              {selectIssue && (
+                <div className="size-full max-w-150 bg-white relative">
+                  <button
+                    className="absolute right-0 top-1"
+                    onClick={() => {
+                      setSelectIssue(null);
+                    }}
+                  >
+                    <i className="icon icon-x-large" />
+                  </button>
+                  <IssueDetailContent selectIssue={selectIssue} />
+                </div>
+              )}
+            </div>
+            // <div className="size-full">
+            //   <TreeMapView />
+            // </div>
           )}
         </div>
       </div>

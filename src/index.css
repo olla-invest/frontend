@@ -137,6 +137,11 @@ input:-webkit-autofill {
   background: rgba(255, 255, 255, 0); /*스크롤바 뒷 배경 색상*/
 }
 
+button,
+a {
+  cursor: pointer;
+}
+
 /* button {
   border-radius: 8px;
   border: 1px solid transparent;
@@ -340,6 +345,12 @@ input:-webkit-autofill {
   width: 16px;
   height: 16px;
   background-image: url("../src/assets/icons/x.svg");
+}
+
+.icon-x-large {
+  width: 24px;
+  height: 24px;
+  background-image: url("../src/assets/icons/x-large.svg");
 }
 
 .icon-circle-x {
