@@ -3,6 +3,9 @@ import { useEffect, useState } from "react";
 import { Badge } from "@/components/ui/badge";
 
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
+import { DropdownMenu, DropdownMenuContent, DropdownMenuRadioGroup, DropdownMenuRadioItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
+import { ChevronDown } from "lucide-react";
+import { Button } from "@/components/ui/button";
 
 import { getIssueThemeDetail } from "@/api/issueTheme";
 import type { IssueTheme, IssueThemeDetailApiResponse } from "@/types/api/issueTheme";
@@ -60,7 +63,8 @@ export default function IssueDetailContent({ selectIssue }: ContentProps) {
         <LoadingUi boxStyle="h-[calc(100vh-195px)]!" />
       ) : (
         <div>
-          <div className="flex justify-between items-center flex-wrap gap-4 px-6 py-2">
+          {/* 헤더 */}
+          <div className="flex justify-between items-center flex-wrap gap-2 px-6 py-2">
             <div className="flex items-center gap-2.5">
               <div className="rounded-md size-16 overflow-hidden shrink-0">
                 <img src={getThemeIcon(detailData?.themeCode)} alt={detailData?.themeName} className="w-full" />
@@ -98,6 +102,13 @@ export default function IssueDetailContent({ selectIssue }: ContentProps) {
                       <span className="text-rose-500">{detailData?.risingCount}</span>/{detailData?.totalCount}
                     </span>
                   </div>
+                  {detailData?.streakBadge && (
+                    <div
+                      className={`py-0.5 px-2 border rounded-lg text-xs font-medium ${detailData.streakBadge.tone === "RED" ? "text-rose-500" : detailData.streakBadge.tone === "BLUE" ? "text-blue-500" : "text-muted-foreground"}`}
+                    >
+                      {detailData?.streakBadge.label}
+                    </div>
+                  )}
                 </div>
                 <div className="md:hidden flex gap-1 items-center">
                   <div className="flex gap-1 text-sm">
@@ -118,6 +129,13 @@ export default function IssueDetailContent({ selectIssue }: ContentProps) {
                       <span className="text-rose-500">{detailData?.risingCount}</span>/{detailData?.totalCount}
                     </span>
                   </div>
+                  {detailData?.streakBadge && (
+                    <div
+                      className={`py-0.5 px-2 border rounded-lg text-xs font-medium ${detailData.streakBadge.tone === "RED" ? "text-rose-500" : detailData.streakBadge.tone === "BLUE" ? "text-blue-500" : "text-muted-foreground"}`}
+                    >
+                      {detailData?.streakBadge.label}
+                    </div>
+                  )}
                 </div>
               </div>
             </div>
@@ -134,27 +152,51 @@ export default function IssueDetailContent({ selectIssue }: ContentProps) {
           </div>
 
           {/* <div className="py-4 px-6 mb-4">
-        <div className="rounded-md p-4 bg-muted flex gap-1">
-          <i className="icon icon-star-four-color" />
-          <div className="flex flex-col gap-1 text-sm">
-            <b className="font-semibold">AI 기업 요약으로 기업정보를 확인해보세요!</b>
-            <p className="text-slate-700 ">동사는 1949년 설립되어 경기도 이천시에 본사를 두고 4개의 생산기지와 3개의 연구개발법인 및 여러 해외 판매법인을 운영하는 글로벌 반도체 기업임.</p>
-          </div>
-        </div>
-      </div> */}
+            <div className="rounded-md p-4 bg-muted flex gap-1">
+              <div className="flex flex-col gap-1 text-sm">
+                <div className="shrink-0 flex gap-1">
+                  <i className="icon icon-star-four-color" />
+                  <b className="text-sm font-semibold">AI 기업 요약으로 기업정보를 확인해보세요!</b>
+                </div>
+                <p className="text-slate-700 pl-5">동사는 1949년 설립되어 경기도 이천시에 본사를 두고 4개의 생산기지와 3개의 연구개발법인 및 여러 해외 판매법인을 운영하는 글로벌 반도체 기업임.</p>
+              </div>
+            </div>
+          </div> */}
 
-          <div className="px-6 mb-10 md:mb-0">
+          {/* 종목 */}
+          <div className="px-6 mb-10 md:mb-4">
+            <div className="flex gap-2.5 justify-between items-center">
+              <p className="text-xs text-muted-foreground">이슈 테마에 포함된 종목은 실시간 차트에서 조회되는 종목에 한해 제공됩니다.</p>
+              <DropdownMenu>
+                <DropdownMenuTrigger asChild>
+                  <Button variant="outline">
+                    거래 대금
+                    <ChevronDown />
+                  </Button>
+                </DropdownMenuTrigger>
+                <DropdownMenuContent className="p-0" align="end">
+                  <DropdownMenuRadioGroup>
+                    <div className="px-2 py-1.5 flex flex-col gap-1">
+                      <DropdownMenuRadioItem key={1} value={"1"}>
+                        테스트
+                      </DropdownMenuRadioItem>
+                    </div>
+                  </DropdownMenuRadioGroup>
+                </DropdownMenuContent>
+              </DropdownMenu>
+            </div>
             <div className="overflow-x-auto">
               <Table className="md:w-full w-max">
                 <TableHeader>
                   <TableRow className="font-medium">
-                    {/* 순위 - 모바일 sticky */}
-                    <TableHead className="md:static sticky left-0 z-10 bg-background w-12 text-muted-foreground">순위</TableHead>
                     {/* 기업명 - 모바일 sticky */}
-                    <TableHead className="md:static sticky left-12 z-10 bg-background text-muted-foreground">기업</TableHead>
-                    <TableHead className="text-right text-muted-foreground bg-background">현재가</TableHead>
-                    <TableHead className="text-right text-muted-foreground whitespace-pre-line bg-background">{isMobile ? "시장대비\n강도 점수" : "시장대비강도 점수"}</TableHead>
-                    <TableHead className="text-right text-muted-foreground whitespace-pre-line bg-background">{isMobile ? "거래대금\n변화" : "거래대금 변화"}</TableHead>
+                    <TableHead className="sticky left-0 z-10 text-muted-foreground">종목명</TableHead>
+                    <TableHead className="text-right text-muted-foreground bg-background">RS 점수</TableHead>
+                    <TableHead className="text-right text-muted-foreground bg-background">단기 RS</TableHead>
+                    <TableHead className="text-right text-muted-foreground bg-background">등락률</TableHead>
+                    <TableHead className="text-right text-muted-foreground bg-background">거래대금</TableHead>
+                    <TableHead className="text-right text-muted-foreground bg-background">전일비</TableHead>
+                    <TableHead className="text-right text-muted-foreground bg-background">신고가</TableHead>
                   </TableRow>
                 </TableHeader>
 
@@ -163,12 +205,13 @@ export default function IssueDetailContent({ selectIssue }: ContentProps) {
                     const isUp = stock.changeRate > 0;
                     const isDown = stock.changeRate < 0;
 
+                    const isHightUp = stock.newHighRate > 0;
+                    const isHightDown = stock.newHighRate < 0;
+
                     return (
                       <TableRow key={stock.stockCode} className="text-slate-700 h-10" onClick={() => handleStockClick(stock.stockCode)}>
-                        {/* 순위 - 모바일 sticky */}
-                        <TableCell className="md:static md:bg-transparent bg-background sticky left-0 z-10 w-7.5 md:w-8">{stock.rank}</TableCell>
                         {/* 기업명 - 모바일 sticky */}
-                        <TableCell className="md:static md:bg-transparent bg-background sticky left-12 z-10 font-semibold text-slate-800">
+                        <TableCell className="sticky left-0 z-10 font-semibold text-slate-800">
                           <div className="flex items-center gap-2">
                             <div className="size-8 rounded-full bg-[#D9D9D9] overflow-hidden text-center hidden md:block">
                               <img src={getStockImageUrl(stock.stockCode)} alt={stock.companyName} className="w-full h-full object-cover" />
@@ -176,15 +219,72 @@ export default function IssueDetailContent({ selectIssue }: ContentProps) {
                             <span className="w-30 truncate">{stock.companyName}</span>
                           </div>
                         </TableCell>
-                        <TableCell className="flex justify-end items-center gap-1 md:flex-row flex-col md:h-12.25">
-                          <div>{stock.currentPrice.toLocaleString()}원</div>
+                        <TableCell className="text-right">{stock.rsScore.toFixed(1)}</TableCell>
+                        <TableCell className="text-right">{stock.shortTermRs || "-"}</TableCell>
+                        <TableCell>
                           <div className={`w-14 text-right ${isUp ? "text-rose-500" : isDown ? "text-blue-500" : "text-gray-400"}`}>
                             {isUp && "+"}
                             {stock.changeRate.toFixed(2)}%
                           </div>
                         </TableCell>
-                        <TableCell className="text-right">{stock.rsScore.toFixed(1)}</TableCell>
-                        <TableCell className="text-right">{stock.tradingValueRatio}</TableCell>
+                        <TableCell>
+                          <div>{stock.currentPrice?.toLocaleString() || "-"}원</div>
+                        </TableCell>
+                        <TableCell>{stock.previousTradingValueRatio.toFixed(2) || "-"}%</TableCell>
+                        <TableCell>
+                          {" "}
+                          <div className={`w-14 text-right ${isHightUp ? "text-rose-500" : isHightDown ? "text-blue-500" : "text-gray-400"}`}>
+                            {isHightUp && "+"}
+                            {stock.newHighRate.toFixed(2)}%
+                          </div>
+                        </TableCell>
+                      </TableRow>
+                    );
+                  })}
+                </TableBody>
+              </Table>
+            </div>
+          </div>
+
+          {/* 연관테마 */}
+          <div className="px-6 py-2 mb-10 md:mb-0 flex flex-col gap-4">
+            <h4 className="text-xl text-foreground font-semibold">연관테마</h4>
+            <div className="overflow-x-auto">
+              <Table className="md:w-full w-max">
+                <TableHeader>
+                  <TableRow className="font-medium">
+                    {/* 기업명 - 모바일 sticky */}
+                    <TableHead className="sticky left-0 z-10 bg-background text-muted-foreground">테마명</TableHead>
+                    <TableHead className="text-right text-muted-foreground bg-background">RS 점수</TableHead>
+                    <TableHead className="text-right text-muted-foreground bg-background">등락률</TableHead>
+                    <TableHead className="text-right text-muted-foreground bg-background">주요 종목</TableHead>
+                  </TableRow>
+                </TableHeader>
+
+                <TableBody>
+                  {detailData?.relatedThemes?.map((theme) => {
+                    const isUp = theme.changeRate > 0;
+                    const isDown = theme?.changeRate < 0;
+
+                    return (
+                      <TableRow key={theme.themeCode} className="text-slate-700 h-10">
+                        {/* 기업명 - 모바일 sticky */}
+                        <TableCell className="sticky left-0 z-10 font-semibold text-slate-800">
+                          <div className="flex items-center gap-2">
+                            <div className="size-8 rounded-md bg-[#D9D9D9] overflow-hidden text-center hidden md:block">
+                              <img src={getThemeIcon(theme.themeCode)} alt={theme.themeName} className="w-full h-full object-cover" />
+                            </div>
+                            <span className="w-30 truncate">{theme.themeName}</span>
+                          </div>
+                        </TableCell>
+                        <TableCell className="text-right">{theme.rsScore.toFixed(1)}</TableCell>
+                        <TableCell className="text-right">
+                          <div className={` ${isUp ? "text-rose-500" : isDown ? "text-blue-500" : "text-gray-400"}`}>
+                            {isUp && "+"}
+                            {theme.changeRate.toFixed(2)}%
+                          </div>
+                        </TableCell>
+                        <TableCell className="text-right">{theme.sharedStockCount || "-"}%</TableCell>
                       </TableRow>
                     );
                   })}

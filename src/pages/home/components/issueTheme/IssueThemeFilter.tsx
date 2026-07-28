@@ -5,6 +5,11 @@ import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Field } from "@/components/ui/field";
 import { Label } from "@/components/ui/label";
+import type { IssueThemeFilterCounts } from "@/types/api/issueTheme";
+
+interface IssueThemeFilterProps {
+  filterCounts?: IssueThemeFilterCounts;
+}
 
 interface IssueThemeFilterType {
   viewType: "rank" | "heatmap";
@@ -13,7 +18,7 @@ interface IssueThemeFilterType {
   myTheme: boolean;
 }
 
-export default function IssueThemeFilter() {
+export default function IssueThemeFilter({ filterCounts }: IssueThemeFilterProps) {
   const [filterValue, setFilterValue] = useState<IssueThemeFilterType>({
     viewType: "rank",
     sortType: "rs",
@@ -30,11 +35,11 @@ export default function IssueThemeFilter() {
   };
 
   const filterOptions = [
-    { key: "all", label: "전체", count: 122 },
-    { key: "rs", label: "RS 80+", count: 22 },
-    { key: "theme", label: "테마 5종목+", count: 33 },
-    { key: "rate5", label: "테마 등락률 +5%", count: 33 },
-    { key: "highPrice", label: "신고가 포함", count: 32 },
+    { key: "all", label: "전체", count: filterCounts?.all },
+    { key: "rs", label: "RS 80+", count: filterCounts?.rs80 },
+    { key: "theme", label: "테마 5종목+", count: filterCounts?.stockCount5 },
+    { key: "rate5", label: "테마 등락률 +5%", count: filterCounts?.changeRate5 },
+    { key: "highPrice", label: "신고가 포함", count: filterCounts?.hasNewHigh },
   ] as const;
 
   // "전체"를 제외한 개별 옵션 key만 추출
@@ -77,7 +82,7 @@ export default function IssueThemeFilter() {
   };
 
   return (
-    <div className="pb-4 border-b mb-4 flex items-center justify-between">
+    <div className="pb-4 md:border-b md:mb-4 flex items-center justify-between">
       <div className="flex gap-2 flex-wrap items-center">
         <Tabs
           value={filterValue.viewType}
@@ -125,7 +130,7 @@ export default function IssueThemeFilter() {
           ))}
         </div>
       </div>
-      <div>
+      <div className="shrink-0">
         <Field orientation="horizontal" className="gap-2">
           <Checkbox
             id="my-theme-checkbox"

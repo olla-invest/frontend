@@ -1,4 +1,4 @@
-import { useEffect, useState, useRef, useCallback } from "react";
+import { useEffect, useState } from "react";
 
 import { Table, TableBody, TableCell, TableHeader, TableHead, TableRow } from "@/components/ui/table";
 import { getCoreRowModel, useReactTable, flexRender, type ColumnDef } from "@tanstack/react-table";
@@ -7,45 +7,36 @@ import IssueDetailModal from "./issueTheme/IssueDetailModal";
 import { format } from "date-fns";
 
 import { getIssueTheme } from "@/api/issueTheme";
-import type { IssueThemeApiResponse, IssueTheme } from "@/types/api/issueTheme";
+import type { IssueThemeApiResponse, IssueTheme, StreakBadge } from "@/types/api/issueTheme";
 
-// import { useWatchThemeStore } from "@/store/WatchListStore";
-// import { toggleWatchThemeList, isInWatchThemeList } from "@/hooks/useToggleWatchList";
 import { useIsMobile } from "@/hooks/use-mobile";
 import { useNavigate } from "react-router-dom";
 import { LoadingUi } from "@/components/LoadingUi";
 import { getThemeIcon } from "@/utils/ThemeIcon";
 import IssueThemeFilter from "./issueTheme/IssueThemeFilter";
 import IssueDetailContent from "./issueTheme/IssueDetailContent";
-// import TreeMapView from "./issueTheme/TreeMapView";
 
 interface IssueThemeRow {
   themeCode: number;
   rank: string;
   themeName: string;
   stats: number[];
+  rsScore: number | null;
+  shortTermRs: number | null;
+  changeRate: number | null;
+  streakBadge: StreakBadge | null;
   original: IssueTheme;
 }
 
 export function IssueTheme() {
-  // const themeList = useWatchThemeStore((state) => state.themeList);
   const navigate = useNavigate();
   const [isLoading, setIsLoading] = useState(false);
 
-  // 데스크탑용
   const [page] = useState(1);
   const [basicData, setBasicData] = useState<IssueThemeApiResponse>();
   const [rows, setRows] = useState<IssueThemeRow[]>([]);
 
-  // 모바일 무한스크롤용
   const isMobile = useIsMobile();
-  const [mobileRows, setMobileRows] = useState<IssueThemeRow[]>([]);
-  const [mobileLoading, setMobileLoading] = useState(false);
-
-  // 최신 상태를 ref로 관리 → stale closure 방지
-  const mobileLoadingRef = useRef(false);
-  const mobileHasMoreRef = useRef(true);
-  const mobilePageRef = useRef(1);
 
   const [detailOpen, setDetailOpen] = useState(false);
   const [selectIssue, setSelectIssue] = useState<IssueTheme | null>();
@@ -55,16 +46,20 @@ export function IssueTheme() {
       themeCode: item.themeCode,
       rank: String(item.rank),
       themeName: item.themeName,
+      rsScore: item.rsScore,
+      shortTermRs: item.shortTermRs,
+      changeRate: item.changeRate,
+      streakBadge: item.streakBadge,
       stats: [item.totalCount, item.risingCount, item.totalCount - item.risingCount, 0],
       original: item,
     }));
 
-  // 데스크탑 데이터 fetch
+  // 전체 데이터 fetch (모바일/데스크탑 공통)
   const getIssueData = async () => {
     setIsLoading(true);
     try {
       const probe = await getIssueTheme(1, 1);
-      const res = await getIssueTheme(probe.total, 1);
+      const res = await getIssueTheme(probe.pagination.total, 1);
       setBasicData(res);
       setRows(mapToRows(res.items));
     } catch (err) {
@@ -74,93 +69,11 @@ export function IssueTheme() {
     }
   };
 
-  // 모바일 데이터 fetch
-  const getMobileData = useCallback(async (nextPage: number) => {
-    if (mobileLoadingRef.current || !mobileHasMoreRef.current) return;
-
-    try {
-      mobileLoadingRef.current = true;
-      setMobileLoading(true);
-
-      const mobilePageSize = 20;
-      const res = await getIssueTheme(mobilePageSize, nextPage);
-      const mapped = mapToRows(res.items);
-
-      setMobileRows((prev) => [...prev, ...mapped]);
-      mobilePageRef.current = nextPage;
-
-      const totalLoaded = nextPage * mobilePageSize;
-      if (totalLoaded >= res.total) {
-        mobileHasMoreRef.current = false;
-      }
-    } catch (err) {
-      console.log(err);
-    } finally {
-      mobileLoadingRef.current = false;
-      setMobileLoading(false);
-    }
-  }, []);
-
-  // 데스크탑: 진입 시 fetch
   useEffect(() => {
-    if (!isMobile) getIssueData();
-  }, [page, isMobile]);
-
-  // 모바일: 첫 진입 시 ref + state 초기화 후 1페이지 fetch
-  useEffect(() => {
-    if (isMobile) {
-      // 웹 → 모바일 전환 시 상태 리셋
-      mobileLoadingRef.current = false;
-      mobileHasMoreRef.current = true;
-      mobilePageRef.current = 1;
-      setMobileRows([]);
-      setMobileLoading(false);
-      getMobileData(1);
-    }
-  }, [isMobile]);
-
-  const observerTargetRef = useCallback(
-    (node: HTMLDivElement | null) => {
-      if (!node || !isMobile) return;
-
-      const observer = new IntersectionObserver(
-        (entries) => {
-          if (entries[0].isIntersecting) {
-            getMobileData(mobilePageRef.current + 1);
-          }
-        },
-        { threshold: 0.1 },
-      );
-
-      observer.observe(node);
-    },
-    [isMobile, getMobileData],
-  );
-
-  // const bookmarkColumn: ColumnDef<IssueThemeRow> = {
-  //   id: "bookmark",
-  //   header: "즐겨찾기",
-  //   cell: ({ row }) => {
-  //     const themeCode = row.original.themeCode;
-  //     const isBookmarked = themeList && isInWatchThemeList(themeList, themeCode);
-  //     return (
-  //       <div className="w-8 flex justify-center">
-  //         <button
-  //           onClick={async (e) => {
-  //             e.stopPropagation();
-  //             const success = await toggleWatchThemeList(themeCode);
-  //             if (!success) return;
-  //           }}
-  //         >
-  //           <i className={`icon ${isBookmarked ? "icon-star-fill" : "icon-star"}`} />
-  //         </button>
-  //       </div>
-  //     );
-  //   },
-  // };
+    getIssueData();
+  }, [page]);
 
   const columns: ColumnDef<IssueThemeRow>[] = [
-    // ...(!isMobile ? [bookmarkColumn] : []),
     {
       accessorKey: "rank",
       header: "순위",
@@ -171,41 +84,75 @@ export function IssueTheme() {
       accessorKey: "themeName",
       header: "테마명",
       cell: ({ row }) => (
-        <div className="flex items-center gap-2 md:w-60 w-30">
+        <div className="flex md:items-center gap-2 md:w-60 w-30 md:flex-row flex-col items-start">
           {!isMobile && (
             <div className="size-8 rounded-md bg-[#D9D9D9] overflow-hidden shrink-0">
               <img src={getThemeIcon(row.original.themeCode)} alt={row.original.themeName} className="w-full" />
             </div>
           )}
           <div className="w-30 md:w-full line-clamp-2 md:line-clamp-1 text-slate-800 font-semibold">{row.getValue("themeName")}</div>
+          {row.original.streakBadge && (
+            <div
+              className={`shrink-0 py-0.5 px-2 border rounded-lg text-xs font-medium ${row.original.streakBadge.tone === "RED" ? "text-rose-500" : row.original.streakBadge.tone === "BLUE" ? "text-blue-500" : "text-muted-foreground"}`}
+            >
+              {row.original.streakBadge.direction === "STRONG" && <i className="icon icon-arrow-up" />}
+              {row.original.streakBadge.direction === "WEAK" && <i className="icon icon-arrow-down" />}
+              {row.original.streakBadge.days || "-"}일
+            </div>
+          )}
         </div>
       ),
     },
-    { accessorKey: "rsScore", header: "RS 점수", cell: ({ row }) => <div className="w-16">{row.original.rank}</div> },
-    { accessorKey: "shortRs", header: "단기 RS", cell: ({ row }) => <div className="w-16">{row.original.rank}</div> },
-    { accessorKey: "upDown", header: "등락률", cell: ({ row }) => <div className="w-20">{row.original.rank}</div> },
-    { accessorKey: "stockList", header: "주요종목", cell: () => <div className="text-slate-700">LG전자 · 로보스타 · 두산로보틱스</div> },
-    // {
-    //   accessorKey: "stats",
-    //   header: "현황",
-    //   cell: ({ row }) => {
-    //     const value = row.getValue("stats") as number[];
-    //     return (
-    //       <div className="flex items-center text-sm md:min-w-50">
-    //         <span className="md:block hidden">{value[0]}개중</span>
-    //         <span className="text-red-500 ml-2">{value[1]}</span>상승
-    //         <span className="text-muted-foreground ml-2">{value[2]}</span>보합
-    //         <span className="text-blue-500 ml-2">{value[3]}</span>하락
-    //       </div>
-    //     );
-    //   },
-    // },
+    {
+      accessorKey: "rsScore",
+      header: "RS 점수",
+      cell: ({ row }) => {
+        return <div className="md:w-16 w-12 text-right">{row.original.rsScore}</div>;
+      },
+    },
+    {
+      accessorKey: "shortRs",
+      header: "단기 RS",
+      cell: ({ row }) => {
+        if (isMobile) {
+          return;
+        } else {
+          return <div className="w-16 text-right">{row.original.shortTermRs}</div>;
+        }
+      },
+    },
+    {
+      accessorKey: "upDown",
+      header: "등락률",
+      cell: ({ row }) => {
+        const rate = row.original.changeRate ?? 0;
+        const colorClass = rate > 0 ? "text-rose-500" : rate < 0 ? "text-blue-500" : "text-muted-foreground";
+
+        return <div className={`md:w-20 w-16 text-right ${colorClass}`}>{row.original.changeRate ?? "-"}%</div>;
+      },
+    },
+    {
+      accessorKey: "stockList",
+      header: "주요종목",
+      cell: () => {
+        if (isMobile) {
+          return <div className="w-0" />;
+        } else {
+          return <div className="text-slate-700">-</div>;
+        }
+      },
+    },
   ];
 
-  // 데스크탑용 테이블
-  const table = useReactTable({ data: rows, columns, getCoreRowModel: getCoreRowModel() });
-  // 모바일용 테이블
-  const mobileTable = useReactTable({ data: mobileRows, columns, getCoreRowModel: getCoreRowModel() });
+  const table = useReactTable({
+    data: rows,
+    columns,
+    getCoreRowModel: getCoreRowModel(),
+    state: {
+      // 모바일: 순위 | 테마명 | RS 점수 | 등락률 만 노출
+      columnVisibility: isMobile ? { shortRs: false, stockList: false } : {},
+    },
+  });
 
   const renderRows = (rowList: ReturnType<typeof table.getRowModel>["rows"]) =>
     rowList.map((row) => (
@@ -214,7 +161,6 @@ export function IssueTheme() {
         className="h-12.25"
         onClick={() => {
           if (!isMobile) {
-            // setDetailOpen(true);
             setSelectIssue(row.original.original);
           } else {
             navigate(`/themeDetail/${row.original.themeCode}`, { state: { theme: row.original.original } });
@@ -222,7 +168,7 @@ export function IssueTheme() {
         }}
       >
         {row.getVisibleCells().map((cell) => (
-          <TableCell key={cell.id} className={cell.column.id === "themeName" ? "whitespace-normal w-60" : cell.column.id === "stockList" ? "w-full" : ""}>
+          <TableCell key={cell.id} className={cell.column.id === "themeName" ? "whitespace-normal w-60" : cell.column.id === "stockList" ? "md:w-full w-fit" : ""}>
             {flexRender(cell.column.columnDef.cell, cell.getContext())}
           </TableCell>
         ))}
@@ -230,31 +176,37 @@ export function IssueTheme() {
     ));
 
   return (
-    <div className="flex flex-col md:h-[calc(100vh-244px)] h-full">
-      {!isMobile && <IssueThemeFilter />}
-      <div className="flex justify-between gap-4 mb-4">
-        <div className="flex gap-2 items-center max-h-8 text-muted-foreground text-xs">
-          <div className="bg-muted p-2 rounded-xs flex align-middle gap-1">
-            <span>업데이트 일시 {basicData?.updatedAt ? format(new Date(basicData.updatedAt), "yyyy-MM-dd HH:mm:ss") : "-"}</span>
+    <div className="flex flex-col md:h-[calc(100vh-204px)] h-full">
+      {basicData?.filterCounts && <IssueThemeFilter filterCounts={basicData.filterCounts} />}
+      {!isMobile && (
+        <div className="flex justify-between gap-4 mb-4">
+          <div className="flex gap-2 items-center max-h-8 text-muted-foreground text-xs">
+            <div className="bg-muted p-2 rounded-xs flex align-middle gap-1">
+              <span>업데이트 일시 {basicData?.updatedAt ? format(new Date(basicData.updatedAt), "yyyy-MM-dd HH:mm:ss") : "-"}</span>
+            </div>
+            <span className="text-sm">전체 {basicData?.pagination.total ?? 0}건</span>
           </div>
-          <span className="text-sm">전체 {basicData?.total ?? 0}건</span>
         </div>
-      </div>
+      )}
 
       <div className="w-full border-t h-full overflow-hidden">
-        {/* 모바일: 무한 스크롤 단일 테이블 */}
+        {/* 모바일: 전체 데이터 단일 테이블 */}
         <div className="md:hidden w-full">
           {isLoading ? (
             <LoadingUi boxStyle="h-[calc(100vh-195px)]!" />
           ) : (
-            <>
-              <Table>
-                <TableBody>{renderRows(mobileTable.getRowModel().rows)}</TableBody>
-              </Table>
-              <div ref={observerTargetRef} className="h-10 flex items-center justify-center">
-                {mobileLoading && <span className="text-muted-foreground text-sm">불러오는 중...</span>}
-              </div>
-            </>
+            <Table>
+              {table.getHeaderGroups().map((hg) => (
+                <TableRow key={hg.id} className="font-medium">
+                  {hg.headers.map((header) => (
+                    <TableHead key={header.id} className="z-10 bg-background text-muted-foreground">
+                      {flexRender(header.column.columnDef.header, header.getContext())}
+                    </TableHead>
+                  ))}
+                </TableRow>
+              ))}
+              <TableBody>{renderRows(table.getRowModel().rows)}</TableBody>
+            </Table>
           )}
         </div>
 
@@ -267,7 +219,7 @@ export function IssueTheme() {
           ) : (
             <div className="flex w-full pt-2">
               <div className="flex-1 pr-4 overflow-y-auto">
-                <Table>
+                <Table className="relative">
                   <TableHeader>
                     {table.getHeaderGroups().map((hg) => (
                       <TableRow key={hg.id} className="hover:bg-transparent">
@@ -284,7 +236,7 @@ export function IssueTheme() {
                 </Table>
               </div>
               {selectIssue && (
-                <div className="size-full max-w-150 bg-white relative">
+                <div className="size-full max-w-150 bg-white relative overflow-y-auto">
                   <button
                     className="absolute right-0 top-1"
                     onClick={() => {
@@ -297,14 +249,8 @@ export function IssueTheme() {
                 </div>
               )}
             </div>
-            // <div className="size-full">
-            //   <TreeMapView />
-            // </div>
           )}
         </div>
-      </div>
-      <div className="h-9 md:flex hidden items-center text-xs text-muted-foreground mt-4">
-        <p>이슈 테마에 포함된 종목은 실시간 차트에서 조회되는 종목에 한해 제공됩니다.</p>
       </div>
       {detailOpen && selectIssue && <IssueDetailModal onClose={() => setDetailOpen(false)} selectIssue={selectIssue} />}
     </div>
