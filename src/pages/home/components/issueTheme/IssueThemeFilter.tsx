@@ -6,6 +6,7 @@ import { Checkbox } from "@/components/ui/checkbox";
 import { Field } from "@/components/ui/field";
 import { Label } from "@/components/ui/label";
 import type { IssueThemeFilterCounts } from "@/types/api/issueTheme";
+import { useIsMobile } from "@/hooks/use-mobile";
 
 interface IssueThemeFilterProps {
   filterCounts?: IssueThemeFilterCounts;
@@ -25,6 +26,8 @@ export default function IssueThemeFilter({ filterCounts }: IssueThemeFilterProps
     filterOption: ["all"],
     myTheme: false,
   });
+
+  const isMobile = useIsMobile();
 
   const isActive = (option: string) => {
     // "전체"가 활성화된 상태에서는 개별 항목은 무조건 비활성 UI
@@ -82,8 +85,8 @@ export default function IssueThemeFilter({ filterCounts }: IssueThemeFilterProps
   };
 
   return (
-    <div className="pb-4 md:border-b md:mb-4 flex items-center justify-between">
-      <div className="flex gap-2 flex-wrap items-center">
+    <div className="pb-4 pt-1 md:border-b md:mb-4 flex items-center justify-between w-full overflow-hidden">
+      <div className="flex gap-2 flex-wrap items-center md:w-fit w-full">
         <Tabs
           value={filterValue.viewType}
           onValueChange={(value) => {
@@ -99,24 +102,26 @@ export default function IssueThemeFilter({ filterCounts }: IssueThemeFilterProps
             <TabsTrigger value="heatmap">히트맵</TabsTrigger>
           </TabsList>
         </Tabs>
-        <div className="w-px h-6 bg-border" />
-        <Tabs
-          value={filterValue.sortType}
-          onValueChange={(value) => {
-            setFilterValue((prev) => ({
-              ...prev,
-              sortType: value as IssueThemeFilterType["sortType"],
-            }));
-          }}
-          className="w-full flex-1 md:flex-none md:w-fit "
-        >
-          <TabsList className="p-0.75 w-full md:w-fit">
-            <TabsTrigger value="rs">RS순</TabsTrigger>
-            <TabsTrigger value="momentum">모멘텀순</TabsTrigger>
-          </TabsList>
-        </Tabs>
+        {!isMobile && <div className="w-px h-6 bg-border" />}
+        {!isMobile && (
+          <Tabs
+            value={filterValue.sortType}
+            onValueChange={(value) => {
+              setFilterValue((prev) => ({
+                ...prev,
+                sortType: value as IssueThemeFilterType["sortType"],
+              }));
+            }}
+            className="w-full flex-1 md:flex-none md:w-fit "
+          >
+            <TabsList className="p-0.75 w-full md:w-fit">
+              <TabsTrigger value="rs">RS순</TabsTrigger>
+              <TabsTrigger value="momentum">모멘텀순</TabsTrigger>
+            </TabsList>
+          </Tabs>
+        )}
 
-        <div className="flex items-center gap-2">
+        <div className="flex items-center gap-2 md:w-fit w-full overflow-x-scroll">
           {filterOptions.map(({ key, label, count }) => (
             <Button
               key={key}
@@ -130,24 +135,26 @@ export default function IssueThemeFilter({ filterCounts }: IssueThemeFilterProps
           ))}
         </div>
       </div>
-      <div className="shrink-0">
-        <Field orientation="horizontal" className="gap-2">
-          <Checkbox
-            id="my-theme-checkbox"
-            name="my-theme-checkbox"
-            checked={filterValue.myTheme}
-            onClick={() =>
-              setFilterValue((prev) => ({
-                ...prev,
-                myTheme: !prev.myTheme,
-              }))
-            }
-          />
-          <Label htmlFor="my-theme-checkbox" className="text-slate-800 cursor-pointer">
-            내 관심 테마만 보기
-          </Label>
-        </Field>
-      </div>
+      {!isMobile && (
+        <div className="shrink-0">
+          <Field orientation="horizontal" className="gap-2">
+            <Checkbox
+              id="my-theme-checkbox"
+              name="my-theme-checkbox"
+              checked={filterValue.myTheme}
+              onClick={() =>
+                setFilterValue((prev) => ({
+                  ...prev,
+                  myTheme: !prev.myTheme,
+                }))
+              }
+            />
+            <Label htmlFor="my-theme-checkbox" className="text-slate-800 cursor-pointer">
+              내 관심 테마만 보기
+            </Label>
+          </Field>
+        </div>
+      )}
     </div>
   );
 }

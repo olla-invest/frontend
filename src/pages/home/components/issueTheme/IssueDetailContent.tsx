@@ -129,7 +129,7 @@ export default function IssueDetailContent({ selectIssue }: ContentProps) {
                       <span className="text-rose-500">{detailData?.risingCount}</span>/{detailData?.totalCount}
                     </span>
                   </div>
-                  {detailData?.streakBadge && (
+                  {!isMobile && detailData?.streakBadge && (
                     <div
                       className={`py-0.5 px-2 border rounded-lg text-xs font-medium ${detailData.streakBadge.tone === "RED" ? "text-rose-500" : detailData.streakBadge.tone === "BLUE" ? "text-blue-500" : "text-muted-foreground"}`}
                     >
@@ -141,6 +141,13 @@ export default function IssueDetailContent({ selectIssue }: ContentProps) {
             </div>
 
             <div className="py-1 flex gap-1 flex-wrap self-start">
+              {isMobile && detailData?.streakBadge && (
+                <div
+                  className={`py-0.5 px-2 border rounded-lg text-xs font-medium ${detailData.streakBadge.tone === "RED" ? "text-rose-500" : detailData.streakBadge.tone === "BLUE" ? "text-blue-500" : "text-muted-foreground"}`}
+                >
+                  {detailData?.streakBadge.label}
+                </div>
+              )}
               {detailData?.insights.map((e, i) => {
                 return (
                   <Badge variant="outline" key={i}>
@@ -165,7 +172,7 @@ export default function IssueDetailContent({ selectIssue }: ContentProps) {
 
           {/* 종목 */}
           <div className="px-6 mb-10 md:mb-4">
-            <div className="flex gap-2.5 justify-between items-center">
+            <div className="flex gap-2.5 justify-between items-center mb-4">
               <p className="text-xs text-muted-foreground">이슈 테마에 포함된 종목은 실시간 차트에서 조회되는 종목에 한해 제공됩니다.</p>
               <DropdownMenu>
                 <DropdownMenuTrigger asChild>
@@ -190,7 +197,7 @@ export default function IssueDetailContent({ selectIssue }: ContentProps) {
                 <TableHeader>
                   <TableRow className="font-medium">
                     {/* 기업명 - 모바일 sticky */}
-                    <TableHead className="sticky left-0 z-10 text-muted-foreground">종목명</TableHead>
+                    <TableHead className="sticky left-0 z-10 text-muted-foreground bg-background">종목명</TableHead>
                     <TableHead className="text-right text-muted-foreground bg-background">RS 점수</TableHead>
                     <TableHead className="text-right text-muted-foreground bg-background">단기 RS</TableHead>
                     <TableHead className="text-right text-muted-foreground bg-background">등락률</TableHead>
@@ -211,7 +218,7 @@ export default function IssueDetailContent({ selectIssue }: ContentProps) {
                     return (
                       <TableRow key={stock.stockCode} className="text-slate-700 h-10" onClick={() => handleStockClick(stock.stockCode)}>
                         {/* 기업명 - 모바일 sticky */}
-                        <TableCell className="sticky left-0 z-10 font-semibold text-slate-800">
+                        <TableCell className="sticky left-0 z-10 font-semibold text-slate-800 bg-background">
                           <div className="flex items-center gap-2">
                             <div className="size-8 rounded-full bg-[#D9D9D9] overflow-hidden text-center hidden md:block">
                               <img src={getStockImageUrl(stock.stockCode)} alt={stock.companyName} className="w-full h-full object-cover" />
@@ -249,48 +256,54 @@ export default function IssueDetailContent({ selectIssue }: ContentProps) {
           {/* 연관테마 */}
           <div className="px-6 py-2 mb-10 md:mb-0 flex flex-col gap-4">
             <h4 className="text-xl text-foreground font-semibold">연관테마</h4>
-            <div className="overflow-x-auto">
-              <Table className="md:w-full w-max">
-                <TableHeader>
-                  <TableRow className="font-medium">
-                    {/* 기업명 - 모바일 sticky */}
-                    <TableHead className="sticky left-0 z-10 bg-background text-muted-foreground">테마명</TableHead>
-                    <TableHead className="text-right text-muted-foreground bg-background">RS 점수</TableHead>
-                    <TableHead className="text-right text-muted-foreground bg-background">등락률</TableHead>
-                    <TableHead className="text-right text-muted-foreground bg-background">주요 종목</TableHead>
-                  </TableRow>
-                </TableHeader>
+            {detailData?.relatedThemes && detailData?.relatedThemes.length > 0 ? (
+              <div className="overflow-x-auto">
+                <Table className="md:w-full w-max">
+                  <TableHeader>
+                    <TableRow className="font-medium">
+                      {/* 기업명 - 모바일 sticky */}
+                      <TableHead className="sticky left-0 z-10 bg-background text-muted-foreground">테마명</TableHead>
+                      <TableHead className="text-right text-muted-foreground bg-background">RS 점수</TableHead>
+                      <TableHead className="text-right text-muted-foreground bg-background">등락률</TableHead>
+                      <TableHead className="text-right text-muted-foreground bg-background">주요 종목</TableHead>
+                    </TableRow>
+                  </TableHeader>
 
-                <TableBody>
-                  {detailData?.relatedThemes?.map((theme) => {
-                    const isUp = theme.changeRate > 0;
-                    const isDown = theme?.changeRate < 0;
+                  <TableBody>
+                    {detailData?.relatedThemes?.map((theme) => {
+                      const isUp = theme.changeRate > 0;
+                      const isDown = theme?.changeRate < 0;
 
-                    return (
-                      <TableRow key={theme.themeCode} className="text-slate-700 h-10">
-                        {/* 기업명 - 모바일 sticky */}
-                        <TableCell className="sticky left-0 z-10 font-semibold text-slate-800">
-                          <div className="flex items-center gap-2">
-                            <div className="size-8 rounded-md bg-[#D9D9D9] overflow-hidden text-center hidden md:block">
-                              <img src={getThemeIcon(theme.themeCode)} alt={theme.themeName} className="w-full h-full object-cover" />
+                      return (
+                        <TableRow key={theme.themeCode} className="text-slate-700 h-10">
+                          {/* 기업명 - 모바일 sticky */}
+                          <TableCell className="sticky left-0 z-10 font-semibold text-slate-800 bg-background">
+                            <div className="flex items-center gap-2">
+                              <div className="size-8 rounded-md bg-[#D9D9D9] overflow-hidden text-center hidden md:block">
+                                <img src={getThemeIcon(theme.themeCode)} alt={theme.themeName} className="w-full h-full object-cover" />
+                              </div>
+                              <span className="w-30 truncate">{theme.themeName}</span>
                             </div>
-                            <span className="w-30 truncate">{theme.themeName}</span>
-                          </div>
-                        </TableCell>
-                        <TableCell className="text-right">{theme.rsScore.toFixed(1)}</TableCell>
-                        <TableCell className="text-right">
-                          <div className={` ${isUp ? "text-rose-500" : isDown ? "text-blue-500" : "text-gray-400"}`}>
-                            {isUp && "+"}
-                            {theme.changeRate.toFixed(2)}%
-                          </div>
-                        </TableCell>
-                        <TableCell className="text-right">{theme.sharedStockCount || "-"}%</TableCell>
-                      </TableRow>
-                    );
-                  })}
-                </TableBody>
-              </Table>
-            </div>
+                          </TableCell>
+                          <TableCell className="text-right">{theme.rsScore.toFixed(1)}</TableCell>
+                          <TableCell className="text-right">
+                            <div className={` ${isUp ? "text-rose-500" : isDown ? "text-blue-500" : "text-gray-400"}`}>
+                              {isUp && "+"}
+                              {theme.changeRate.toFixed(2)}%
+                            </div>
+                          </TableCell>
+                          <TableCell className="text-right">{theme.sharedStockCount || "-"}%</TableCell>
+                        </TableRow>
+                      );
+                    })}
+                  </TableBody>
+                </Table>
+              </div>
+            ) : (
+              <div className="w-full h-12 flex items-center justify-center">
+                <p className="text-muted-foreground text-sm">연관 테마가 없습니다</p>
+              </div>
+            )}
           </div>
         </div>
       )}

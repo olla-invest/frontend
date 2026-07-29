@@ -196,15 +196,17 @@ export function IssueTheme() {
             <LoadingUi boxStyle="h-[calc(100vh-195px)]!" />
           ) : (
             <Table>
-              {table.getHeaderGroups().map((hg) => (
-                <TableRow key={hg.id} className="font-medium">
-                  {hg.headers.map((header) => (
-                    <TableHead key={header.id} className="z-10 bg-background text-muted-foreground">
-                      {flexRender(header.column.columnDef.header, header.getContext())}
-                    </TableHead>
-                  ))}
-                </TableRow>
-              ))}
+              <TableHeader>
+                {table.getHeaderGroups().map((hg) => (
+                  <TableRow key={hg.id} className="font-medium">
+                    {hg.headers.map((header) => (
+                      <TableHead key={header.id} className="z-10 bg-background text-muted-foreground">
+                        {flexRender(header.column.columnDef.header, header.getContext())}
+                      </TableHead>
+                    ))}
+                  </TableRow>
+                ))}
+              </TableHeader>
               <TableBody>{renderRows(table.getRowModel().rows)}</TableBody>
             </Table>
           )}
