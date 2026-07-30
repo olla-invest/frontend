@@ -1,9 +1,8 @@
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 
 import { Table, TableBody, TableCell, TableHeader, TableHead, TableRow } from "@/components/ui/table";
 import { getCoreRowModel, useReactTable, flexRender, type ColumnDef } from "@tanstack/react-table";
 
-import IssueDetailModal from "./issueTheme/IssueDetailModal";
 import { format } from "date-fns";
 
 import { getIssueTheme } from "@/api/issueTheme";
@@ -13,8 +12,9 @@ import { useIsMobile } from "@/hooks/use-mobile";
 import { useNavigate } from "react-router-dom";
 import { LoadingUi } from "@/components/LoadingUi";
 import { getThemeIcon } from "@/utils/ThemeIcon";
-import IssueThemeFilter from "./issueTheme/IssueThemeFilter";
+import IssueThemeFilter, { type IssueThemeFilterType } from "./issueTheme/IssueThemeFilter";
 import IssueDetailContent from "./issueTheme/IssueDetailContent";
+import TreeMapView from "./issueTheme/TreeMapView";
 
 interface IssueThemeRow {
   themeCode: number;
@@ -28,31 +28,39 @@ interface IssueThemeRow {
   original: IssueTheme;
 }
 
+// 개별 필터 옵션 하나가 item에 대해 참/거짓인지 판단
+const matchesOption = (item: IssueTheme, key: string): boolean => {
+  switch (key) {
+    case "rs":
+      return (item.rsScore ?? 0) >= 80;
+    case "theme":
+      return (item.stockCount ?? 0) >= 5;
+    case "rate5":
+      return (item.changeRate ?? 0) >= 5;
+    case "highPrice":
+      return (item.newHighCount ?? 0) > 0;
+    default:
+      return true;
+  }
+};
+
 export function IssueTheme() {
   const navigate = useNavigate();
   const [isLoading, setIsLoading] = useState(false);
 
   const [page] = useState(1);
   const [basicData, setBasicData] = useState<IssueThemeApiResponse>();
-  const [rows, setRows] = useState<IssueThemeRow[]>([]);
+  const [items, setItems] = useState<IssueTheme[]>([]);
 
   const isMobile = useIsMobile();
 
-  const [detailOpen, setDetailOpen] = useState(false);
   const [selectIssue, setSelectIssue] = useState<IssueTheme | null>();
-
-  const mapToRows = (themes: IssueTheme[]): IssueThemeRow[] =>
-    themes.map((item) => ({
-      themeCode: item.themeCode,
-      rank: String(item.rank),
-      themeName: item.themeName,
-      rsScore: item.rsScore,
-      shortTermRs: item.shortTermRs,
-      changeRate: item.changeRate,
-      streakBadge: item.streakBadge,
-      stats: [item.totalCount, item.risingCount, item.totalCount - item.risingCount, 0],
-      original: item,
-    }));
+  const [filterValue, setFilterValue] = useState<IssueThemeFilterType>({
+    viewType: "rank",
+    sortType: "rs",
+    filterOption: ["all"],
+    isFavorite: false,
+  });
 
   // 전체 데이터 fetch (모바일/데스크탑 공통)
   const getIssueData = async () => {
@@ -61,7 +69,7 @@ export function IssueTheme() {
       const probe = await getIssueTheme(1, 1);
       const res = await getIssueTheme(probe.pagination.total, 1);
       setBasicData(res);
-      setRows(mapToRows(res.items));
+      setItems(res.items);
     } catch (err) {
       console.log(err);
     } finally {
@@ -72,6 +80,45 @@ export function IssueTheme() {
   useEffect(() => {
     getIssueData();
   }, [page]);
+
+  // 필터/정렬이 적용된 최종 목록
+  const filteredItems = useMemo(() => {
+    const activeKeys = filterValue.filterOption.filter((k) => k !== "all");
+
+    let result = items.filter((item) => {
+      // 전체가 선택되어 있으면 개별 조건은 건너뜀
+      const passesOptionFilters = filterValue.filterOption.includes("all") || activeKeys.every((key) => matchesOption(item, key));
+
+      const passesMyTheme = !filterValue.isFavorite || item.isFavorite;
+
+      return passesOptionFilters && passesMyTheme;
+    });
+
+    result = [...result].sort((a, b) => {
+      if (filterValue.sortType === "momentum") {
+        return (b.momentum ?? 0) - (a.momentum ?? 0);
+      }
+      return (b.rsScore ?? 0) - (a.rsScore ?? 0);
+    });
+
+    return result;
+  }, [items, filterValue]);
+
+  const rows: IssueThemeRow[] = useMemo(
+    () =>
+      filteredItems.map((item) => ({
+        themeCode: item.themeCode,
+        rank: String(item.rank),
+        themeName: item.themeName,
+        rsScore: item.rsScore,
+        shortTermRs: item.shortTermRs,
+        changeRate: item.changeRate,
+        streakBadge: item.streakBadge,
+        stats: [item.totalCount, item.risingCount, item.totalCount - item.risingCount, 0],
+        original: item,
+      })),
+    [filteredItems],
+  );
 
   const columns: ColumnDef<IssueThemeRow>[] = [
     {
@@ -177,14 +224,14 @@ export function IssueTheme() {
 
   return (
     <div className="flex flex-col md:h-[calc(100vh-204px)] h-full">
-      {basicData?.filterCounts && <IssueThemeFilter filterCounts={basicData.filterCounts} />}
+      {basicData?.filterCounts && <IssueThemeFilter filterCounts={basicData.filterCounts} value={filterValue} onChange={setFilterValue} />}
       {!isMobile && (
         <div className="flex justify-between gap-4 mb-4">
           <div className="flex gap-2 items-center max-h-8 text-muted-foreground text-xs">
             <div className="bg-muted p-2 rounded-xs flex align-middle gap-1">
               <span>업데이트 일시 {basicData?.updatedAt ? format(new Date(basicData.updatedAt), "yyyy-MM-dd HH:mm:ss") : "-"}</span>
             </div>
-            <span className="text-sm">전체 {basicData?.pagination.total ?? 0}건</span>
+            <span className="text-sm">전체 {rows.length ?? 0}건</span>
           </div>
         </div>
       )}
@@ -218,7 +265,7 @@ export function IssueTheme() {
             <div className="w-full h-full flex items-center justify-center md:min-h-112.5">
               <LoadingUi message="이슈 테마 데이터를 불러오는 중입니다..." />
             </div>
-          ) : (
+          ) : filterValue.viewType === "rank" ? (
             <div className="flex w-full pt-2">
               <div className="flex-1 pr-4 overflow-y-auto">
                 <Table className="relative">
@@ -238,7 +285,26 @@ export function IssueTheme() {
                 </Table>
               </div>
               {selectIssue && (
-                <div className="size-full max-w-150 bg-white relative overflow-y-auto">
+                <div className="size-full max-w-150 bg-white relative overflow-y-auto border-l">
+                  <button
+                    className="absolute right-0 top-1"
+                    onClick={() => {
+                      setSelectIssue(null);
+                    }}
+                  >
+                    <i className="icon icon-x-large" />
+                  </button>
+                  <IssueDetailContent selectIssue={selectIssue} />
+                </div>
+              )}
+            </div>
+          ) : (
+            <div className="flex w-full pt-2 gap-6">
+              <div className="flex-1 overflow-hidden border-2 border-slate-600 rounded-md">
+                <TreeMapView items={filteredItems} onSelect={setSelectIssue} />
+              </div>
+              {selectIssue && (
+                <div className="size-full max-w-150 bg-white relative overflow-y-auto border-l">
                   <button
                     className="absolute right-0 top-1"
                     onClick={() => {
@@ -254,7 +320,6 @@ export function IssueTheme() {
           )}
         </div>
       </div>
-      {detailOpen && selectIssue && <IssueDetailModal onClose={() => setDetailOpen(false)} selectIssue={selectIssue} />}
     </div>
   );
 }

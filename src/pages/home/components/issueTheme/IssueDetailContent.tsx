@@ -36,6 +36,7 @@ export default function IssueDetailContent({ selectIssue }: ContentProps) {
         setIsLoading(true);
         const res = await getIssueThemeDetail(selectIssue.themeCode);
         setDetailData(res);
+        setIsBookmark(isInWatchThemeList(themeList ?? [], selectIssue.themeCode));
       } catch (err) {
         console.log(err);
       } finally {
@@ -64,7 +65,7 @@ export default function IssueDetailContent({ selectIssue }: ContentProps) {
       ) : (
         <div>
           {/* 헤더 */}
-          <div className="flex justify-between items-center flex-wrap gap-2 px-6 py-2">
+          <div className="flex flex-col gap-2 px-6 py-2">
             <div className="flex items-center gap-2.5">
               <div className="rounded-md size-16 overflow-hidden shrink-0">
                 <img src={getThemeIcon(detailData?.themeCode)} alt={detailData?.themeName} className="w-full" />
@@ -140,7 +141,7 @@ export default function IssueDetailContent({ selectIssue }: ContentProps) {
               </div>
             </div>
 
-            <div className="py-1 flex gap-1 flex-wrap self-start">
+            <div className="py-1 flex gap-1 flex-wrap">
               {isMobile && detailData?.streakBadge && (
                 <div
                   className={`py-0.5 px-2 border rounded-lg text-xs font-medium ${detailData.streakBadge.tone === "RED" ? "text-rose-500" : detailData.streakBadge.tone === "BLUE" ? "text-blue-500" : "text-muted-foreground"}`}
@@ -176,7 +177,7 @@ export default function IssueDetailContent({ selectIssue }: ContentProps) {
               <p className="text-xs text-muted-foreground">이슈 테마에 포함된 종목은 실시간 차트에서 조회되는 종목에 한해 제공됩니다.</p>
               <DropdownMenu>
                 <DropdownMenuTrigger asChild>
-                  <Button variant="outline">
+                  <Button variant="outline" size="sm">
                     거래 대금
                     <ChevronDown />
                   </Button>

@@ -1,5 +1,3 @@
-import { useState } from "react";
-
 import { Button } from "@/components/ui/button";
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Checkbox } from "@/components/ui/checkbox";
@@ -8,33 +6,28 @@ import { Label } from "@/components/ui/label";
 import type { IssueThemeFilterCounts } from "@/types/api/issueTheme";
 import { useIsMobile } from "@/hooks/use-mobile";
 
-interface IssueThemeFilterProps {
-  filterCounts?: IssueThemeFilterCounts;
-}
-
-interface IssueThemeFilterType {
+export interface IssueThemeFilterType {
   viewType: "rank" | "heatmap";
   sortType: "rs" | "momentum";
   filterOption: string[];
-  myTheme: boolean;
+  isFavorite: boolean;
 }
 
-export default function IssueThemeFilter({ filterCounts }: IssueThemeFilterProps) {
-  const [filterValue, setFilterValue] = useState<IssueThemeFilterType>({
-    viewType: "rank",
-    sortType: "rs",
-    filterOption: ["all"],
-    myTheme: false,
-  });
+interface IssueThemeFilterProps {
+  filterCounts?: IssueThemeFilterCounts;
+  value: IssueThemeFilterType;
+  onChange: (value: IssueThemeFilterType) => void;
+}
 
+export default function IssueThemeFilter({ filterCounts, value, onChange }: IssueThemeFilterProps) {
   const isMobile = useIsMobile();
 
   const isActive = (option: string) => {
     // "전체"가 활성화된 상태에서는 개별 항목은 무조건 비활성 UI
-    if (option !== "all" && filterValue.filterOption.includes("all")) {
+    if (option !== "all" && value.filterOption.includes("all")) {
       return false;
     }
-    return filterValue.filterOption.includes(option);
+    return value.filterOption.includes(option);
   };
 
   const filterOptions = [
@@ -49,54 +42,38 @@ export default function IssueThemeFilter({ filterCounts }: IssueThemeFilterProps
   const individualKeys = filterOptions.filter((o) => o.key !== "all").map((o) => o.key);
 
   const toggleFilter = (key: string) => {
-    setFilterValue((prev) => {
-      // "전체"를 직접 클릭한 경우
-      if (key === "all") {
-        // 이미 "전체"가 켜져있으면 끄지 않고 유지 (아무것도 선택 안 된 상태 방지)
-        return {
-          ...prev,
-          filterOption: ["all"],
-        };
-      }
+    // "전체"를 직접 클릭한 경우
+    if (key === "all") {
+      // 이미 "전체"가 켜져있으면 끄지 않고 유지 (아무것도 선택 안 된 상태 방지)
+      onChange({ ...value, filterOption: ["all"] });
+      return;
+    }
 
-      // 개별 항목을 클릭한 경우
-      const isCurrentlyActive = prev.filterOption.includes(key);
-      let nextOptions = isCurrentlyActive ? prev.filterOption.filter((i) => i !== key) : [...prev.filterOption, key];
+    // 개별 항목을 클릭한 경우
+    const isCurrentlyActive = value.filterOption.includes(key);
+    let nextOptions = isCurrentlyActive ? value.filterOption.filter((i) => i !== key) : [...value.filterOption, key];
 
-      // "all"은 별도로 관리 (일단 제거하고 아래서 재계산)
-      nextOptions = nextOptions.filter((i) => i !== "all");
+    // "all"은 별도로 관리 (일단 제거하고 아래서 재계산)
+    nextOptions = nextOptions.filter((i) => i !== "all");
 
-      // 개별 항목이 전부 선택되어 있으면 "all"도 활성화
-      const allSelected = individualKeys.every((k) => nextOptions.includes(k));
-      if (allSelected) {
-        nextOptions = ["all"];
-      }
+    // 개별 항목이 전부 선택되어 있으면 "all"도 활성화
+    const allSelected = individualKeys.every((k) => nextOptions.includes(k));
+    if (allSelected) {
+      nextOptions = ["all"];
+    }
 
-      // 아무 것도 선택 안 된 상태면 "전체"로 기본 설정
-      if (nextOptions.length === 0) {
-        nextOptions = ["all"];
-      }
+    // 아무 것도 선택 안 된 상태면 "전체"로 기본 설정
+    if (nextOptions.length === 0) {
+      nextOptions = ["all"];
+    }
 
-      return {
-        ...prev,
-        filterOption: nextOptions,
-      };
-    });
+    onChange({ ...value, filterOption: nextOptions });
   };
 
   return (
     <div className="pb-4 pt-1 md:border-b md:mb-4 flex items-center justify-between w-full overflow-hidden">
       <div className="flex gap-2 flex-wrap items-center md:w-fit w-full">
-        <Tabs
-          value={filterValue.viewType}
-          onValueChange={(value) => {
-            setFilterValue((prev) => ({
-              ...prev,
-              viewType: value as IssueThemeFilterType["viewType"],
-            }));
-          }}
-          className="w-full flex-1 md:flex-none md:w-fit "
-        >
+        <Tabs value={value.viewType} onValueChange={(v) => onChange({ ...value, viewType: v as IssueThemeFilterType["viewType"] })} className="w-full flex-1 md:flex-none md:w-fit ">
           <TabsList className="p-0.75 w-full md:w-fit">
             <TabsTrigger value="rank">순위</TabsTrigger>
             <TabsTrigger value="heatmap">히트맵</TabsTrigger>
@@ -104,16 +81,7 @@ export default function IssueThemeFilter({ filterCounts }: IssueThemeFilterProps
         </Tabs>
         {!isMobile && <div className="w-px h-6 bg-border" />}
         {!isMobile && (
-          <Tabs
-            value={filterValue.sortType}
-            onValueChange={(value) => {
-              setFilterValue((prev) => ({
-                ...prev,
-                sortType: value as IssueThemeFilterType["sortType"],
-              }));
-            }}
-            className="w-full flex-1 md:flex-none md:w-fit "
-          >
+          <Tabs value={value.sortType} onValueChange={(v) => onChange({ ...value, sortType: v as IssueThemeFilterType["sortType"] })} className="w-full flex-1 md:flex-none md:w-fit ">
             <TabsList className="p-0.75 w-full md:w-fit">
               <TabsTrigger value="rs">RS순</TabsTrigger>
               <TabsTrigger value="momentum">모멘텀순</TabsTrigger>
@@ -138,17 +106,7 @@ export default function IssueThemeFilter({ filterCounts }: IssueThemeFilterProps
       {!isMobile && (
         <div className="shrink-0">
           <Field orientation="horizontal" className="gap-2">
-            <Checkbox
-              id="my-theme-checkbox"
-              name="my-theme-checkbox"
-              checked={filterValue.myTheme}
-              onClick={() =>
-                setFilterValue((prev) => ({
-                  ...prev,
-                  myTheme: !prev.myTheme,
-                }))
-              }
-            />
+            <Checkbox id="my-theme-checkbox" name="my-theme-checkbox" checked={value.isFavorite} onClick={() => onChange({ ...value, isFavorite: !value.isFavorite })} />
             <Label htmlFor="my-theme-checkbox" className="text-slate-800 cursor-pointer">
               내 관심 테마만 보기
             </Label>
