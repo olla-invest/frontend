@@ -18,16 +18,10 @@ interface TreemapNode {
 // RS 점수 구간별 색상
 const getColorByRsScore = (score: number | null): string => {
   const rs = score ?? 0;
-
-  if (rs >= 90) return "#F43F5E";
-  if (rs >= 80) return "#E8546A";
-  if (rs >= 70) return "#CC6A7A";
-  if (rs >= 60) return "#A9718A";
-  if (rs >= 50) return "#64748B";
-  if (rs >= 40) return "#6B7D9E";
-  if (rs >= 30) return "#5B82B8";
-  if (rs >= 20) return "#4882CF";
-  if (rs >= 10) return "#3B82F6";
+  if (rs >= 95) return "#f43f52";
+  if (rs >= 90) return "#e8546a";
+  if (rs >= 85) return "#cc6a7a";
+  if (rs >= 80) return "#a9718a";
   return "#3B82F6";
 };
 
