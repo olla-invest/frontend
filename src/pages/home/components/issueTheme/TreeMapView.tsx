@@ -83,7 +83,6 @@ const CustomizedContent = (props: any) => {
 
 export default function TreeMapView({ items, onSelect }: TreeMapViewProps) {
   const data = buildTreemapData(items);
-  console.log(items);
 
   if (data.length === 0) {
     return <div className="flex items-center justify-center w-full h-full text-muted-foreground text-sm">표시할 테마가 없습니다.</div>;
