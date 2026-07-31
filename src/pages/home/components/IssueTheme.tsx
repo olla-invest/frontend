@@ -1,6 +1,7 @@
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 
 import { Table, TableBody, TableCell, TableHeader, TableHead, TableRow } from "@/components/ui/table";
+import { InputGroup, InputGroupAddon } from "@/components/ui/input-group";
 import { getCoreRowModel, useReactTable, flexRender, type ColumnDef } from "@tanstack/react-table";
 
 import { format } from "date-fns";
@@ -44,11 +45,24 @@ const matchesOption = (item: IssueTheme, key: string): boolean => {
   }
 };
 
+// 검색어와 일치하는 부분을 하이라이트
+const highlightMatch = (text: string, query: string) => {
+  if (!query) return text;
+  const idx = text.toLowerCase().indexOf(query.toLowerCase());
+  if (idx === -1) return text;
+  return (
+    <>
+      {text.slice(0, idx)}
+      <span className="text-primary font-semibold">{text.slice(idx, idx + query.length)}</span>
+      {text.slice(idx + query.length)}
+    </>
+  );
+};
+
 export function IssueTheme() {
   const navigate = useNavigate();
   const [isLoading, setIsLoading] = useState(false);
 
-  const [page] = useState(1);
   const [basicData, setBasicData] = useState<IssueThemeApiResponse>();
   const [items, setItems] = useState<IssueTheme[]>([]);
 
@@ -62,6 +76,12 @@ export function IssueTheme() {
     isFavorite: false,
   });
 
+  // 검색 관련 state - API 호출 없이 이미 불러온 items 안에서 자동완성 처리
+  const [search, setSearch] = useState("");
+  const [searchTerm, setSearchTerm] = useState("");
+  const [suggestOpen, setSuggestOpen] = useState(false);
+  const searchWrapperRef = useRef<HTMLDivElement>(null);
+
   // 전체 데이터 fetch (모바일/데스크탑 공통)
   const getIssueData = async () => {
     setIsLoading(true);
@@ -70,6 +90,9 @@ export function IssueTheme() {
       const res = await getIssueTheme(probe.pagination.total, 1);
       setBasicData(res);
       setItems(res.items);
+      if (res.items && res.items.length > 0) {
+        setSelectIssue(res.items[0]);
+      }
     } catch (err) {
       console.log(err);
     } finally {
@@ -79,30 +102,63 @@ export function IssueTheme() {
 
   useEffect(() => {
     getIssueData();
-  }, [page]);
+  }, []);
 
-  // 필터/정렬이 적용된 최종 목록
+  // 바깥 클릭 시 자동완성 닫기
+  useEffect(() => {
+    const handleClickOutside = (e: MouseEvent) => {
+      if (searchWrapperRef.current && !searchWrapperRef.current.contains(e.target as Node)) {
+        setSuggestOpen(false);
+      }
+    };
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => document.removeEventListener("mousedown", handleClickOutside);
+  }, []);
+
+  // items 안에서 테마명 기준 자동완성 후보 계산
+  const suggestions = useMemo(() => {
+    const q = search.trim();
+    if (!q) return [];
+    return items.filter((item) => item.themeName.toLowerCase().includes(q.toLowerCase())).slice(0, 10);
+  }, [items, search]);
+
+  const commitSearch = (value?: string) => {
+    const v = value !== undefined ? value : search;
+    setSearchTerm(v.trim());
+  };
+
+  const handleSelectSuggestion = (item: IssueTheme) => {
+    setSearch(item.themeName);
+    setSearchTerm(item.themeName);
+    setSuggestOpen(false);
+    setSelectIssue(item);
+  };
+
+  // 필터/검색/정렬이 적용된 최종 목록
   const filteredItems = useMemo(() => {
     const activeKeys = filterValue.filterOption.filter((k) => k !== "all");
 
     let result = items.filter((item) => {
       // 전체가 선택되어 있으면 개별 조건은 건너뜀
       const passesOptionFilters = filterValue.filterOption.includes("all") || activeKeys.every((key) => matchesOption(item, key));
-
       const passesMyTheme = !filterValue.isFavorite || item.isFavorite;
+      const passesSearch = !searchTerm || item.themeName.toLowerCase().includes(searchTerm.toLowerCase());
 
-      return passesOptionFilters && passesMyTheme;
+      return passesOptionFilters && passesMyTheme && passesSearch;
     });
 
     result = [...result].sort((a, b) => {
       if (filterValue.sortType === "momentum") {
         return (b.momentum ?? 0) - (a.momentum ?? 0);
       }
+      if (filterValue.sortType === "rate") {
+        return (b.changeRate ?? 0) - (a.changeRate ?? 0);
+      }
       return (b.rsScore ?? 0) - (a.rsScore ?? 0);
     });
 
     return result;
-  }, [items, filterValue]);
+  }, [items, filterValue, searchTerm]);
 
   const rows: IssueThemeRow[] = useMemo(
     () =>
@@ -225,23 +281,102 @@ export function IssueTheme() {
   return (
     <div className="flex flex-col md:h-[calc(100vh-204px)] h-full">
       {basicData?.filterCounts && <IssueThemeFilter filterCounts={basicData.filterCounts} value={filterValue} onChange={setFilterValue} />}
-      {!isMobile && (
-        <div className="flex justify-between gap-4 mb-4">
-          <div className="flex gap-2 items-center max-h-8 text-muted-foreground text-xs">
-            <div className="bg-muted p-2 rounded-xs flex align-middle gap-1">
+      <div className="flex justify-between gap-4 mb-4">
+        {filterValue.viewType === "rank" && (
+          <div className="flex gap-2 items-center max-h-8 w-full">
+            <div className="relative w-full max-w-80" ref={searchWrapperRef}>
+              <InputGroup className={`h-8 w-full ${suggestOpen && search.trim().length > 0 ? "rounded-b-none border-b-0" : ""}`}>
+                <InputGroupAddon align="inline-start" className="mr-0!">
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setSearch("");
+                    }}
+                    className="cursor-pointer mb-1"
+                  >
+                    <i className="icon icon-search" />
+                  </button>
+                </InputGroupAddon>
+                <input
+                  placeholder="테마명을 검색해주세요 (예 : AI, 2차전지 등)"
+                  className="text-sm text-foreground placeholder:text-muted-foreground w-full"
+                  onChange={(e) => {
+                    setSearch(e.target.value);
+                    setSuggestOpen(true);
+                  }}
+                  onFocus={() => {
+                    setSuggestOpen(true);
+                  }}
+                  onKeyDown={(e) => {
+                    if (e.key === "Enter") {
+                      e.preventDefault();
+                      commitSearch();
+                      setSuggestOpen(false);
+                    } else if (e.key === "Escape") {
+                      setSuggestOpen(false);
+                    }
+                  }}
+                  value={search}
+                />
+                {search.length > 0 && (
+                  <InputGroupAddon align="inline-end" className="mr-0!">
+                    <button
+                      type="button"
+                      onClick={() => {
+                        setSearch("");
+                        setSearchTerm("");
+                        setSuggestOpen(false);
+                      }}
+                      className="cursor-pointer mb-1"
+                    >
+                      <i className="icon icon-circle-x" />
+                    </button>
+                  </InputGroupAddon>
+                )}
+              </InputGroup>
+
+              {suggestOpen && search.trim().length > 0 && (
+                <div className="absolute top-full left-0 right-0 p-1 z-20 bg-white border rounded-md rounded-t-none shadow-md max-h-80 overflow-y-auto">
+                  <div className="flex flex-col">
+                    <span className="py-1.5 px-2 text-xs text-muted-foreground font-medium">검색결과 - 테마명 '{search}'</span>
+                    {suggestions.length > 0 ? (
+                      suggestions.map((item) => (
+                        <button
+                          type="button"
+                          key={item.themeCode}
+                          onClick={() => handleSelectSuggestion(item)}
+                          className="w-full rounded-sm flex items-center gap-2 px-3 py-2 text-sm text-left hover:bg-muted cursor-pointer"
+                        >
+                          <span className="flex-1 truncate text-slate-800">{highlightMatch(item.themeName, search)}</span>
+                          <span className="text-popover-foreground text-sm shrink-0">
+                            RS {item.rsScore ?? "-"} · {item.rank}위
+                          </span>
+                        </button>
+                      ))
+                    ) : (
+                      <div className="px-3 py-3 text-sm text-muted-foreground text-center">검색 결과가 없습니다.</div>
+                    )}
+                  </div>
+                </div>
+              )}
+            </div>
+          </div>
+        )}
+        {!isMobile && (
+          <div className="flex gap-2 items-center max-h-8 text-muted-foreground text-xs shrink-0">
+            <div className="bg-muted p-2 rounded-md flex align-middle gap-1">
               <span>업데이트 일시 {basicData?.updatedAt ? format(new Date(basicData.updatedAt), "yyyy-MM-dd HH:mm:ss") : "-"}</span>
             </div>
-            <span className="text-sm">전체 {rows.length ?? 0}건</span>
           </div>
-        </div>
-      )}
+        )}
+      </div>
 
-      <div className="w-full border-t h-full overflow-hidden">
+      <div className="w-full h-full overflow-hidden">
         {/* 모바일: 전체 데이터 단일 테이블 */}
         <div className="md:hidden w-full">
           {isLoading ? (
             <LoadingUi boxStyle="h-[calc(100vh-195px)]!" />
-          ) : (
+          ) : filterValue.viewType === "rank" ? (
             <Table>
               <TableHeader>
                 {table.getHeaderGroups().map((hg) => (
@@ -256,6 +391,10 @@ export function IssueTheme() {
               </TableHeader>
               <TableBody>{renderRows(table.getRowModel().rows)}</TableBody>
             </Table>
+          ) : (
+            <div className="flex-1 h-[100vh] overflow-hidden border-2 border-slate-600 rounded-md">
+              <TreeMapView items={filteredItems} onSelect={setSelectIssue} />
+            </div>
           )}
         </div>
 
@@ -300,7 +439,7 @@ export function IssueTheme() {
             </div>
           ) : (
             <div className="flex w-full pt-2 gap-6">
-              <div className="flex-1 overflow-hidden border-2 border-slate-600 rounded-md">
+              <div className="flex-1 overflow-hidden  rounded-md">
                 <TreeMapView items={filteredItems} onSelect={setSelectIssue} />
               </div>
               {selectIssue && (

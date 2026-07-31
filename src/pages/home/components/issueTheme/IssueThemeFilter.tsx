@@ -8,7 +8,7 @@ import { useIsMobile } from "@/hooks/use-mobile";
 
 export interface IssueThemeFilterType {
   viewType: "rank" | "heatmap";
-  sortType: "rs" | "momentum";
+  sortType: "rs" | "momentum" | "rate";
   filterOption: string[];
   isFavorite: boolean;
 }
@@ -71,37 +71,60 @@ export default function IssueThemeFilter({ filterCounts, value, onChange }: Issu
   };
 
   return (
-    <div className="pb-4 pt-1 md:border-b md:mb-4 flex items-center justify-between w-full overflow-hidden">
-      <div className="flex gap-2 flex-wrap items-center md:w-fit w-full">
-        <Tabs value={value.viewType} onValueChange={(v) => onChange({ ...value, viewType: v as IssueThemeFilterType["viewType"] })} className="w-full flex-1 md:flex-none md:w-fit ">
+    <div className="pb-4 pt-1 border-b md:mb-4 flex items-center justify-between w-full overflow-hidden">
+      <div className="flex gap-4 flex-col md:flex-row md:gap-2 flex-wrap md:w-fit w-full">
+        <Tabs
+          value={value.viewType}
+          onValueChange={(v) => {
+            const nextViewType = v as IssueThemeFilterType["viewType"];
+            onChange({
+              ...value,
+              viewType: nextViewType,
+              filterOption: nextViewType === "heatmap" ? ["rs"] : ["all"],
+              sortType: nextViewType === "heatmap" ? "rate" : "rs",
+            });
+          }}
+          className="w-full flex-1 md:flex-none md:w-fit"
+        >
           <TabsList className="p-0.75 w-full md:w-fit">
             <TabsTrigger value="rank">순위</TabsTrigger>
             <TabsTrigger value="heatmap">히트맵</TabsTrigger>
           </TabsList>
         </Tabs>
         {!isMobile && <div className="w-px h-6 bg-border" />}
-        {!isMobile && (
-          <Tabs value={value.sortType} onValueChange={(v) => onChange({ ...value, sortType: v as IssueThemeFilterType["sortType"] })} className="w-full flex-1 md:flex-none md:w-fit ">
+        {value.viewType === "rank" && (
+          <div className="flex gap-2 md:w-fit w-full overflow-x-scroll">
+            <Tabs value={value.sortType} onValueChange={(v) => onChange({ ...value, sortType: v as IssueThemeFilterType["sortType"] })} className="w-full flex-1 md:flex-none md:w-fit ">
+              <TabsList className="p-0.75 w-full md:w-fit">
+                <TabsTrigger value="rs">RS순</TabsTrigger>
+                <TabsTrigger value="momentum">모멘텀순</TabsTrigger>
+              </TabsList>
+            </Tabs>
+
+            <div className="flex items-center gap-2">
+              {filterOptions.map(({ key, label, count }) => (
+                <Button
+                  key={key}
+                  variant="outline"
+                  className={`shadow-none gap-1 py-2 px-3 ${isActive(key) ? "text-foreground border-gray-500" : "text-muted-foreground"}`}
+                  onClick={() => toggleFilter(key)}
+                >
+                  {label}
+                  <span className="font-medium text-primary text-sm">{count}</span>
+                </Button>
+              ))}
+            </div>
+          </div>
+        )}
+        {value.viewType === "heatmap" && (
+          <Tabs value={value.sortType} onValueChange={(v) => onChange({ ...value, sortType: v as IssueThemeFilterType["sortType"] })} className="w-full flex-1 md:flex-none md:w-fit">
             <TabsList className="p-0.75 w-full md:w-fit">
-              <TabsTrigger value="rs">RS순</TabsTrigger>
+              <TabsTrigger value="rate">등락률</TabsTrigger>
+              <TabsTrigger value="rs">RS</TabsTrigger>
               <TabsTrigger value="momentum">모멘텀순</TabsTrigger>
             </TabsList>
           </Tabs>
         )}
-
-        <div className="flex items-center gap-2 md:w-fit w-full overflow-x-scroll">
-          {filterOptions.map(({ key, label, count }) => (
-            <Button
-              key={key}
-              variant="outline"
-              className={`shadow-none gap-1 py-2 px-3 ${isActive(key) ? "text-foreground border-gray-500" : "text-muted-foreground"}`}
-              onClick={() => toggleFilter(key)}
-            >
-              {label}
-              <span className="font-medium text-primary text-sm">{count}</span>
-            </Button>
-          ))}
-        </div>
       </div>
       {!isMobile && (
         <div className="shrink-0">

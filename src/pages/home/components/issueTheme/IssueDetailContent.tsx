@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 
 import { Badge } from "@/components/ui/badge";
 
@@ -20,6 +20,16 @@ import { getThemeIcon } from "@/utils/ThemeIcon";
 interface ContentProps {
   selectIssue: IssueTheme;
 }
+
+// 종목 정렬 옵션
+type StockSortType = "rs" | "rate" | "prevRatio";
+
+const STOCK_SORT_OPTIONS: { key: StockSortType; label: string }[] = [
+  { key: "rs", label: "RS 점수 높은순" },
+  { key: "rate", label: "등락률 높은순" },
+  { key: "prevRatio", label: "전일비 순" },
+];
+
 export default function IssueDetailContent({ selectIssue }: ContentProps) {
   const isMobile = useIsMobile();
   const [detailData, setDetailData] = useState<IssueThemeDetailApiResponse>();
@@ -27,6 +37,17 @@ export default function IssueDetailContent({ selectIssue }: ContentProps) {
   const { themeList } = useWatchThemeStore();
   const [isBookmark, setIsBookmark] = useState(isInWatchThemeList(themeList ?? [], selectIssue.themeCode));
   const navigate = useNavigate();
+
+  // 종목 정렬 - 디폴트 RS 점수 높은순
+  const [stockSort, setStockSort] = useState<StockSortType>("rs");
+
+  // 테마가 바뀌면 정렬 기준을 디폴트로 리셋
+  // (effect에서 setState를 동기 호출하는 대신, 렌더링 중 상태를 조정하는 React 권장 패턴 사용)
+  const [prevThemeCode, setPrevThemeCode] = useState(selectIssue.themeCode);
+  if (prevThemeCode !== selectIssue.themeCode) {
+    setPrevThemeCode(selectIssue.themeCode);
+    setStockSort("rs");
+  }
 
   const BASE_URL = import.meta.env.VITE_API_BASE_URL;
 
@@ -45,6 +66,21 @@ export default function IssueDetailContent({ selectIssue }: ContentProps) {
     };
     getIssueDetailData();
   }, [selectIssue]);
+
+  const sortedStocks = useMemo(() => {
+    const stocks = detailData?.stocks ?? [];
+    return [...stocks].sort((a, b) => {
+      if (stockSort === "rate") {
+        return b.changeRate - a.changeRate;
+      }
+      if (stockSort === "prevRatio") {
+        return b.previousTradingValueRatio - a.previousTradingValueRatio;
+      }
+      return b.rsScore - a.rsScore;
+    });
+  }, [detailData?.stocks, stockSort]);
+
+  const currentSortLabel = STOCK_SORT_OPTIONS.find((o) => o.key === stockSort)?.label ?? STOCK_SORT_OPTIONS[0].label;
 
   const getStockImageUrl = (stockCode: string) => {
     return `${BASE_URL}/stock-image/${stockCode}.png`;
@@ -178,16 +214,18 @@ export default function IssueDetailContent({ selectIssue }: ContentProps) {
               <DropdownMenu>
                 <DropdownMenuTrigger asChild>
                   <Button variant="outline" size="sm">
-                    거래 대금
+                    {currentSortLabel}
                     <ChevronDown />
                   </Button>
                 </DropdownMenuTrigger>
                 <DropdownMenuContent className="p-0" align="end">
-                  <DropdownMenuRadioGroup>
+                  <DropdownMenuRadioGroup value={stockSort} onValueChange={(v) => setStockSort(v as StockSortType)}>
                     <div className="px-2 py-1.5 flex flex-col gap-1">
-                      <DropdownMenuRadioItem key={1} value={"1"}>
-                        테스트
-                      </DropdownMenuRadioItem>
+                      {STOCK_SORT_OPTIONS.map((option) => (
+                        <DropdownMenuRadioItem key={option.key} value={option.key}>
+                          {option.label}
+                        </DropdownMenuRadioItem>
+                      ))}
                     </div>
                   </DropdownMenuRadioGroup>
                 </DropdownMenuContent>
@@ -209,7 +247,7 @@ export default function IssueDetailContent({ selectIssue }: ContentProps) {
                 </TableHeader>
 
                 <TableBody>
-                  {detailData?.stocks.map((stock) => {
+                  {sortedStocks.map((stock) => {
                     const isUp = stock.changeRate > 0;
                     const isDown = stock.changeRate < 0;
 
