@@ -232,7 +232,7 @@ export default function IssueDetailContent({ selectIssue }: ContentProps) {
               </DropdownMenu>
             </div>
             <div className="overflow-x-auto">
-              <Table className="md:w-full w-max">
+              <Table className="md:w-full">
                 <TableHeader>
                   <TableRow className="font-medium">
                     {/* 기업명 - 모바일 sticky */}
@@ -297,7 +297,7 @@ export default function IssueDetailContent({ selectIssue }: ContentProps) {
             <h4 className="text-xl text-foreground font-semibold">연관테마</h4>
             {detailData?.relatedThemes && detailData?.relatedThemes.length > 0 ? (
               <div className="overflow-x-auto">
-                <Table className="md:w-full w-max">
+                <Table className="w-full">
                   <TableHeader>
                     <TableRow className="font-medium">
                       {/* 기업명 - 모바일 sticky */}

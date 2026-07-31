@@ -1,5 +1,6 @@
-import { Treemap, ResponsiveContainer } from "recharts";
+import { Treemap, ResponsiveContainer, Tooltip } from "recharts";
 import type { IssueTheme } from "@/types/api/issueTheme";
+import { useIsMobile } from "@/hooks/use-mobile";
 
 interface TreeMapViewProps {
   items: IssueTheme[];
@@ -36,9 +37,44 @@ const buildTreemapData = (items: IssueTheme[]): TreemapNode[] =>
     original: item,
   }));
 
-// recharts Treemap의 content 렌더 프롭 (내부적으로 x,y,width,height + dataKey로 넘긴 값들이 함께 전달됨)
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
-const CustomizedContent = (props: any) => {
+// 컴포넌트 밖에 헬퍼 함수 추가
+const measureCtx = typeof document !== "undefined" ? document.createElement("canvas").getContext("2d") : null;
+
+// 테마명 말줄임 처리
+const truncateText = (text: string, maxWidth: number, fontSize: number, fontWeight = 400): string => {
+  if (!measureCtx) return text;
+  measureCtx.font = `${fontWeight} ${fontSize}px sans-serif`;
+
+  if (measureCtx.measureText(text).width <= maxWidth) return text;
+
+  const ellipsis = "...";
+  let low = 0;
+  let high = text.length;
+
+  while (low < high) {
+    const mid = Math.ceil((low + high) / 2);
+    const candidate = text.slice(0, mid) + ellipsis;
+    if (measureCtx.measureText(candidate).width <= maxWidth) {
+      low = mid;
+    } else {
+      high = mid - 1;
+    }
+  }
+
+  return text.slice(0, low) + ellipsis;
+};
+
+interface CustomizedContentProps {
+  x: number;
+  y: number;
+  width: number;
+  height: number;
+  name: string;
+  changeRate: number;
+  rsScore: number | null;
+}
+
+const CustomizedContent = (props: CustomizedContentProps) => {
   const { x, y, width, height, name, changeRate, rsScore } = props;
 
   if (width <= 0 || height <= 0) return null;
@@ -46,6 +82,9 @@ const CustomizedContent = (props: any) => {
   const fill = getColorByRsScore(rsScore);
   const textColor = "#fff";
   const showText = width > 45 && height > 30;
+
+  const displayName = showText ? truncateText(name, width - 16, 16, 700) : name;
+  const changeRateText = `${changeRate > 0 ? "+" : ""}${changeRate}%`;
 
   return (
     <g>
@@ -63,26 +102,44 @@ const CustomizedContent = (props: any) => {
       />
       {showText && (
         <>
-          <text x={x + width / 2} y={y + height / 2 - 6} textAnchor="middle" fill={textColor} fontSize={12} fontWeight={600}>
-            {name}
+          <text x={x + width / 2} y={y + height / 2 - 6} textAnchor="middle" fill={textColor} fontSize={16} fontWeight={700}>
+            {displayName}
           </text>
-          <text x={x + width / 2} y={y + height / 2 + 12} textAnchor="middle" fill={textColor} fontSize={11}>
-            {changeRate > 0 ? "+" : ""}
-            {changeRate}%
+          <text x={x + width / 2} y={y + height / 2 + 12} textAnchor="middle" fill={textColor} fontSize={14}>
+            <tspan>{changeRateText}</tspan>
+            <tspan dx={8}>RS</tspan>
+            <tspan dx={4}>{rsScore ?? "-"}</tspan>
           </text>
-          {width > 70 && height > 55 && (
-            <text x={x + width / 2} y={y + height / 2 + 28} textAnchor="middle" fill={textColor} fontSize={10} opacity={0.85}>
-              RS {rsScore ?? "-"}
-            </text>
-          )}
         </>
       )}
     </g>
   );
 };
 
+interface CustomTooltipProps {
+  active?: boolean;
+  payload?: Array<{ payload: TreemapNode }>;
+}
+
+const CustomTooltip = ({ active, payload }: CustomTooltipProps) => {
+  if (!active || !payload || payload.length === 0) return null;
+
+  const data = payload[0].payload;
+  const changeRateText = `${data.changeRate > 0 ? "+" : ""}${data.changeRate}%`;
+
+  return (
+    <div className="rounded-md border border-slate-600 bg-slate-800 px-3 py-2 shadow-lg">
+      <p className="text-sm font-bold text-white">{data.name}</p>
+      <p className="text-xs text-slate-300">
+        {changeRateText} · RS {data.rsScore ?? "-"}
+      </p>
+    </div>
+  );
+};
+
 export default function TreeMapView({ items, onSelect }: TreeMapViewProps) {
   const data = buildTreemapData(items);
+  const isMobile = useIsMobile();
 
   if (data.length === 0) {
     return <div className="flex items-center justify-center w-full h-full text-muted-foreground text-sm">표시할 테마가 없습니다.</div>;
@@ -94,7 +151,7 @@ export default function TreeMapView({ items, onSelect }: TreeMapViewProps) {
         data={data}
         dataKey="size"
         aspectRatio={4 / 3}
-        content={<CustomizedContent />}
+        content={<CustomizedContent x={0} y={0} width={0} height={0} name="" changeRate={0} rsScore={null} />}
         isAnimationActive={false}
         onClick={(node: unknown) => {
           const clicked = node as { original?: IssueTheme } | undefined;
@@ -102,7 +159,9 @@ export default function TreeMapView({ items, onSelect }: TreeMapViewProps) {
             onSelect(clicked.original);
           }
         }}
-      />
+      >
+        {!isMobile && <Tooltip content={<CustomTooltip />} />}
+      </Treemap>
     </ResponsiveContainer>
   );
 }

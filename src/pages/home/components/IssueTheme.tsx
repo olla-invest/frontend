@@ -392,8 +392,13 @@ export function IssueTheme() {
               <TableBody>{renderRows(table.getRowModel().rows)}</TableBody>
             </Table>
           ) : (
-            <div className="flex-1 h-[100vh] overflow-hidden border-2 border-slate-600 rounded-md">
-              <TreeMapView items={filteredItems} onSelect={setSelectIssue} />
+            <div className="flex-1 h-screen overflow-hidden rounded-md">
+              <TreeMapView
+                items={filteredItems}
+                onSelect={(item) => {
+                  navigate(`/themeDetail/${item.themeCode}`, { state: { theme: item } });
+                }}
+              />
             </div>
           )}
         </div>
