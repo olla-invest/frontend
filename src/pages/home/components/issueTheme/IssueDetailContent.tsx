@@ -273,19 +273,19 @@ export default function IssueDetailContent({ selectIssue }: ContentProps) {
                         </TableCell>
                         <TableCell className="text-right">{stock.rsScore.toFixed(1)}</TableCell>
                         <TableCell className="text-right">{stock.shortTermRs || "-"}</TableCell>
-                        <TableCell>
-                          <div className={`w-14 text-right ${isUp ? "text-rose-500" : isDown ? "text-blue-500" : "text-gray-400"}`}>
+                        <TableCell className="text-right">
+                          <div className={`w-full text-right ${isUp ? "text-rose-500" : isDown ? "text-blue-500" : "text-gray-400"}`}>
                             {isUp && "+"}
                             {stock.changeRate.toFixed(2)}%
                           </div>
                         </TableCell>
-                        <TableCell>
+                        <TableCell className="text-right">
                           <div>{stock.currentPrice?.toLocaleString() || "-"}원</div>
                         </TableCell>
-                        <TableCell>{stock.previousTradingValueRatio.toFixed(2) || "-"}%</TableCell>
+                        <TableCell className="text-right">{stock.previousTradingValueRatio.toFixed(2) || "-"}%</TableCell>
                         <TableCell>
                           {" "}
-                          <div className={`w-14 text-right ${isHightUp ? "text-rose-500" : isHightDown ? "text-blue-500" : "text-gray-400"}`}>
+                          <div className={`w-full text-right ${isHightUp ? "text-rose-500" : isHightDown ? "text-blue-500" : "text-gray-400"}`}>
                             {isHightUp && "+"}
                             {stock.newHighRate.toFixed(2)}%
                           </div>
