@@ -8,7 +8,7 @@ import { ChevronDown } from "lucide-react";
 import { Button } from "@/components/ui/button";
 
 import { getIssueThemeDetail } from "@/api/issueTheme";
-import type { IssueTheme, IssueThemeDetailApiResponse } from "@/types/api/issueTheme";
+import type { IssueThemeDetailApiResponse } from "@/types/api/issueTheme";
 import { useWatchThemeStore } from "@/store/WatchListStore";
 import { isInWatchThemeList, toggleWatchThemeList } from "@/hooks/useToggleWatchList";
 import { useIsMobile } from "@/hooks/use-mobile";
@@ -17,8 +17,14 @@ import { openStockDetailInNewTab } from "../liveChart/stockDetailTypes";
 import { useNavigate } from "react-router-dom";
 import { getThemeIcon } from "@/utils/ThemeIcon";
 
+export interface IssueDetailSummary {
+  themeCode: number;
+  rank?: number;
+  rankChange?: number | null;
+}
+
 interface ContentProps {
-  selectIssue: IssueTheme;
+  selectIssue: IssueDetailSummary;
 }
 
 // 종목 정렬 옵션

@@ -1,11 +1,11 @@
 import DraggableModal from "@/components/DraggableModal";
 
-import type { IssueTheme } from "@/types/api/issueTheme";
 import IssueDetailContent from "../issueTheme/IssueDetailContent";
+import type { IssueDetailSummary } from "../issueTheme/IssueDetailContent";
 
 interface ModalProps {
   onClose: () => void;
-  selectIssue: IssueTheme;
+  selectIssue: IssueDetailSummary;
 }
 export default function ThemeDetailModal({ onClose, selectIssue }: ModalProps) {
   return (
