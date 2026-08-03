@@ -214,7 +214,7 @@ export default function IssueDetailContent({ selectIssue }: ContentProps) {
           </div> */}
 
           {/* 종목 */}
-          <div className="px-6 mb-10 md:mb-4">
+          <div className="pl-6 mb-10 md:mb-4">
             <div className="flex gap-2.5 justify-between items-center mb-4">
               <p className="text-xs text-muted-foreground">이슈 테마에 포함된 종목은 실시간 차트에서 조회되는 종목에 한해 제공됩니다.</p>
               <DropdownMenu>

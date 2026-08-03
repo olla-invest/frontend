@@ -24,6 +24,10 @@ export interface IssueTheme {
   themeScore: number;
   streakBadge: StreakBadge | null;
   isFavorite: boolean;
+  topStocks: {
+    stockCode: string;
+    stockName: string;
+  }[];
 }
 
 export interface IssueThemeFilterCounts {

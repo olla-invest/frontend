@@ -1,8 +1,10 @@
 import api from "@/lib/api";
+import authApi from "@/lib/authApi";
+
 import type { IssueThemeApiResponse, IssueThemeDetailApiResponse } from "@/types/api/issueTheme";
 
 export const getIssueTheme = async (display?: number, page?: number) => {
-  const res = await api.get<IssueThemeApiResponse>("/issue-theme", {
+  const res = await authApi.get<IssueThemeApiResponse>("/issue-theme", {
     params: { display, page },
   });
   return res.data;

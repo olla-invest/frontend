@@ -126,7 +126,7 @@ export default function IssueThemeFilter({ filterCounts, value, onChange }: Issu
           </Tabs>
         )}
       </div>
-      {!isMobile && (
+      {!isMobile && value.viewType !== "heatmap" && (
         <div className="shrink-0">
           <Field orientation="horizontal" className="gap-2">
             <Checkbox id="my-theme-checkbox" name="my-theme-checkbox" checked={value.isFavorite} onClick={() => onChange({ ...value, isFavorite: !value.isFavorite })} />

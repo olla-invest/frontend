@@ -26,6 +26,7 @@ interface IssueThemeRow {
   shortTermRs: number | null;
   changeRate: number | null;
   streakBadge: StreakBadge | null;
+  topStocks: string;
   original: IssueTheme;
 }
 
@@ -170,6 +171,7 @@ export function IssueTheme() {
         shortTermRs: item.shortTermRs,
         changeRate: item.changeRate,
         streakBadge: item.streakBadge,
+        topStocks: item.topStocks ? item.topStocks.map((s) => s.stockName).join(" · ") : "",
         stats: [item.totalCount, item.risingCount, item.totalCount - item.risingCount, 0],
         original: item,
       })),
@@ -187,13 +189,13 @@ export function IssueTheme() {
       accessorKey: "themeName",
       header: "테마명",
       cell: ({ row }) => (
-        <div className="flex md:items-center gap-2 md:w-60 w-30 md:flex-row flex-col items-start">
+        <div className="flex md:items-center gap-1 md:gap-2 md:w-60 w-full md:flex-row flex-col items-start">
           {!isMobile && (
             <div className="size-8 rounded-md bg-[#D9D9D9] overflow-hidden shrink-0">
               <img src={getThemeIcon(row.original.themeCode)} alt={row.original.themeName} className="w-full" />
             </div>
           )}
-          <div className="w-30 md:w-full line-clamp-2 md:line-clamp-1 text-slate-800 font-semibold">{row.getValue("themeName")}</div>
+          <div className="md:max-w-46 line-clamp-2 md:line-clamp-1 text-slate-800 font-semibold">{row.getValue("themeName")}</div>
           {row.original.streakBadge && (
             <div
               className={`shrink-0 py-0.5 px-2 border rounded-lg text-xs font-medium ${row.original.streakBadge.tone === "RED" ? "text-rose-500" : row.original.streakBadge.tone === "BLUE" ? "text-blue-500" : "text-muted-foreground"}`}
@@ -226,7 +228,7 @@ export function IssueTheme() {
     },
     {
       accessorKey: "upDown",
-      header: "등락률",
+      header: () => <div className="text-right">등락률</div>,
       cell: ({ row }) => {
         const rate = row.original.changeRate ?? 0;
         const colorClass = rate > 0 ? "text-rose-500" : rate < 0 ? "text-blue-500" : "text-muted-foreground";
@@ -237,11 +239,11 @@ export function IssueTheme() {
     {
       accessorKey: "stockList",
       header: "주요종목",
-      cell: () => {
+      cell: ({ row }) => {
         if (isMobile) {
           return <div className="w-0" />;
         } else {
-          return <div className="text-slate-700">-</div>;
+          return <div className="text-slate-700">{row.original.topStocks}</div>;
         }
       },
     },
@@ -281,10 +283,10 @@ export function IssueTheme() {
   return (
     <div className="flex flex-col md:h-[calc(100vh-204px)] h-full">
       {basicData?.filterCounts && <IssueThemeFilter filterCounts={basicData.filterCounts} value={filterValue} onChange={setFilterValue} />}
-      <div className="flex justify-between gap-4 mb-4">
+      <div className="flex justify-between gap-4 mb-4 md:pt-0 pt-4">
         {filterValue.viewType === "rank" && (
           <div className="flex gap-2 items-center max-h-8 w-full">
-            <div className="relative w-full max-w-80" ref={searchWrapperRef}>
+            <div className="relative w-full md:max-w-80" ref={searchWrapperRef}>
               <InputGroup className={`h-8 w-full ${suggestOpen && search.trim().length > 0 ? "rounded-b-none border-b-0" : ""}`}>
                 <InputGroupAddon align="inline-start" className="mr-0!">
                   <button
@@ -392,9 +394,10 @@ export function IssueTheme() {
               <TableBody>{renderRows(table.getRowModel().rows)}</TableBody>
             </Table>
           ) : (
-            <div className="flex-1 h-screen overflow-hidden rounded-md">
+            <div className="flex-1 h-screen overflow-hidden rounded-md mb-12">
               <TreeMapView
                 items={filteredItems}
+                colorBy={filterValue.sortType === "rate" ? "rate" : "rs"}
                 onSelect={(item) => {
                   navigate(`/themeDetail/${item.themeCode}`, { state: { theme: item } });
                 }}
@@ -410,7 +413,7 @@ export function IssueTheme() {
               <LoadingUi message="이슈 테마 데이터를 불러오는 중입니다..." />
             </div>
           ) : filterValue.viewType === "rank" ? (
-            <div className="flex w-full pt-2">
+            <div className="flex w-full md:pt-0 pt-2">
               <div className="flex-1 pr-4 overflow-y-auto">
                 <Table className="relative">
                   <TableHeader>
@@ -424,9 +427,13 @@ export function IssueTheme() {
                       </TableRow>
                     ))}
                   </TableHeader>
-
                   <TableBody>{renderRows(table.getRowModel().rows)}</TableBody>
                 </Table>
+                {filteredItems.length === 0 && (
+                  <div className="h-21 flex items-center justify-center">
+                    <div className="text-center text-sm text-muted-foreground">표시할 테마가 없습니다.</div>
+                  </div>
+                )}
               </div>
               {selectIssue && (
                 <div className="size-full max-w-150 bg-white relative overflow-y-auto border-l">
@@ -443,9 +450,9 @@ export function IssueTheme() {
               )}
             </div>
           ) : (
-            <div className="flex w-full pt-2 gap-6">
+            <div className="flex w-full md:pt-0 pt-2 gap-6 mb-12">
               <div className="flex-1 overflow-hidden  rounded-md">
-                <TreeMapView items={filteredItems} onSelect={setSelectIssue} />
+                <TreeMapView items={filteredItems} colorBy={filterValue.sortType === "rate" ? "rate" : "rs"} onSelect={setSelectIssue} />
               </div>
               {selectIssue && (
                 <div className="size-full max-w-150 bg-white relative overflow-y-auto border-l">

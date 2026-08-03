@@ -5,6 +5,7 @@ import { useIsMobile } from "@/hooks/use-mobile";
 interface TreeMapViewProps {
   items: IssueTheme[];
   onSelect?: (item: IssueTheme) => void;
+  colorBy?: "rs" | "rate"; // 기본값 "rs"
 }
 
 interface TreemapNode {
@@ -17,12 +18,26 @@ interface TreemapNode {
 }
 
 // RS 점수 구간별 색상
+// RS 점수 구간별 색상
 const getColorByRsScore = (score: number | null): string => {
   const rs = score ?? 0;
   if (rs >= 95) return "#f43f52";
   if (rs >= 90) return "#e8546a";
   if (rs >= 85) return "#cc6a7a";
   if (rs >= 80) return "#a9718a";
+  return "#3B82F6";
+};
+
+// 등락률 구간별 색상
+const getColorByChangeRate = (rate: number): string => {
+  if (rate >= 10) return "#F43F5E";
+  if (rate >= 3) return "#E8546A";
+  if (rate >= 1) return "#CC6A7A";
+  if (rate > 0) return "#A9718A";
+  if (rate === 0) return "#64748B";
+  if (rate > -1) return "#6B7D9E";
+  if (rate > -3) return "#5B82B8";
+  if (rate > -10) return "#4882CF";
   return "#3B82F6";
 };
 
@@ -72,14 +87,15 @@ interface CustomizedContentProps {
   name: string;
   changeRate: number;
   rsScore: number | null;
+  colorBy: "rs" | "rate";
 }
 
 const CustomizedContent = (props: CustomizedContentProps) => {
-  const { x, y, width, height, name, changeRate, rsScore } = props;
+  const { x, y, width, height, name, changeRate, rsScore, colorBy } = props;
 
   if (width <= 0 || height <= 0) return null;
 
-  const fill = getColorByRsScore(rsScore);
+  const fill = colorBy === "rate" ? getColorByChangeRate(changeRate) : getColorByRsScore(rsScore);
   const textColor = "#fff";
   const showText = width > 45 && height > 30;
 
@@ -137,7 +153,7 @@ const CustomTooltip = ({ active, payload }: CustomTooltipProps) => {
   );
 };
 
-export default function TreeMapView({ items, onSelect }: TreeMapViewProps) {
+export default function TreeMapView({ items, onSelect, colorBy = "rs" }: TreeMapViewProps) {
   const data = buildTreemapData(items);
   const isMobile = useIsMobile();
 
@@ -151,7 +167,7 @@ export default function TreeMapView({ items, onSelect }: TreeMapViewProps) {
         data={data}
         dataKey="size"
         aspectRatio={4 / 3}
-        content={<CustomizedContent x={0} y={0} width={0} height={0} name="" changeRate={0} rsScore={null} />}
+        content={<CustomizedContent x={0} y={0} width={0} height={0} name="" changeRate={0} rsScore={null} colorBy={colorBy} />}
         isAnimationActive={false}
         onClick={(node: unknown) => {
           const clicked = node as { original?: IssueTheme } | undefined;
