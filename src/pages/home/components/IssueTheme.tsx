@@ -116,6 +116,15 @@ export function IssueTheme() {
     return () => document.removeEventListener("mousedown", handleClickOutside);
   }, []);
 
+  // 뷰타입이 히트맵으로 전환되면 검색 상태 초기화
+  useEffect(() => {
+    if (filterValue.viewType === "heatmap") {
+      setSearch("");
+      setSearchTerm("");
+      setSuggestOpen(false);
+    }
+  }, [filterValue.viewType]);
+
   // items 안에서 테마명 기준 자동완성 후보 계산
   const suggestions = useMemo(() => {
     const q = search.trim();

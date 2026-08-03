@@ -158,7 +158,7 @@ export default function TreeMapView({ items, onSelect, colorBy = "rs" }: TreeMap
   const isMobile = useIsMobile();
 
   if (data.length === 0) {
-    return <div className="flex items-center justify-center w-full h-full text-muted-foreground text-sm">표시할 테마가 없습니다.</div>;
+    return <div className="flex items-center justify-center w-full h-12 text-muted-foreground text-sm">표시할 테마가 없습니다.</div>;
   }
 
   return (

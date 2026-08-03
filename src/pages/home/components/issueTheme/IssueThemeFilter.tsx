@@ -71,8 +71,8 @@ export default function IssueThemeFilter({ filterCounts, value, onChange }: Issu
   };
 
   return (
-    <div className="pb-4 pt-1 border-b md:mb-4 flex items-center justify-between w-full overflow-hidden">
-      <div className="flex gap-4 flex-col md:flex-row md:gap-2 flex-wrap md:w-fit w-full">
+    <div className="pb-4 pt-1 border-b md:mb-4 flex gap-2 items-center justify-between w-full overflow-hidden md:overflow-x-auto">
+      <div className="flex gap-4 flex-col md:flex-row md:gap-2 md:w-fit w-full items-center">
         <Tabs
           value={value.viewType}
           onValueChange={(v) => {
@@ -93,7 +93,7 @@ export default function IssueThemeFilter({ filterCounts, value, onChange }: Issu
         </Tabs>
         {!isMobile && <div className="w-px h-6 bg-border" />}
         {value.viewType === "rank" && (
-          <div className="flex gap-2 md:w-fit w-full overflow-x-scroll">
+          <div className="flex gap-2 md:max-w-fit w-full overflow-x-auto overflow-y-hidden h-[37px]">
             <Tabs value={value.sortType} onValueChange={(v) => onChange({ ...value, sortType: v as IssueThemeFilterType["sortType"] })} className="w-full flex-1 md:flex-none md:w-fit ">
               <TabsList className="p-0.75 w-full md:w-fit">
                 <TabsTrigger value="rs">RS순</TabsTrigger>
