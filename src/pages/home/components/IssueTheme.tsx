@@ -231,7 +231,7 @@ export function IssueTheme() {
         if (isMobile) {
           return;
         } else {
-          return <div className="md:w-12 w-12 text-right">{row.original.shortTermRs}</div>;
+          return <div className="md:w-12 w-12 text-right">{row.original.shortTermRs ?? "-"}</div>;
         }
       },
     },
