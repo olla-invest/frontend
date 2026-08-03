@@ -111,7 +111,7 @@ export default function DraggableModal({ title, onClose, children }: DraggableMo
         </button>
       </div>
 
-      <div className="pb-6 px-2 overflow-auto h-[calc(100%-48px)]">{children}</div>
+      <div className="pb-6 pl-2 pr-8 overflow-auto h-[calc(100%-48px)]">{children}</div>
     </div>
   );
 }

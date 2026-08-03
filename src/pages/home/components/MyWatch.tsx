@@ -32,7 +32,7 @@ export default function MyWatch() {
   const [stockModalOpen, setStockModalOpen] = useState(false);
   const [selectStock, setSelectStock] = useState<StockdetailInfo>();
   const [themeModalOpen, setThemeMoadlOpen] = useState(false);
-  const [selectTheme, setSelectTheme] = useState<WatchListTheme>();
+  const [selectTheme, setSelectTheme] = useState<WatchListTheme | null>(null);
 
   const sumWatchList = useMemo(() => {
     const stocks = (stockList ?? []).map((item) => ({
