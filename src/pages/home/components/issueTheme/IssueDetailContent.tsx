@@ -299,7 +299,7 @@ export default function IssueDetailContent({ selectIssue }: ContentProps) {
           </div>
 
           {/* 연관테마 */}
-          <div className="px-6 py-2 mb-10 md:mb-0 flex flex-col gap-4">
+          <div className="pl-6 py-2 mb-10 md:mb-0 flex flex-col gap-4">
             <h4 className="text-xl text-foreground font-semibold">연관테마</h4>
             {detailData?.relatedThemes && detailData?.relatedThemes.length > 0 ? (
               <div className="overflow-x-auto">

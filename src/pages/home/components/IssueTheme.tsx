@@ -210,19 +210,19 @@ export function IssueTheme() {
     },
     {
       accessorKey: "rsScore",
-      header: "RS 점수",
+      header: () => <div className="text-center">RS 점수</div>,
       cell: ({ row }) => {
-        return <div className="md:w-16 w-12 text-right">{row.original.rsScore}</div>;
+        return <div className="md:w-12 w-12 text-right">{row.original.rsScore}</div>;
       },
     },
     {
       accessorKey: "shortRs",
-      header: "단기 RS",
+      header: () => <div className="text-center">단기 RS</div>,
       cell: ({ row }) => {
         if (isMobile) {
           return;
         } else {
-          return <div className="w-16 text-right">{row.original.shortTermRs}</div>;
+          return <div className="md:w-12 w-12 text-right">{row.original.shortTermRs}</div>;
         }
       },
     },
