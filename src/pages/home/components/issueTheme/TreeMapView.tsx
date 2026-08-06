@@ -5,7 +5,7 @@ import { useIsMobile } from "@/hooks/use-mobile";
 interface TreeMapViewProps {
   items: IssueTheme[];
   onSelect?: (item: IssueTheme) => void;
-  colorBy?: "rs" | "rate"; // 기본값 "rs"
+  colorBy?: "rs" | "rate" | "momentum"; // 기본값 "rs"
 }
 
 interface TreemapNode {
@@ -13,11 +13,11 @@ interface TreemapNode {
   size: number;
   changeRate: number;
   rsScore: number | null;
+  momentum: number;
   themeCode: number;
   original: IssueTheme;
 }
 
-// RS 점수 구간별 색상
 // RS 점수 구간별 색상
 const getColorByRsScore = (score: number | null): string => {
   const rs = score ?? 0;
@@ -41,6 +41,28 @@ const getColorByChangeRate = (rate: number): string => {
   return "#3B82F6";
 };
 
+// 모멘텀 구간별 색상
+// 1) +20 이상            #F43F5E
+// 2) +10 ~ +20           #E8546A
+// 3) +5 ~ +10            #CC6A7A
+// 4) +1 ~ +5             #A9718A
+// 5) 보합 (-1 ~ +1)       #64748B
+// 6) -1 ~ -5             #6B7D9E
+// 7) -5 ~ -10            #5B82B8
+// 8) -10 ~ -20           #4882CF
+// 9) -20 이하            #3B82F6
+const getColorByMomentum = (momentum: number): string => {
+  if (momentum >= 20) return "#F43F5E";
+  if (momentum >= 10) return "#E8546A";
+  if (momentum >= 5) return "#CC6A7A";
+  if (momentum >= 1) return "#A9718A";
+  if (momentum >= -1) return "#64748B";
+  if (momentum >= -5) return "#6B7D9E";
+  if (momentum >= -10) return "#5B82B8";
+  if (momentum >= -20) return "#4882CF";
+  return "#3B82F6";
+};
+
 const buildTreemapData = (items: IssueTheme[]): TreemapNode[] =>
   items.map((item) => ({
     name: item.themeName,
@@ -48,6 +70,7 @@ const buildTreemapData = (items: IssueTheme[]): TreemapNode[] =>
     size: Math.max(item.stockCount ?? 1, 1),
     changeRate: item.changeRate ?? 0,
     rsScore: item.rsScore,
+    momentum: item.momentum ?? 0,
     themeCode: item.themeCode,
     original: item,
   }));
@@ -87,15 +110,16 @@ interface CustomizedContentProps {
   name: string;
   changeRate: number;
   rsScore: number | null;
-  colorBy: "rs" | "rate";
+  momentum: number;
+  colorBy: "rs" | "rate" | "momentum";
 }
 
 const CustomizedContent = (props: CustomizedContentProps) => {
-  const { x, y, width, height, name, changeRate, rsScore, colorBy } = props;
+  const { x, y, width, height, name, changeRate, rsScore, momentum, colorBy } = props;
 
   if (width <= 0 || height <= 0) return null;
 
-  const fill = colorBy === "rate" ? getColorByChangeRate(changeRate) : getColorByRsScore(rsScore);
+  const fill = colorBy === "rate" ? getColorByChangeRate(changeRate) : colorBy === "momentum" ? getColorByMomentum(momentum) : getColorByRsScore(rsScore);
   const textColor = "#fff";
   const showText = width > 45 && height > 30;
 
@@ -167,7 +191,7 @@ export default function TreeMapView({ items, onSelect, colorBy = "rs" }: TreeMap
         data={data}
         dataKey="size"
         aspectRatio={4 / 3}
-        content={<CustomizedContent x={0} y={0} width={0} height={0} name="" changeRate={0} rsScore={null} colorBy={colorBy} />}
+        content={<CustomizedContent x={0} y={0} width={0} height={0} name="" changeRate={0} rsScore={null} momentum={0} colorBy={colorBy} />}
         isAnimationActive={false}
         onClick={(node: unknown) => {
           const clicked = node as { original?: IssueTheme } | undefined;

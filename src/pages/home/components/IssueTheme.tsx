@@ -30,6 +30,9 @@ interface IssueThemeRow {
   original: IssueTheme;
 }
 
+// hover 후 상세조회가 트리거되기까지의 대기 시간(ms)
+const HOVER_DETAIL_DELAY_MS = 500;
+
 // 개별 필터 옵션 하나가 item에 대해 참/거짓인지 판단
 const matchesOption = (item: IssueTheme, key: string): boolean => {
   switch (key) {
@@ -83,6 +86,25 @@ export function IssueTheme() {
   const [suggestOpen, setSuggestOpen] = useState(false);
   const searchWrapperRef = useRef<HTMLDivElement>(null);
 
+  // 행 hover 시 일정 시간 이상 머무르면 상세조회를 트리거하기 위한 타이머
+  const hoverTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+
+  const clearHoverTimer = () => {
+    if (hoverTimerRef.current) {
+      clearTimeout(hoverTimerRef.current);
+      hoverTimerRef.current = null;
+    }
+  };
+
+  const handleRowMouseEnter = (item: IssueTheme) => {
+    // 모바일은 클릭 시 상세 페이지로 이동하므로 hover 로직을 적용하지 않음
+    if (isMobile) return;
+    clearHoverTimer();
+    hoverTimerRef.current = setTimeout(() => {
+      setSelectIssue(item);
+    }, HOVER_DETAIL_DELAY_MS);
+  };
+
   // 전체 데이터 fetch (모바일/데스크탑 공통)
   const getIssueData = async () => {
     setIsLoading(true);
@@ -124,6 +146,11 @@ export function IssueTheme() {
       setSuggestOpen(false);
     }
   }, [filterValue.viewType]);
+
+  // 언마운트 시 hover 타이머 정리
+  useEffect(() => {
+    return () => clearHoverTimer();
+  }, []);
 
   // items 안에서 테마명 기준 자동완성 후보 계산
   const suggestions = useMemo(() => {
@@ -170,11 +197,14 @@ export function IssueTheme() {
     return result;
   }, [items, filterValue, searchTerm]);
 
+  // filteredItems는 이미 filterValue.sortType(rs/momentum/rate) 기준으로 정렬되어 있으므로
+  // 그 정렬 결과의 인덱스를 그대로 "순위"로 사용한다.
+  // (item.rank는 API가 내려준 고정값이라 정렬 기준이 바뀌어도 갱신되지 않는 문제가 있었음)
   const rows: IssueThemeRow[] = useMemo(
     () =>
-      filteredItems.map((item) => ({
+      filteredItems.map((item, index) => ({
         themeCode: item.themeCode,
-        rank: String(item.rank),
+        rank: String(index + 1),
         themeName: item.themeName,
         rsScore: item.rsScore,
         shortTermRs: item.shortTermRs,
@@ -275,11 +305,15 @@ export function IssueTheme() {
         className="h-12.25"
         onClick={() => {
           if (!isMobile) {
+            // 클릭 시 즉시 상세를 열고, 진행 중이던 hover 타이머는 취소(중복 트리거 방지)
+            clearHoverTimer();
             setSelectIssue(row.original.original);
           } else {
             navigate(`/themeDetail/${row.original.themeCode}`, { state: { theme: row.original.original } });
           }
         }}
+        onMouseEnter={() => handleRowMouseEnter(row.original.original)}
+        onMouseLeave={clearHoverTimer}
       >
         {row.getVisibleCells().map((cell) => (
           <TableCell key={cell.id} className={cell.column.id === "themeName" ? "whitespace-normal w-60" : cell.column.id === "stockList" ? "md:w-full w-fit" : ""}>
@@ -406,7 +440,7 @@ export function IssueTheme() {
             <div className="flex-1 h-screen overflow-hidden rounded-md mb-12">
               <TreeMapView
                 items={filteredItems}
-                colorBy={filterValue.sortType === "rate" ? "rate" : "rs"}
+                colorBy={filterValue.sortType === "rate" ? "rate" : filterValue.sortType === "momentum" ? "momentum" : "rs"}
                 onSelect={(item) => {
                   navigate(`/themeDetail/${item.themeCode}`, { state: { theme: item } });
                 }}
@@ -461,7 +495,7 @@ export function IssueTheme() {
           ) : (
             <div className="flex w-full md:pt-0 pt-2 gap-6 mb-12">
               <div className="flex-1 overflow-hidden  rounded-md">
-                <TreeMapView items={filteredItems} colorBy={filterValue.sortType === "rate" ? "rate" : "rs"} onSelect={setSelectIssue} />
+                <TreeMapView items={filteredItems} colorBy={filterValue.sortType === "rate" ? "rate" : filterValue.sortType === "momentum" ? "momentum" : "rs"} onSelect={setSelectIssue} />
               </div>
               {selectIssue && (
                 <div className="size-full max-w-150 bg-white relative overflow-y-auto border-l">
