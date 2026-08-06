@@ -100,6 +100,16 @@ export default function IssueDetailContent({ selectIssue }: ContentProps) {
     }
   };
 
+  const formatAmount = (value: number | null | undefined) => {
+    if (value == null) return "-";
+
+    const eok = value / 100_000_000;
+
+    return `${eok.toLocaleString(undefined, {
+      maximumFractionDigits: 1,
+    })}억`;
+  };
+
   return (
     <>
       {isLoading ? (
@@ -280,7 +290,7 @@ export default function IssueDetailContent({ selectIssue }: ContentProps) {
                           </div>
                         </TableCell>
                         <TableCell className="text-right">
-                          <div>{stock.currentPrice?.toLocaleString() || "-"}원</div>
+                          <div>{stock.currentAccTradingValue ? formatAmount(stock.currentAccTradingValue) : "-"}원</div>
                         </TableCell>
                         <TableCell className="text-right">{stock.previousTradingValueRatio.toFixed(2) || "-"}%</TableCell>
                         <TableCell>
