@@ -22,14 +22,14 @@ const buildMaCards = (label: string, ma: MovingAverages | undefined): MaCardData
       declineRate: ma.belowMa20Ratio ?? 0,
       description: ma.belowMa20Status?.label ?? "-",
       colorClass: ma20Color,
-      barColor: `bg-linear-to-r from-slate-200 to-${ma20Color}-500`,
+      barColor: `bg-linear-to-r from-slate-200 to-${ma20Color}-500 bg-${ma20Color}-500`,
     },
     {
       title: `${label} MA200`,
       declineRate: ma.belowMa200Ratio ?? 0,
       description: ma.belowMa200Status?.label ?? "-",
       colorClass: ma200Color,
-      barColor: `bg-linear-to-r from-slate-200 to-${ma200Color}-500`,
+      barColor: `bg-linear-to-r from-slate-200 to-${ma200Color}-500 bg-${ma200Color}-500`,
     },
   ];
 };

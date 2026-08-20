@@ -117,7 +117,7 @@ export default function IssueDetailContent({ selectIssue }: ContentProps) {
       ) : (
         <div>
           {/* 헤더 */}
-          <div className="flex flex-col gap-2 px-6 py-2">
+          <div className="flex flex-col gap-2 px-6 pb-2">
             <div className="flex items-center gap-2.5">
               <div className="rounded-md size-16 overflow-hidden shrink-0">
                 <img src={getThemeIcon(detailData?.themeCode)} alt={detailData?.themeName} className="w-full" />

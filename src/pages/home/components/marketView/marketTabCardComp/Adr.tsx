@@ -21,7 +21,7 @@ const buildAdrCard = (title: string, breadth: MarketBreadth | undefined): AdrCar
     adrValue: breadth.adr ?? 0,
     description: breadth.adrStatus?.label ?? "-",
     colorClass,
-    barColor: `bg-linear-to-r from-slate-200 to-${colorClass}-500`,
+    barColor: `bg-linear-to-r from-slate-200 to-${colorClass}-500 bg-${colorClass}-500`,
   };
 };
 

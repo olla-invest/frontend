@@ -14,7 +14,7 @@ const CardUi = ({ marketInfo, marketName, chartData }: { marketInfo: MarketData;
 
   return (
     <div className="flex gap-6 flex-col md:flex-row">
-      <div className="flex flex-col gap-4 w-full pr-0 pb-0 border-r-0 shrink-0 md:pr-6 md:pb-6 md:border-r md:w-82">
+      <div className="flex flex-col gap-4 w-full pr-0 pb-0 border-r-0 shrink-0 md:pr-6 md:border-r md:w-82">
         <div className="flex justify-between items-center">
           <span className="font-semibold text-xl text-slate-800">{marketName}</span>
           <div className="flex items-center gap-1">
@@ -27,7 +27,7 @@ const CardUi = ({ marketInfo, marketName, chartData }: { marketInfo: MarketData;
           </div>
         </div>
         <LineAreaChart colorType={index.change > 0 ? "red" : index.change < 0 ? "blue" : "gray"} data={chartData} />
-        <div className="flex items-center gap-4 text-xs justify-between md:justify-start">
+        <div className={`flex items-center gap-4 text-xs justify-between md:justify-start ${marketName === "코스피" ? "md:pb-6" : ""}`}>
           <div className="flex gap-1">
             <span className="text-muted-foreground shrink-0">외인</span>
             <span className={`font-medium ${getChangeTextColorClass(investorFlow.foreign)}`}>
@@ -60,7 +60,7 @@ export default function MarketTypeCard({ kospi, kosdaq, chartData }: { kospi: Ma
   return (
     <section className="pt-8 border-t">
       <h3 className="sr-only">시장별 카드</h3>
-      <div className="flex flex-col gap-10 md:gap-6">
+      <div className="flex flex-col gap-10 md:gap-0">
         {kospi && <CardUi marketInfo={kospi} marketName="코스피" chartData={chartData?.kospi ?? []} />}
         {kosdaq && <CardUi marketInfo={kosdaq} marketName="코스닥" chartData={chartData?.kosdaq ?? []} />}
       </div>

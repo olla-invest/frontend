@@ -71,9 +71,9 @@ export default function WatchlistStatus({ themeList, stockList, handleThemeModal
   const stockColumns: ColumnDef<WatchListStock>[] = [
     {
       accessorKey: "companyName",
-      header: "기업",
+      header: "종목명",
       cell: ({ row }) => (
-        <div className="min-w-24 flex items-center gap-2">
+        <div className="min-w-24 flex items-center gap-2 font-semibold">
           <div className="size-8 rounded-full overflow-hidden bg-[#d9d9d9]">
             <img src={getStockImageUrl(row.original.stockCode)} alt={row.original.companyName} className="w-full h-full object-cover" />
           </div>
@@ -88,9 +88,9 @@ export default function WatchlistStatus({ themeList, stockList, handleThemeModal
         const change = row.original.priceChangeRate1d;
 
         return (
-          <div className="min-w-24 text-right">
+          <div className="text-right">
             {row.original.closePrice ? row.original.closePrice?.toLocaleString() : "-"}원
-            <span className={`ml-2 text-xs ${change > 0 ? "text-red-500" : change < 0 ? "text-blue-500" : "text-muted-foreground"} w-12.5 inline-block`}>
+            <span className={`ml-1 text-sm ${change > 0 ? "text-red-500" : change < 0 ? "text-blue-500" : "text-muted-foreground"} inline-block`}>
               {change > 0 ? "+" : ""}
               {change ? change?.toFixed(2) : "-"}%
             </span>
@@ -127,7 +127,7 @@ export default function WatchlistStatus({ themeList, stockList, handleThemeModal
             </span>
             <span>으로 {rankMeta.text}했어요.</span>
             {rankStatus !== "same" && (
-              <span className={`${rankMeta.color} flex items-center gap-0.5`}>
+              <span className={`${rankMeta.color} flex items-center gap-0.5 text-sm`}>
                 {rankMeta.icon}
                 {diff}
               </span>
@@ -166,7 +166,7 @@ export default function WatchlistStatus({ themeList, stockList, handleThemeModal
       header: "테마",
       cell: ({ row }) => {
         return (
-          <div className="min-w-24 flex items-center gap-2">
+          <div className="min-w-24 flex items-center gap-2 font-semibold">
             <div className="size-8 rounded-md overflow-hidden bg-[#d9d9d9]">
               <img src={getThemeIcon(row.original.themeCode)} alt={row.original.themeName} className="w-full" />
             </div>
@@ -245,7 +245,9 @@ export default function WatchlistStatus({ themeList, stockList, handleThemeModal
           {table.getHeaderGroups().map((hg) => (
             <TableRow key={hg.id} className="hover:bg-transparent">
               {hg.headers.map((header) => (
-                <TableHead key={header.id}>{flexRender(header.column.columnDef.header, header.getContext())}</TableHead>
+                <TableHead key={header.id} className="text-muted-foreground">
+                  {flexRender(header.column.columnDef.header, header.getContext())}
+                </TableHead>
               ))}
             </TableRow>
           ))}

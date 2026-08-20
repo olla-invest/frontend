@@ -49,7 +49,7 @@ export default function MarketTypeCardDetail({ marketName, info }: { marketName:
   return (
     <div className="flex flex-col gap-4 flex-1">
       {/* 상단 */}
-      <div className="py-2 flex gap-0 md:gap-2 justify-between w-full items-start flex-wrap md:flex-nowrap">
+      <div className="py-1 flex gap-0 md:gap-2 justify-between w-full items-start flex-wrap md:flex-nowrap">
         <div className="flex items-center gap-2 text-sm">
           <div className="flex items-center gap-2">
             <div className={`size-2 rounded-full shrink-0 ${getCardDot(info.marketState)}`} />
@@ -95,12 +95,16 @@ export default function MarketTypeCardDetail({ marketName, info }: { marketName:
         {latestDistributionDay && (
           <div className="flex gap-1 items-center text-xs shrink-0">
             <span className="text-muted-foreground">매도 신호일</span>
-            {latestDistributionDay.slice(0, SLICE).map((day, index, arr) => (
-              <span key={index} className="text-slate-800 font-medium">
-                {day.tradeDate.slice(5).replace("-", "-")}({day.changeRate}%)
-                {index < arr.length - 1 && ", "}
-              </span>
-            ))}
+            {latestDistributionDay.length > 0 ? (
+              latestDistributionDay.slice(0, SLICE).map((day, index, arr) => (
+                <span key={index} className="text-slate-800 font-medium">
+                  {day.tradeDate.slice(5).replace("-", "-")}({day.changeRate}%)
+                  {index < arr.length - 1 && ", "}
+                </span>
+              ))
+            ) : (
+              <span className="text-slate-800 font-medium">-</span>
+            )}
             {latestDistributionDay.length > SLICE && (
               <span className="text-slate-800 font-medium cursor-pointer" onClick={() => setIsFollowThroughDateModalOpen(true)}>
                 ...더보기
