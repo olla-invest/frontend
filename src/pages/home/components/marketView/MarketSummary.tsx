@@ -19,7 +19,7 @@ export default function MarketSummary({ summary, updateTime }: { summary: Overal
   return (
     <section>
       <h3 className="sr-only">요약</h3>
-      <div className="w-fit px-2 rounded-full bg-muted ml-auto hidden md:block">
+      <div className="w-fit items-center justify-center px-2 py-1 rounded-full bg-muted ml-auto hidden md:flex">
         <span className="text-xs text-muted-foreground">{updateTime ? moment(updateTime).format("YYYY-MM-DD") : "-"} 기준 · 매일 오후 4:30 자동 업데이트</span>
       </div>
       <div className="flex md:gap-6 py-1 px-2 md:flex-row flex-col items-center gap-4 justify-center">
@@ -34,6 +34,9 @@ export default function MarketSummary({ summary, updateTime }: { summary: Overal
           <GaugeChart label="단기" signal={getSignalColor(summary?.signalMeta?.short?.inactiveColorClass)} />
           <GaugeChart label="장기" signal={getSignalColor(summary?.signalMeta?.long?.inactiveColorClass)} />
         </div>
+      </div>
+      <div className="mx-auto w-fit items-center justify-center px-2 py-1 rounded-full bg-muted flex md:hidden mb-8">
+        <span className="text-xs text-muted-foreground">{updateTime ? moment(updateTime).format("YYYY-MM-DD") : "-"} 기준 · 매일 오후 4:30 자동 업데이트</span>
       </div>
     </section>
   );

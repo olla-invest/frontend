@@ -487,7 +487,7 @@ export function IssueTheme() {
               {selectIssue && (
                 <div className="size-full max-w-150 bg-white relative overflow-y-auto border-l">
                   <button
-                    className="absolute right-0 top-1"
+                    className="absolute right-0 -top-1.25"
                     onClick={() => {
                       setSelectIssue(null);
                     }}
@@ -506,7 +506,7 @@ export function IssueTheme() {
               {selectIssue && (
                 <div className="size-full max-w-150 bg-white relative overflow-y-auto border-l">
                   <button
-                    className="absolute right-0 top-1"
+                    className="absolute right-0 -top-1.25"
                     onClick={() => {
                       setSelectIssue(null);
                     }}
