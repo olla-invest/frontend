@@ -1,4 +1,4 @@
-import { Button } from "@/components/ui/button";
+// import { Button } from "@/components/ui/button";
 import { useAuthStore } from "@/store/useAuthStore";
 import { useNavigate } from "react-router-dom";
 import UserBtnImg from "@/assets/images/user-info.png";
@@ -52,7 +52,7 @@ export function Header() {
           <span className="sr-only">olla</span>
         </h1>
         <div className="flex gap-2 items-center">
-          <Button
+          {/* <Button
             onClick={() => {
               navigate("/plan");
             }}
@@ -60,7 +60,7 @@ export function Header() {
             size="sm"
           >
             olla 플랜 업그레이드하기
-          </Button>
+          </Button> */}
           {isLoggedIn ? (
             <div className="flex gap-2 items-center relative" ref={menuRef}>
               <button
@@ -99,7 +99,8 @@ export function Header() {
                           <button
                             className="w-full px-2 py-1.5 cursor-pointer text-left"
                             onClick={() => {
-                              toast.success("준비중 입니다", { position: "top-center" });
+                              setShowUserMenu(false);
+                              navigate("/mypage");
                             }}
                           >
                             설정
