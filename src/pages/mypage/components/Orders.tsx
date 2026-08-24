@@ -3,10 +3,11 @@ import { getMyPlan } from "@/api/plan";
 import { LoadingUi } from "@/components/LoadingUi";
 import type { MyPlan } from "@/types/api/plan";
 import { Button } from "@/components/ui/button";
-import { useNavigate } from "react-router-dom";
+// import { useNavigate } from "react-router-dom";
+import { toast } from "sonner";
 
 export default function Orders() {
-  const navigate = useNavigate();
+  // const navigate = useNavigate();
   const [myPlan, setMyPlan] = useState<MyPlan | null>(null);
   useEffect(() => {
     const fetchMyPlan = async () => {
@@ -36,7 +37,8 @@ export default function Orders() {
           <Button
             size="sm"
             onClick={() => {
-              navigate("/plan");
+              // navigate("/plan");
+              toast.info("준비중 입니다", { position: "top-center" });
             }}
           >
             플랜 변경하기

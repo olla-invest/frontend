@@ -1,13 +1,24 @@
 import { Button } from "@/components/ui/button";
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog";
 import { useState } from "react";
+import type { SelectPlanType } from "..";
 
-export default function SelectPlanModal({ open, onClose, setModal }: { open: boolean; onClose: () => void; setModal: React.Dispatch<React.SetStateAction<string>> }) {
+export default function SelectPlanModal({
+  open,
+  onClose,
+  setModal,
+  setSelectPlan,
+}: {
+  open: boolean;
+  onClose: () => void;
+  setModal: React.Dispatch<React.SetStateAction<string>>;
+  setSelectPlan?: React.Dispatch<React.SetStateAction<SelectPlanType>>;
+}) {
   const handleSubmit = () => {
     setModal("upgrade");
   };
 
-  const [planType, setPlanTyle] = useState("month");
+  const [planType, setPlanTyle] = useState("MONTHLY");
 
   return (
     <Dialog
@@ -25,9 +36,9 @@ export default function SelectPlanModal({ open, onClose, setModal }: { open: boo
           <div>
             <div className="flex flex-col gap-2 py-4 border-y mb-4">
               <div
-                className={`p-4 flex flex-col gap-2 text-sm rounded-lg border cursor-pointer ${planType === "month" ? "border-primary bg-accent" : ""}`}
+                className={`p-4 flex flex-col gap-2 text-sm rounded-lg border cursor-pointer ${planType === "MONTHLY" ? "border-primary bg-accent" : ""}`}
                 onClick={() => {
-                  setPlanTyle("month");
+                  setPlanTyle("MONTHLY");
                 }}
               >
                 <span className="text-accent-foreground font-medium">월별 결제</span>
@@ -37,9 +48,9 @@ export default function SelectPlanModal({ open, onClose, setModal }: { open: boo
                 </div>
               </div>
               <div
-                className={`p-4 flex flex-col gap-2 text-sm rounded-lg border cursor-pointer ${planType === "year" ? "border-primary bg-accent" : ""}`}
+                className={`p-4 flex flex-col gap-2 text-sm rounded-lg border cursor-pointer ${planType === "YEARLY" ? "border-primary bg-accent" : ""}`}
                 onClick={() => {
-                  setPlanTyle("year");
+                  setPlanTyle("YEARLY");
                 }}
               >
                 <span className="text-accent-foreground font-medium">연간 결제</span>
@@ -60,6 +71,10 @@ export default function SelectPlanModal({ open, onClose, setModal }: { open: boo
             type="button"
             onClick={() => {
               handleSubmit();
+              setSelectPlan?.((prev) => ({
+                ...prev,
+                billingCycle: planType,
+              }));
             }}
           >
             다음

@@ -3,9 +3,11 @@ import { useState, useEffect } from "react";
 import { getMyInfo } from "@/api/users";
 import type { UserInfo } from "@/types/api/users";
 import { Button } from "@/components/ui/button";
+import ChangeProfileModal from "./ChangeProfileModal";
 
 export default function Profile() {
   const [userInfo, setUserInfo] = useState<UserInfo | null>(null);
+  const [changeProfileModalOpen, setChangeProfileModalOpen] = useState(false);
   useEffect(() => {
     const fetchUserInfo = async () => {
       const info = await getMyInfo();
@@ -32,9 +34,10 @@ export default function Profile() {
           );
         })}
       </div>
-      <Button size="sm" className="ml-auto" variant="outline">
+      <Button size="sm" className="ml-auto" variant="outline" onClick={() => setChangeProfileModalOpen(true)}>
         프로필 수정
       </Button>
+      {changeProfileModalOpen && <ChangeProfileModal open={changeProfileModalOpen} onClose={() => setChangeProfileModalOpen(false)} user={userInfo!} />}
     </div>
   );
 }

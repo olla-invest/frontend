@@ -6,7 +6,7 @@ import { getMyPlan } from "@/api/plan";
 
 const demoPlan: PlanCardProps[] = [
   {
-    planName: "Basic",
+    planName: "BASIC",
     isRecomend: false,
     description: "olla의 기본 분석 기준으로 데이터를 쉽고 빠르게",
     cost: "NN,NNN",
@@ -17,7 +17,7 @@ const demoPlan: PlanCardProps[] = [
     notIncluded: ["데이터 필터 조건 직접 설정 불가", "조건 저장 기능 미지원", "일부 확장 데이터 확인 불가"],
   },
   {
-    planName: "Pro",
+    planName: "PRO",
     isRecomend: true,
     description: "olla의 기본 분석 기준을 넘어, 직접 설정한 조건으로 체계적으로 관리",
     cost: "NN,NNN",
@@ -26,7 +26,7 @@ const demoPlan: PlanCardProps[] = [
     notIncluded: ["전략별 데이터 AI 비교 분석", "전략 성과 추적 기능", "고급 지표 제공"],
   },
   {
-    planName: "Premium",
+    planName: "PREMIUM",
     isRecomend: false,
     description: "설정한 조건을 관리하고, 심화 분석과 AI 비교기능까지",
     cost: "NN,NNN",
@@ -44,8 +44,17 @@ const demoPlan: PlanCardProps[] = [
   },
 ];
 
+export interface SelectPlanType {
+  planType: string;
+  billingCycle: string;
+}
+
 const PlanChange: React.FC = () => {
   const [modal, setModal] = useState("");
+  const [selectPlan, setSelectType] = useState<SelectPlanType>({
+    planType: "",
+    billingCycle: "",
+  });
   useEffect(() => {
     const myPlan = async () => {
       try {
@@ -80,11 +89,11 @@ const PlanChange: React.FC = () => {
           {/* 컨텐츠 영역 */}
           <div className="grid grid-cols-3 gap-4">
             {demoPlan.map((plan, i) => (
-              <PlanCard key={i} {...plan} setModal={setModal} />
+              <PlanCard key={i} {...plan} setModal={setModal} setSelectType={setSelectType} />
             ))}
           </div>
-          <SelectPlanModal open={modal === "default"} onClose={() => setModal("")} setModal={setModal} />
-          <ChangePlanModal open={modal === "upgrade" || modal === "downgrade"} onClose={() => setModal("")} type={modal} />
+          {selectPlan.planType && <SelectPlanModal open={modal === "default"} onClose={() => setModal("")} setModal={setModal} setSelectPlan={setSelectType} />}
+          {selectPlan.billingCycle && <ChangePlanModal open={modal === "upgrade" || modal === "downgrade"} onClose={() => setModal("")} type={modal} selectPlan={selectPlan} />}
         </div>
       </div>
     </div>

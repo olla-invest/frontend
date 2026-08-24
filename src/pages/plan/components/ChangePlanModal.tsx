@@ -1,8 +1,29 @@
 import { Button } from "@/components/ui/button";
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogFooter, DialogClose } from "@/components/ui/dialog";
+import type { SelectPlanType } from "..";
+import { postFirstPay } from "@/api/payment";
 
-export default function ChangePlanModal({ open, onClose, type }: { open: boolean; onClose: () => void; type: string }) {
-  const handleSubmit = async () => {};
+export default function ChangePlanModal({ open, onClose, type, selectPlan }: { open: boolean; onClose: () => void; type: string; selectPlan: SelectPlanType }) {
+  const handleSubmit = async () => {
+    const authKey = import.meta.env.VITE_TOSS_API_KEY;
+    const customerKey = import.meta.env.VITE_TOSS_CLI_KEY;
+
+    console.log(import.meta.env);
+
+    console.log(authKey, customerKey);
+    if (!authKey || !customerKey) return;
+    try {
+      const res = await postFirstPay({
+        authKey: authKey,
+        customerKey: customerKey,
+        planType: selectPlan.planType,
+        billingCycle: selectPlan.billingCycle,
+      });
+      console.log(res);
+    } catch (err) {
+      console.error("토스 결제 호출 실패" + err);
+    }
+  };
 
   return (
     <Dialog
@@ -14,7 +35,9 @@ export default function ChangePlanModal({ open, onClose, type }: { open: boolean
       <DialogContent className="w-[384px] h-131">
         <div className="flex flex-col gap-4">
           <DialogHeader>
-            <DialogTitle>Premium으로{type === "upgrade" ? "업그레이드 " : "변경"}할까요?</DialogTitle>
+            <DialogTitle>
+              {selectPlan.planType}으로{type === "upgrade" ? "업그레이드 " : "변경"}할까요?
+            </DialogTitle>
             <DialogDescription>
               {type === "upgrade"
                 ? "결제 완료 즉시 모든 Premium 기능을 바로 이용할 수 있어요. 남은 이용 기간을 자동으로 차액 정산돼요."
@@ -25,12 +48,12 @@ export default function ChangePlanModal({ open, onClose, type }: { open: boolean
             <div className="flex flex-col gap-4 py-4 border-y mb-4">
               <div className="flex items-center gap-1 text-sm">
                 <span className="text-slate-700">현재 플랜: </span>
-                <span className="font-semibold text-muted-foreground">Pro</span>
+                <span className="font-semibold text-muted-foreground">FREE</span>
                 <span className="border py-0.5 px-2.5 rounded-lg font-medium text-xs">이용중</span>
               </div>
               <div className="flex items-center gap-1 text-sm">
                 <span className="text-slate-700">변경 플랜: </span>
-                <span className="font-semibold text-foreground">Premium</span>
+                <span className="font-semibold text-foreground">{selectPlan.planType}</span>
               </div>
               <div className="p-4 flex flex-col rounded-lg border bg-muted">
                 <span className="font-medium text-sm text-accent-foreground mb-2">오늘 결제 금액</span>
