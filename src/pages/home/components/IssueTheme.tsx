@@ -171,20 +171,9 @@ export function IssueTheme() {
     setSelectIssue(item);
   };
 
-  // 필터/검색/정렬이 적용된 최종 목록
-  const filteredItems = useMemo(() => {
-    const activeKeys = filterValue.filterOption.filter((k) => k !== "all");
-
-    let result = items.filter((item) => {
-      // 전체가 선택되어 있으면 개별 조건은 건너뜀
-      const passesOptionFilters = filterValue.filterOption.includes("all") || activeKeys.every((key) => matchesOption(item, key));
-      const passesMyTheme = !filterValue.isFavorite || item.isFavorite;
-      const passesSearch = !searchTerm || item.themeName.toLowerCase().includes(searchTerm.toLowerCase());
-
-      return passesOptionFilters && passesMyTheme && passesSearch;
-    });
-
-    result = [...result].sort((a, b) => {
+  // 필터/검색과 무관하게, 현재 sortType 기준으로 전체 items를 정렬한 "고정 순위" 목록
+  const sortedItems = useMemo(() => {
+    return [...items].sort((a, b) => {
       if (filterValue.sortType === "momentum") {
         return (b.momentum ?? 0) - (a.momentum ?? 0);
       }
@@ -193,18 +182,35 @@ export function IssueTheme() {
       }
       return (b.rsScore ?? 0) - (a.rsScore ?? 0);
     });
+  }, [items, filterValue.sortType]);
 
-    return result;
-  }, [items, filterValue, searchTerm]);
+  // themeCode -> 고정 순위(1부터 시작) 매핑
+  const rankMap = useMemo(() => {
+    const map = new Map<number, number>();
+    sortedItems.forEach((item, index) => {
+      map.set(item.themeCode, index + 1);
+    });
+    return map;
+  }, [sortedItems]);
 
-  // filteredItems는 이미 filterValue.sortType(rs/momentum/rate) 기준으로 정렬되어 있으므로
-  // 그 정렬 결과의 인덱스를 그대로 "순위"로 사용한다.
-  // (item.rank는 API가 내려준 고정값이라 정렬 기준이 바뀌어도 갱신되지 않는 문제가 있었음)
+  // 필터/검색이 적용된 최종 목록 (정렬은 이미 sortedItems에서 끝났으므로 순서만 유지하며 필터링)
+  const filteredItems = useMemo(() => {
+    const activeKeys = filterValue.filterOption.filter((k) => k !== "all");
+
+    return sortedItems.filter((item) => {
+      const passesOptionFilters = filterValue.filterOption.includes("all") || activeKeys.every((key) => matchesOption(item, key));
+      const passesMyTheme = !filterValue.isFavorite || item.isFavorite;
+      const passesSearch = !searchTerm || item.themeName.toLowerCase().includes(searchTerm.toLowerCase());
+
+      return passesOptionFilters && passesMyTheme && passesSearch;
+    });
+  }, [sortedItems, filterValue, searchTerm]);
+
   const rows: IssueThemeRow[] = useMemo(
     () =>
-      filteredItems.map((item, index) => ({
+      filteredItems.map((item) => ({
         themeCode: item.themeCode,
-        rank: String(index + 1),
+        rank: String(rankMap.get(item.themeCode) ?? "-"),
         themeName: item.themeName,
         rsScore: item.rsScore,
         shortTermRs: item.shortTermRs,
@@ -214,7 +220,7 @@ export function IssueTheme() {
         stats: [item.totalCount, item.risingCount, item.totalCount - item.risingCount, 0],
         original: item,
       })),
-    [filteredItems],
+    [filteredItems, rankMap],
   );
 
   const columns: ColumnDef<IssueThemeRow>[] = [
@@ -481,7 +487,7 @@ export function IssueTheme() {
               {selectIssue && (
                 <div className="size-full max-w-150 bg-white relative overflow-y-auto border-l">
                   <button
-                    className="absolute right-0 top-1"
+                    className="absolute right-0 -top-1.25"
                     onClick={() => {
                       setSelectIssue(null);
                     }}
@@ -500,7 +506,7 @@ export function IssueTheme() {
               {selectIssue && (
                 <div className="size-full max-w-150 bg-white relative overflow-y-auto border-l">
                   <button
-                    className="absolute right-0 top-1"
+                    className="absolute right-0 -top-1.25"
                     onClick={() => {
                       setSelectIssue(null);
                     }}
