@@ -198,6 +198,8 @@ export default function DetailChart({ stockCode }: { stockCode: string }) {
     getPaginationRowModel: getPaginationRowModel(),
   });
 
+  const adColSpan = table.getVisibleFlatColumns().length;
+
   return (
     <div className="flex flex-col gap-4">
       <div className="w-full py-2 flex flex-col gap-4">
@@ -263,15 +265,32 @@ export default function DetailChart({ stockCode }: { stockCode: string }) {
             {loading
               ? null
               : table.getRowModel().rows.length
-                ? table.getRowModel().rows.map((row) => (
-                    <TableRow key={row.id} className="h-12">
-                      {row.getVisibleCells().map((cell) => (
-                        <TableCell key={cell.id} className="text-sm text-slate-700">
-                          {flexRender(cell.column.columnDef.cell, cell.getContext())}
-                        </TableCell>
-                      ))}
-                    </TableRow>
-                  ))
+                ? table.getRowModel().rows.map((row, i) =>
+                    i === 5 ? (
+                      <>
+                        <TableRow key={`ad-${row.id}`} className="h-12.25">
+                          <TableCell colSpan={adColSpan} className="p-0">
+                            <div className="min-h-22.5 max-h-40 size-full flex items-center justify-center bg-slate-100">광고 영역</div>
+                          </TableCell>
+                        </TableRow>
+                        <TableRow key={row.id} className="h-12">
+                          {row.getVisibleCells().map((cell) => (
+                            <TableCell key={cell.id} className="text-sm text-slate-700">
+                              {flexRender(cell.column.columnDef.cell, cell.getContext())}
+                            </TableCell>
+                          ))}
+                        </TableRow>
+                      </>
+                    ) : (
+                      <TableRow key={row.id} className="h-12">
+                        {row.getVisibleCells().map((cell) => (
+                          <TableCell key={cell.id} className="text-sm text-slate-700">
+                            {flexRender(cell.column.columnDef.cell, cell.getContext())}
+                          </TableCell>
+                        ))}
+                      </TableRow>
+                    ),
+                  )
                 : null}
           </TableBody>
         </Table>

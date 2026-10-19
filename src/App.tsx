@@ -21,6 +21,7 @@ import Mypage from "./pages/mypage";
 
 import MainLayout from "./layouts/MainLayout";
 import SubLayout from "./layouts/SubLayout";
+import AdSubLayout from "./layouts/AdSubLayout";
 
 import { useChartSocket } from "./hooks/useChartSocket";
 
@@ -148,12 +149,16 @@ const App: React.FC = () => {
         <Route path="/social-signup" element={<SocialSignUp />} />
 
         <Route element={<SubLayout />}>
-          <Route path="/detail/:stockCode" element={<LiveChartDetailPage />} />
+          {/* <Route path="/detail/:stockCode" element={<LiveChartDetailPage />} /> */}
           <Route path="/themeDetail/:themeCode" element={<IssueDetailPage />} />
           <Route path="/policies/privacy" element={<Privacy />} />
           <Route path="/policies/terms" element={<Terms />} />
           <Route path="/policies/investmentNotice" element={<InvestmentNotice />} />
           <Route path="/policies/marketing" element={<Marketing />} />
+        </Route>
+
+        <Route element={<AdSubLayout />}>
+          <Route path="/detail/:stockCode" element={<LiveChartDetailPage />} />
         </Route>
 
         {/* 404 */}

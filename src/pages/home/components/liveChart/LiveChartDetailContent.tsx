@@ -10,6 +10,7 @@ import { isInWatchList, toggleWatchStockList } from "@/hooks/useToggleWatchList"
 import { useWatchStockListStore } from "@/store/WatchListStore";
 import type { StockDetailInfo } from "./stockDetailTypes";
 import { useLiveStore } from "@/store/liveChartStore";
+import { useIsMobile } from "@/hooks/use-mobile";
 
 const BASE_URL = import.meta.env.VITE_API_BASE_URL;
 
@@ -40,7 +41,7 @@ export default function LiveChartDetailContent({ detailInfo, variant = "modal" }
 
   const isPage = variant === "page";
   const horizontalPadding = isPage ? "px-4 sm:px-6" : "px-6";
-  const tabsListWidth = isPage ? "w-full" : "w-[calc(100%-48px)]";
+  const tabsListWidth = isPage ? "w-[calc(100%-48px)]" : "w-[calc(100%-48px)]";
 
   const { stockList, fetchWatchStockList } = useWatchStockListStore();
 
@@ -81,6 +82,7 @@ export default function LiveChartDetailContent({ detailInfo, variant = "modal" }
   };
 
   const compareInfo = getCompareInfo(detailInfo.investmentIndicators, basicData?.currentPrice);
+  const isMobile = useIsMobile();
 
   const volumeInfo = useMemo(() => {
     if (!basicData) return [];
@@ -105,70 +107,73 @@ export default function LiveChartDetailContent({ detailInfo, variant = "modal" }
   const currentPrice = livePrice?.price ?? basicData?.currentPrice ?? detailInfo.currentPrice;
 
   return (
-    <div className={isPage ? "py-4" : undefined}>
-      <div className={`py-2 ${horizontalPadding} flex w-full flex-col gap-4 lg:flex-row lg:justify-between`}>
-        <div className="flex gap-2.5">
-          <div className="size-16 rounded-full bg-[#D9D9D9] overflow-hidden text-center">
-            <img src={getStockImageUrl(detailInfo.id)} alt={detailInfo.companyName} className="w-full h-full object-cover" />
-          </div>
-          <div>
+    <div className={isPage ? "py-4 flex" : undefined}>
+      <div className="flex-1 px-2 w-full">
+        <div className={`py-2 ${horizontalPadding} flex w-full flex-col gap-4 lg:flex-row lg:justify-between`}>
+          <div className="flex gap-2.5">
+            <div className="size-16 rounded-full bg-[#D9D9D9] overflow-hidden text-center">
+              <img src={getStockImageUrl(detailInfo.id)} alt={detailInfo.companyName} className="w-full h-full object-cover" />
+            </div>
             <div>
-              <span className="font-bold">{detailInfo.companyName}</span>
-              <button
-                onClick={async () => {
-                  await toggleWatchStockList(detailInfo.id);
-                }}
-              >
-                <i className={`icon ${isBookmark ? "icon-star-fill" : "icon-star"}`} />
-              </button>
-            </div>
-            <div className="flex flex-wrap gap-2 items-center">
-              <span className="text-2xl font-semibold">{currentPrice?.toLocaleString()}원</span>
-              {compareInfo && (
-                <div className="text-sm flex gap-1">
-                  <span className="text-muted-foreground">전일 대비</span>
-                  <span className={compareInfo.color}>
-                    {compareInfo.diffText}({compareInfo.rateText}%)
-                  </span>
-                </div>
-              )}
+              <div>
+                <span className="font-bold">{detailInfo.companyName}</span>
+                <button
+                  onClick={async () => {
+                    await toggleWatchStockList(detailInfo.id);
+                  }}
+                >
+                  <i className={`icon ${isBookmark ? "icon-star-fill" : "icon-star"}`} />
+                </button>
+              </div>
+              <div className="flex flex-wrap gap-2 items-center">
+                <span className="text-2xl font-semibold">{currentPrice?.toLocaleString()}원</span>
+                {compareInfo && (
+                  <div className="text-sm flex gap-1">
+                    <span className="text-muted-foreground">전일 대비</span>
+                    <span className={compareInfo.color}>
+                      {compareInfo.diffText}({compareInfo.rateText}%)
+                    </span>
+                  </div>
+                )}
+              </div>
             </div>
           </div>
+          <div className="grid items-center grid-cols-[repeat(2,minmax(0,auto))] gap-y-1 gap-x-4 py-2.5">
+            {volumeInfo.map((e, i) => {
+              return (
+                <div key={i} className="flex gap-2 text-xs">
+                  <span className={`text-muted-foreground shrink-0 ${i % 2 !== 0 ? "w-18.5" : "w-10.5"}`}>{e.title}</span>
+                  <span>{e.value}</span>
+                </div>
+              );
+            })}
+          </div>
         </div>
-        <div className="grid items-center grid-cols-[repeat(2,minmax(0,auto))] gap-y-1 gap-x-4 py-2.5">
-          {volumeInfo.map((e, i) => {
-            return (
-              <div key={i} className="flex gap-2 text-xs">
-                <span className={`text-muted-foreground shrink-0 ${i % 2 !== 0 ? "w-18.5" : "w-10.5"}`}>{e.title}</span>
-                <span>{e.value}</span>
-              </div>
-            );
-          })}
+        <div className="py-2">
+          <Tabs defaultValue="chart" className="h-full">
+            <TabsList variant="line" className={`justify-start border-b ${tabsListWidth} p-0 pb-0.5 gap-4 mb-2 mx-4 sm:mx-6`}>
+              {tabs.map((tab) => (
+                <TabsTrigger key={tab.value} value={tab.value} className="grow-0 px-0 py-2 text-base">
+                  {tab.name}
+                </TabsTrigger>
+              ))}
+            </TabsList>
+            <TabsContent value="chart" className={`h-full overflow-y-auto ${horizontalPadding}`}>
+              <DetailChart stockCode={detailInfo.id} />
+            </TabsContent>
+            <TabsContent value="marketStrength" className={`h-full overflow-y-auto ${horizontalPadding}`}>
+              <DetailMarketStrength stockCode={detailInfo.id} />
+            </TabsContent>
+            <TabsContent value="stockInfo" className={`h-full overflow-y-auto ${horizontalPadding}`}>
+              <DetailStockInfo stockCode={detailInfo.id} />
+            </TabsContent>
+            <TabsContent value="issueAnalysis" className="h-full overflow-y-auto">
+              <DetailIssue stockCode={detailInfo.id} stockName={detailInfo.companyName} />
+            </TabsContent>
+          </Tabs>
         </div>
       </div>
-      <div className="py-2">
-        <Tabs defaultValue="chart" className="h-full">
-          <TabsList variant="line" className={`justify-start border-b ${tabsListWidth} p-0 pb-0.5 gap-4 mb-2 mx-4 sm:mx-6`}>
-            {tabs.map((tab) => (
-              <TabsTrigger key={tab.value} value={tab.value} className="grow-0 px-0 py-2 text-base">
-                {tab.name}
-              </TabsTrigger>
-            ))}
-          </TabsList>
-          <TabsContent value="chart" className={`h-full overflow-y-auto ${horizontalPadding}`}>
-            <DetailChart stockCode={detailInfo.id} />
-          </TabsContent>
-          <TabsContent value="marketStrength" className={`h-full overflow-y-auto ${horizontalPadding}`}>
-            <DetailMarketStrength stockCode={detailInfo.id} />
-          </TabsContent>
-          <TabsContent value="stockInfo" className={`h-full overflow-y-auto ${horizontalPadding}`}>
-            <DetailStockInfo stockCode={detailInfo.id} />
-          </TabsContent>
-          <TabsContent value="issueAnalysis" className="h-full overflow-y-auto">
-            <DetailIssue stockCode={detailInfo.id} stockName={detailInfo.companyName} />
-          </TabsContent>
-        </Tabs>
-      </div>
+      {isMobile ? null : <div className="w-50 h-150 border rounded-md bg-white">광고 영역</div>}
     </div>
   );
 }

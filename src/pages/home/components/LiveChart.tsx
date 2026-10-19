@@ -648,6 +648,8 @@ export function LiveChart() {
     getFilteredRowModel: getFilteredRowModel(),
   });
 
+  const adColSpan = table.getVisibleFlatColumns().length;
+
   return (
     <>
       <div className="w-full flex flex-col h-full relative">
@@ -831,21 +833,44 @@ export function LiveChart() {
               {loading
                 ? null
                 : table.getRowModel().rows.length
-                  ? table.getRowModel().rows.map((row) => (
-                      <TableRow key={row.id} className="h-12.25" onClick={() => openStockDetail(row.original)}>
-                        {row.getVisibleCells().map((cell) => (
-                          <TableCell key={cell.id} className={cell.column.id === "companyName" ? "whitespace-normal text-slate-700" : "text-slate-700"}>
-                            {cell.column.id === "theme" ? (
-                              <div className="h-8 flex items-center justify-end" title={row.original.themeFull}>
-                                {flexRender(cell.column.columnDef.cell, cell.getContext())}
-                              </div>
-                            ) : (
-                              flexRender(cell.column.columnDef.cell, cell.getContext())
-                            )}
-                          </TableCell>
-                        ))}
-                      </TableRow>
-                    ))
+                  ? table.getRowModel().rows.map((row, i) =>
+                      i === 5 ? (
+                        <>
+                          <TableRow key={`ad-${row.id}`} className="h-12.25">
+                            <TableCell colSpan={adColSpan} className="p-0">
+                              <div className="min-h-22.5 max-h-40 size-full flex items-center justify-center bg-slate-100">광고 영역</div>
+                            </TableCell>
+                          </TableRow>
+                          <TableRow key={row.id} className="h-12.25" onClick={() => openStockDetail(row.original)}>
+                            {row.getVisibleCells().map((cell) => (
+                              <TableCell key={cell.id} className={cell.column.id === "companyName" ? "whitespace-normal text-slate-700" : "text-slate-700"}>
+                                {cell.column.id === "theme" ? (
+                                  <div className="h-8 flex items-center justify-end" title={row.original.themeFull}>
+                                    {flexRender(cell.column.columnDef.cell, cell.getContext())}
+                                  </div>
+                                ) : (
+                                  flexRender(cell.column.columnDef.cell, cell.getContext())
+                                )}
+                              </TableCell>
+                            ))}
+                          </TableRow>
+                        </>
+                      ) : (
+                        <TableRow key={row.id} className="h-12.25" onClick={() => openStockDetail(row.original)}>
+                          {row.getVisibleCells().map((cell) => (
+                            <TableCell key={cell.id} className={cell.column.id === "companyName" ? "whitespace-normal text-slate-700" : "text-slate-700"}>
+                              {cell.column.id === "theme" ? (
+                                <div className="h-8 flex items-center justify-end" title={row.original.themeFull}>
+                                  {flexRender(cell.column.columnDef.cell, cell.getContext())}
+                                </div>
+                              ) : (
+                                flexRender(cell.column.columnDef.cell, cell.getContext())
+                              )}
+                            </TableCell>
+                          ))}
+                        </TableRow>
+                      ),
+                    )
                   : null}
             </TableBody>
           </Table>
