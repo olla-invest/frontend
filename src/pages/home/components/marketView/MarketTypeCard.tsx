@@ -26,7 +26,7 @@ const CardUi = ({ marketInfo, marketName, chartData }: { marketInfo: MarketData;
             </p>
           </div>
         </div>
-        <LineAreaChart colorType={index.change > 0 ? "red" : index.change < 0 ? "blue" : "gray"} data={chartData} />
+        <LineAreaChart colorType={index.change > 0 ? "red" : index.change < 0 ? "blue" : "gray"} data={chartData} prevClose={index.previousClose} />
         <div className={`flex items-center gap-4 text-xs justify-between md:justify-start ${marketName === "코스피" ? "md:pb-6" : ""}`}>
           <div className="flex gap-1">
             <span className="text-muted-foreground shrink-0">외인</span>

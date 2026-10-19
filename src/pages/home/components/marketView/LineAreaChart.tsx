@@ -5,6 +5,7 @@ import type { IndexCandle } from "@/types/api/marketView";
 interface LineAreaChartProps {
   colorType: string;
   data: IndexCandle[];
+  prevClose: number;
 }
 
 // tradeTime/indexPrice가 아직 없는 데이터(undefined)는 걸러내고, 유효한 것만 변환
@@ -43,7 +44,7 @@ const toAreaData = (data: IndexCandle[]) => {
     });
 };
 
-export default function LineAreaChart({ colorType, data }: LineAreaChartProps) {
+export default function LineAreaChart({ colorType, data, prevClose }: LineAreaChartProps) {
   const containerRef = useRef<HTMLDivElement>(null);
 
   const chartColorMap = () => {
@@ -115,9 +116,23 @@ export default function LineAreaChart({ colorType, data }: LineAreaChartProps) {
       lineWidth: 1,
       lineType: 2,
       crosshairMarkerVisible: false,
+      // 기존 마지막 값 기준선 숨기기
+      priceLineVisible: false,
+      lastValueVisible: false,
     });
 
     areaSeries.setData(areaData);
+
+    // prevClose 값으로 기준선 생성
+    if (Number.isFinite(prevClose)) {
+      areaSeries.createPriceLine({
+        price: prevClose,
+        lineWidth: 1,
+        lineStyle: 2,
+        axisLabelVisible: false,
+      });
+    }
+
     chart.timeScale().fitContent();
 
     const resizeObserver = new ResizeObserver((entries) => {
