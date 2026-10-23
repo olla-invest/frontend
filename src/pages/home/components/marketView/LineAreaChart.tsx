@@ -1,5 +1,5 @@
 import { useEffect, useRef } from "react";
-import { createChart, AreaSeries, type UTCTimestamp } from "lightweight-charts";
+import { createChart, AreaSeries, type UTCTimestamp, type AutoscaleInfo } from "lightweight-charts";
 import type { IndexCandle } from "@/types/api/marketView";
 
 interface LineAreaChartProps {
@@ -116,9 +116,23 @@ export default function LineAreaChart({ colorType, data, prevClose }: LineAreaCh
       lineWidth: 1,
       lineType: 2,
       crosshairMarkerVisible: false,
-      // 기존 마지막 값 기준선 숨기기
       priceLineVisible: false,
       lastValueVisible: false,
+      autoscaleInfoProvider: (original: () => AutoscaleInfo | null) => {
+        const res = original();
+        if (res === null || res.priceRange === null || !Number.isFinite(prevClose)) {
+          return res;
+        }
+        if (res === null || !Number.isFinite(prevClose)) return res;
+
+        return {
+          ...res,
+          priceRange: {
+            minValue: Math.min(res.priceRange.minValue, prevClose),
+            maxValue: Math.max(res.priceRange.maxValue, prevClose),
+          },
+        };
+      },
     });
 
     areaSeries.setData(areaData);
@@ -130,6 +144,7 @@ export default function LineAreaChart({ colorType, data, prevClose }: LineAreaCh
         lineWidth: 1,
         lineStyle: 2,
         axisLabelVisible: false,
+        color: chartColorMap().lineColor,
       });
     }
 
@@ -146,7 +161,7 @@ export default function LineAreaChart({ colorType, data, prevClose }: LineAreaCh
       resizeObserver.disconnect();
       chart.remove();
     };
-  }, [data, colorType]);
+  }, [data, colorType, prevClose]);
 
   return <div ref={containerRef} style={{ width: "100%", height: 56 }} />;
 }

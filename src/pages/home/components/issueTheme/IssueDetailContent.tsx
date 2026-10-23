@@ -201,7 +201,7 @@ export default function IssueDetailContent({ selectIssue }: ContentProps) {
                   {detailData?.streakBadge.label}
                 </div>
               )}
-              {detailData?.insights.map((e, i) => {
+              {detailData?.insights?.map((e, i) => {
                 return (
                   <Badge variant="outline" key={i}>
                     {e}

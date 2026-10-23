@@ -53,7 +53,7 @@ export default function Mypage() {
   return (
     <div className="flex gap-12 mx-auto h-full w-full max-w-312 pt-4 pb-14 px-6">
       {/* 좌측 - 메뉴 리스트 */}
-      <div className="border rounded-md shadow-sm pt-8 pb-6 flex flex-col gap-6 w-60 shrink-0">
+      <div className="border rounded-md shadow-sm pt-8 pb-6 flex flex-col gap-6 w-60 shrink-0 h-fit">
         <div className="flex flex-col items-center gap-2 pb-6 border-b">
           <div className="size-24 rounded-2xl bg-gray-300 overflow-hidden">
             <img src={userImg} alt="프로필 이미지" className="size-full" />
