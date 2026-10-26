@@ -22,6 +22,7 @@ interface MarketIndex {
   change: number;
   changeRate: number;
   volume: string;
+  previousClose: number;
 }
 
 export interface MarketBreadth {

@@ -22,15 +22,17 @@ export default function HighLow({ kospiHighLow, kosdaqHighLow }: { kospiHighLow:
   const demoData = [
     {
       title: "신고가",
-      declineRate: totalNewHigh,
+      declineRate: "+" + totalNewHigh,
       description: "52주 최고가 경신",
-      ...getColors(totalNewHigh),
+      color: "rose",
+      barColor: "bg-linear-to-r from-slate-200 to-rose-500",
     },
     {
       title: "신저가",
-      declineRate: totalNewLow,
+      declineRate: "-" + totalNewLow,
       description: "52주 최저가 경신",
-      ...getColors(totalNewLow),
+      color: "blue",
+      barColor: "bg-linear-to-r from-blue-500 to-slate-200",
     },
     {
       title: isMobile ? "순증" : "순증 (신고가 - 신저가)",

@@ -1,10 +1,11 @@
 import { useEffect, useRef } from "react";
-import { createChart, AreaSeries, type UTCTimestamp } from "lightweight-charts";
+import { createChart, AreaSeries, type UTCTimestamp, type AutoscaleInfo } from "lightweight-charts";
 import type { IndexCandle } from "@/types/api/marketView";
 
 interface LineAreaChartProps {
   colorType: string;
   data: IndexCandle[];
+  prevClose: number;
 }
 
 // tradeTime/indexPrice가 아직 없는 데이터(undefined)는 걸러내고, 유효한 것만 변환
@@ -43,7 +44,7 @@ const toAreaData = (data: IndexCandle[]) => {
     });
 };
 
-export default function LineAreaChart({ colorType, data }: LineAreaChartProps) {
+export default function LineAreaChart({ colorType, data, prevClose }: LineAreaChartProps) {
   const containerRef = useRef<HTMLDivElement>(null);
 
   const chartColorMap = () => {
@@ -115,9 +116,38 @@ export default function LineAreaChart({ colorType, data }: LineAreaChartProps) {
       lineWidth: 1,
       lineType: 2,
       crosshairMarkerVisible: false,
+      priceLineVisible: false,
+      lastValueVisible: false,
+      autoscaleInfoProvider: (original: () => AutoscaleInfo | null) => {
+        const res = original();
+        if (res === null || res.priceRange === null || !Number.isFinite(prevClose)) {
+          return res;
+        }
+        if (res === null || !Number.isFinite(prevClose)) return res;
+
+        return {
+          ...res,
+          priceRange: {
+            minValue: Math.min(res.priceRange.minValue, prevClose),
+            maxValue: Math.max(res.priceRange.maxValue, prevClose),
+          },
+        };
+      },
     });
 
     areaSeries.setData(areaData);
+
+    // prevClose 값으로 기준선 생성
+    if (Number.isFinite(prevClose)) {
+      areaSeries.createPriceLine({
+        price: prevClose,
+        lineWidth: 1,
+        lineStyle: 2,
+        axisLabelVisible: false,
+        color: chartColorMap().lineColor,
+      });
+    }
+
     chart.timeScale().fitContent();
 
     const resizeObserver = new ResizeObserver((entries) => {
@@ -131,7 +161,7 @@ export default function LineAreaChart({ colorType, data }: LineAreaChartProps) {
       resizeObserver.disconnect();
       chart.remove();
     };
-  }, [data, colorType]);
+  }, [data, colorType, prevClose]);
 
   return <div ref={containerRef} style={{ width: "100%", height: 56 }} />;
 }
