@@ -38,10 +38,11 @@ interface LiveChartDetailContentProps {
 export default function LiveChartDetailContent({ detailInfo, variant = "modal" }: LiveChartDetailContentProps) {
   const [basicData, setBasicData] = useState<StockBasicDataResponse | null>();
   const livePrice = useLiveStore((s) => s.prices[detailInfo.id]);
+  const isMobile = useIsMobile();
 
   const isPage = variant === "page";
   const horizontalPadding = isPage ? "px-4 sm:px-6" : "px-6";
-  const tabsListWidth = isPage ? "w-[calc(100%-48px)]" : "w-[calc(100%-48px)]";
+  const tabsListWidth = isMobile ? "w-[calc(100%-36px)]" : "w-[calc(100%-48px)]";
 
   const { stockList, fetchWatchStockList } = useWatchStockListStore();
 
@@ -82,7 +83,6 @@ export default function LiveChartDetailContent({ detailInfo, variant = "modal" }
   };
 
   const compareInfo = getCompareInfo(detailInfo.investmentIndicators, basicData?.currentPrice);
-  const isMobile = useIsMobile();
 
   const volumeInfo = useMemo(() => {
     if (!basicData) return [];
@@ -108,7 +108,7 @@ export default function LiveChartDetailContent({ detailInfo, variant = "modal" }
 
   return (
     <div className={isPage ? "py-4 flex" : undefined}>
-      <div className="flex-1 px-2 w-full">
+      <div className="flex-1 w-full">
         <div className={`py-2 ${horizontalPadding} flex w-full flex-col gap-4 lg:flex-row lg:justify-between`}>
           <div className="flex gap-2.5">
             <div className="size-16 rounded-full bg-[#D9D9D9] overflow-hidden text-center">
@@ -173,7 +173,7 @@ export default function LiveChartDetailContent({ detailInfo, variant = "modal" }
           </Tabs>
         </div>
       </div>
-      {isMobile ? null : <div className="w-50 h-150 border rounded-md bg-white">광고 영역</div>}
+      {isMobile ? null : <div className="w-50 h-150 border rounded-md bg-slate-100">광고 영역</div>}
     </div>
   );
 }

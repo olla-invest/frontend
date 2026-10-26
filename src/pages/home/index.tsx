@@ -91,7 +91,7 @@ const Home: React.FC = () => {
             <IssueTheme />
           </TabsContent>
 
-          <TabsContent value="myWatch" className="hidden h-full overflow-y-auto md:block mb-14">
+          <TabsContent value="myWatch" className="hidden h-full overflow-y-auto md:block">
             <MyWatch />
           </TabsContent>
         </Tabs>

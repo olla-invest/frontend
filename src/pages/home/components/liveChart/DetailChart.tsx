@@ -13,6 +13,7 @@ import { subDays, subYears } from "date-fns";
 import { getChartTableDetailData, getChartGraphDetailData } from "@/api/chartDetails";
 import { TablePagination } from "@/components/TablePagination";
 import DetailChartGraph from "./DetailChartGraph";
+import { useIsMobile } from "@/hooks/use-mobile";
 
 //소켓
 import { getChartSocket } from "@/soket/chartSocket";
@@ -22,6 +23,7 @@ export default function DetailChart({ stockCode }: { stockCode: string }) {
   const [tableData, setTableData] = useState<TableDetail | null>(null);
   const [graphData, setGraphData] = useState<GraphDetail | null>(null);
   const [loading] = useState(false);
+  const isMobile = useIsMobile();
 
   // 차트 필터
   const minuteRef = useRef<HTMLButtonElement | null>(null);
@@ -241,6 +243,8 @@ export default function DetailChart({ stockCode }: { stockCode: string }) {
 
         <DetailChartGraph data={graphData?.candles ?? []} chartPeriod={chartPeriod} tick={tick} interval={chartPeriod === "minute" ? Number(minute) : undefined} />
       </div>
+
+      {isMobile && <div className="w-auto -mx-4 min-h-22.5 max-h-40 bg-slate-100">광고 영역</div>}
 
       <div className="py-2">
         <div className="flex justify-between items-center mb-4">

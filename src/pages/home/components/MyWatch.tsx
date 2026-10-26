@@ -126,7 +126,7 @@ export default function MyWatch() {
       ) : (
         <div className="flex h-full xl:flex-row overflow-y-auto flex-col">
           {/* 왼쪽 영역 */}
-          <div className="pr-6 xl:border-r xl:border-b-0 pt-4 flex flex-col gap-6 flex-1">
+          <div className="pr-6 xl:border-r xl:border-b-0 pt-4 flex flex-col gap-6 flex-1 xl:pb-14">
             {/* 오늘 주목_종목 또는 테마가 1개리도 있어야 UI표시 */}
             {(themeList.length > 0 || stockList.length > 0) && (
               <div className="flex flex-col gap-4 py-2">
@@ -166,6 +166,8 @@ export default function MyWatch() {
               <WatchlistStatus themeList={themeList} stockList={stockList} handleThemeModal={handleThemeModal} handleStockModal={handleStockModal} />
             </div>
 
+            <div className="border rounded-md w-full max-h-50 min-h-22.5">광고 영역</div>
+
             {/* 추천 영역 */}
             <div className="flex flex-col gap-4 py-2">
               <h4 className="text-xl text-foreground font-semibold">함께 보면 좋을 만한 종목·테마</h4>
@@ -174,17 +176,20 @@ export default function MyWatch() {
           </div>
 
           {/* 오른쪽: 내 관심 리스트 */}
-          <div className="xl:pl-6 xl:min-w-66 xl:max-w-86 py-4 w-full">
-            <div className="flex flex-col gap-4 py-2 h-full">
-              <h4 className="text-xl text-foreground font-semibold">내 관심</h4>
+          <div className="xl:pl-6 xl:min-w-66 xl:max-w-86 py-4 w-full pb-14">
+            <div className="flex flex-col gap-4 py-2 h-full justify-between">
+              <div className="flex flex-col gap-4 h-full">
+                <h4 className="text-xl text-foreground font-semibold">내 관심</h4>
 
-              <ul className="flex flex-col w-full overflow-y-auto">
-                {sumWatchList && sumWatchList.length > 0 ? (
-                  sumWatchList.map((item, i) => <MyWatchlist key={i} item={item} bookmarks={bookmarks} handleStockModal={handleStockModal} handleThemeModal={handleThemeModal} />)
-                ) : (
-                  <li className="text-center text-sm text-muted-foreground h-13 flex items-end justify-center">관심 종목이 없어요.</li>
-                )}
-              </ul>
+                <ul className="flex flex-col w-full overflow-y-auto">
+                  {sumWatchList && sumWatchList.length > 0 ? (
+                    sumWatchList.map((item, i) => <MyWatchlist key={i} item={item} bookmarks={bookmarks} handleStockModal={handleStockModal} handleThemeModal={handleThemeModal} />)
+                  ) : (
+                    <li className="text-center text-sm text-muted-foreground h-13 flex items-end justify-center">관심 종목이 없어요.</li>
+                  )}
+                </ul>
+              </div>
+              <div className="border rounded-md size-80 items-end">광고 영역</div>
             </div>
           </div>
         </div>

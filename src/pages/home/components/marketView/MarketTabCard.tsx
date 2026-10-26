@@ -23,7 +23,7 @@ export default function MarketTabCard({ kospi, kosdaq }: { kospi: MarketData | u
     },
   };
   return (
-    <Tabs defaultValue="maDecline" value={activeTab} onValueChange={setActiveTab}>
+    <Tabs defaultValue="maDecline" value={activeTab} onValueChange={setActiveTab} className="flex-1">
       <div className="flex md:items-center md:flex-row gap-4 mb-2 flex-col items-start">
         <TabsList className="w-full md:w-fit">
           <TabsTrigger value="maDecline">MA하락률</TabsTrigger>
