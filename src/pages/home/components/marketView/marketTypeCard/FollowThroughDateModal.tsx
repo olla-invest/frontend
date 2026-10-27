@@ -49,7 +49,7 @@ export default function FollowThroughDateModal({ marketName, isOpen, onClose }: 
       }}
     >
       <DialogContent className="w-[384px] h-131">
-        <div className="flex flex-col gap-4">
+        <div className="flex flex-col gap-4 overflow-y-auto">
           <DialogHeader className="h-fit">
             <DialogTitle className="text-lg font-semibold text-slate-800">{marketName} 매도 신호일</DialogTitle>
             <DialogDescription className="text-sm text-slate-700">최근 25거래일 기준 · 총 {data?.total ?? 0}개 ⚡️</DialogDescription>

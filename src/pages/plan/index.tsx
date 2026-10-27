@@ -1,51 +1,71 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import PlanCard, { type PlanCardProps } from "./components/PlanCard";
 import SelectPlanModal from "./components/SelectPlanModal";
 import ChangePlanModal from "./components/ChangePlanModal";
+import { getMyPlan } from "@/api/plan";
+
+const demoPlan: PlanCardProps[] = [
+  {
+    planName: "BASIC",
+    isRecomend: false,
+    description: "olla의 기본 분석 기준으로 데이터를 쉽고 빠르게",
+    cost: "NN,NNN",
+    discountInfo: "NN,NNN원/월",
+    costInfo: "NN개월 동안, 이후 NN,NNN원 /월 으로 결제",
+    actionType: "upgrade",
+    include: ["olla 기본 분석 기준 적용", "종목 및 테마 데이터 확인", "시장대비강도 점수 / 등락률 / 거래대금 등 주요 지표 데이터 확인", "관심 종목·테마 데이터 변화 알림 제공"],
+    notIncluded: ["데이터 필터 조건 직접 설정 불가", "조건 저장 기능 미지원", "일부 확장 데이터 확인 불가"],
+  },
+  {
+    planName: "PRO",
+    isRecomend: true,
+    description: "olla의 기본 분석 기준을 넘어, 직접 설정한 조건으로 체계적으로 관리",
+    cost: "NN,NNN",
+    actionType: "upgrade",
+    include: ["데이터 필터 조건 직접 설정 가능", "확장 데이터 무제한 확인 가능", "RS기간 및 세부 조건 설정 가능", "관심 종목·테마 기준 정렬 가능", "AI 데이터 분석 기능 및 인사이트 제공"],
+    notIncluded: ["전략별 데이터 AI 비교 분석", "전략 성과 추적 기능", "고급 지표 제공"],
+  },
+  {
+    planName: "PREMIUM",
+    isRecomend: false,
+    description: "설정한 조건을 관리하고, 심화 분석과 AI 비교기능까지",
+    cost: "NN,NNN",
+    actionType: "upgrade",
+    include: [
+      "데이터 필터 조건 직접 설정 가능",
+      "확장 데이터 무제한 확인 가능",
+      "RS기간 및 세부 조건 설정 가능",
+      "AI 데이터 분석 기능 및 인사이트 제공",
+      "전략별 데이터 AI 비교 분석",
+      "전략 성과 추적 가능",
+      "고급 지표 제공",
+      "전략 히스토리 관리",
+    ],
+  },
+];
+
+export interface SelectPlanType {
+  planType: string;
+  billingCycle: string;
+}
 
 const PlanChange: React.FC = () => {
-  const demoPlan: PlanCardProps[] = [
-    {
-      planName: "Basic",
-      isRecomend: false,
-      description: "olla의 기본 분석 기준으로 데이터를 쉽고 빠르게",
-      cost: "NN,NNN",
-      discountInfo: "NN,NNN원/월",
-      costInfo: "NN개월 동안, 이후 NN,NNN원 /월 으로 결제",
-      actionType: "upgrade",
-      include: ["olla 기본 분석 기준 적용", "종목 및 테마 데이터 확인", "시장대비강도 점수 / 등락률 / 거래대금 등 주요 지표 데이터 확인", "관심 종목·테마 데이터 변화 알림 제공"],
-      notIncluded: ["데이터 필터 조건 직접 설정 불가", "조건 저장 기능 미지원", "일부 확장 데이터 확인 불가"],
-    },
-    {
-      planName: "Pro",
-      isRecomend: true,
-      description: "olla의 기본 분석 기준을 넘어, 직접 설정한 조건으로 체계적으로 관리",
-      cost: "NN,NNN",
-      actionType: "upgrade",
-      include: ["데이터 필터 조건 직접 설정 가능", "확장 데이터 무제한 확인 가능", "RS기간 및 세부 조건 설정 가능", "관심 종목·테마 기준 정렬 가능", "AI 데이터 분석 기능 및 인사이트 제공"],
-      notIncluded: ["전략별 데이터 AI 비교 분석", "전략 성과 추적 기능", "고급 지표 제공"],
-    },
-    {
-      planName: "Premium",
-      isRecomend: false,
-      description: "설정한 조건을 관리하고, 심화 분석과 AI 비교기능까지",
-      cost: "NN,NNN",
-      actionType: "upgrade",
-      include: [
-        "데이터 필터 조건 직접 설정 가능",
-        "확장 데이터 무제한 확인 가능",
-        "RS기간 및 세부 조건 설정 가능",
-        "AI 데이터 분석 기능 및 인사이트 제공",
-        "전략별 데이터 AI 비교 분석",
-        "전략 성과 추적 가능",
-        "고급 지표 제공",
-        "전략 히스토리 관리",
-      ],
-    },
-  ];
-
   const [modal, setModal] = useState("");
-
+  const [selectPlan, setSelectType] = useState<SelectPlanType>({
+    planType: "",
+    billingCycle: "",
+  });
+  useEffect(() => {
+    const myPlan = async () => {
+      try {
+        const res = await getMyPlan();
+        console.log("내 플랜 정보:", res.data);
+      } catch (error) {
+        console.error("내 플랜 정보 가져오기 실패:", error);
+      }
+    };
+    myPlan();
+  }, []);
   return (
     <div className="py-2 px-6 w-full h-[calc(100vh-120px)] overflow-y-auto">
       <div className="mx-auto max-w-312 py-2">
@@ -69,11 +89,11 @@ const PlanChange: React.FC = () => {
           {/* 컨텐츠 영역 */}
           <div className="grid grid-cols-3 gap-4">
             {demoPlan.map((plan, i) => (
-              <PlanCard key={i} {...plan} setModal={setModal} />
+              <PlanCard key={i} {...plan} setModal={setModal} setSelectType={setSelectType} />
             ))}
           </div>
-          <SelectPlanModal open={modal === "default"} onClose={() => setModal("")} setModal={setModal} />
-          <ChangePlanModal open={modal === "upgrade" || modal === "downgrade"} onClose={() => setModal("")} type={modal} />
+          {selectPlan.planType && <SelectPlanModal open={modal === "default"} onClose={() => setModal("")} setModal={setModal} setSelectPlan={setSelectType} />}
+          {selectPlan.billingCycle && <ChangePlanModal open={modal === "upgrade" || modal === "downgrade"} onClose={() => setModal("")} type={modal} selectPlan={selectPlan} />}
         </div>
       </div>
     </div>

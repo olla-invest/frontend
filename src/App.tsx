@@ -17,6 +17,7 @@ import Marketing from "./pages/policies/Marketing";
 import Terms from "./pages/policies/Terms";
 import InvestmentNotice from "./pages/policies/InvestmentNotice";
 import LiveChartDetailPage from "./pages/home/components/liveChart/LiveChartDetailPage";
+import Mypage from "./pages/mypage";
 
 import MainLayout from "./layouts/MainLayout";
 import SubLayout from "./layouts/SubLayout";
@@ -110,6 +111,14 @@ const App: React.FC = () => {
             element={
               <PrivateRoute>
                 <PlanChange />
+              </PrivateRoute>
+            }
+          />
+          <Route
+            path="/mypage/:tab?"
+            element={
+              <PrivateRoute>
+                <Mypage />
               </PrivateRoute>
             }
           />

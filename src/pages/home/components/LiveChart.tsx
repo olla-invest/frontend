@@ -361,7 +361,7 @@ export function LiveChart() {
 
   //페이지 네이션 (데스크톱)
   const [page, setPage] = useState(1); // 1-based
-  const [pageSize, setPageSize] = useState(DESKTOP_DEFAULT_PAGE_SIZE);
+  const [pageSize, setPageSize] = useState(sessionStorage.getItem("liveChartPageSize") ? Number(sessionStorage.getItem("liveChartPageSize")) : DESKTOP_DEFAULT_PAGE_SIZE);
   //정렬 기준
   const [sortOption, setSortOption] = useState<SortOption>("RS점수 높은 순");
   //검색어
@@ -788,6 +788,7 @@ export function LiveChart() {
                       onCheckedChange={() => {
                         setPage(1);
                         setPageSize(size);
+                        sessionStorage.setItem("liveChartPageSize", size.toString());
                       }}
                     >
                       {size}

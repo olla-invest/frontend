@@ -2,6 +2,7 @@ import { Badge } from "@/components/ui/badge";
 import { CircleCheckIcon } from "lucide-react";
 import type { StockEventType, WatchListStock, WatchListTheme } from "@/types/api/watchList";
 import { getThemeIcon } from "@/utils/ThemeIcon";
+import { RANK_META, getRankInfo } from "@/utils/rankInfo";
 
 interface ThemeFocusProps {
   theme: WatchListTheme;
@@ -41,26 +42,8 @@ const EVENT_META: Record<StockEventType, EventMeta> = {
 };
 
 export function ThemeFocus({ theme, handleThemeModal }: ThemeFocusProps) {
-  const rankStatus = theme.prevRank === theme.rank ? "same" : theme.prevRank > theme.rank ? "up" : "down";
+  const rankStatus = getRankInfo(theme.prevRank, theme.rank).status;
   const diff = Math.abs(theme.prevRank - theme.rank);
-
-  const RANK_META = {
-    same: {
-      text: "유지",
-      color: "text-gray-500",
-      icon: null,
-    },
-    up: {
-      text: "상승",
-      color: "text-rose-500",
-      icon: <i className="icon icon-arrow-up" />,
-    },
-    down: {
-      text: "하락",
-      color: "text-blue-500",
-      icon: <i className="icon icon-arrow-down" />,
-    },
-  } as const;
 
   const rankMeta = RANK_META[rankStatus];
   return (
@@ -90,7 +73,7 @@ export function ThemeFocus({ theme, handleThemeModal }: ThemeFocusProps) {
 
             <span>으로 {rankMeta.text}했어요.</span>
 
-            {rankStatus !== "same" && (
+            {rankStatus !== "same" && theme.prevRank && theme.rank && (
               <span className={`${rankMeta.color} flex items-center gap-0.5`}>
                 {rankMeta.icon}
                 {diff}
@@ -120,26 +103,8 @@ export function ThemeFocus({ theme, handleThemeModal }: ThemeFocusProps) {
 }
 
 export function StockFocus({ stock, handleStockModal }: StockFocusProps) {
-  const rankStatus = stock.prevRank === stock.rank ? "same" : stock.prevRank > stock.rank ? "up" : "down";
+  const rankStatus = getRankInfo(stock.prevRank, stock.rank).status;
   const diff = Math.abs(stock.prevRank - stock.rank);
-
-  const RANK_META = {
-    same: {
-      text: "유지",
-      color: "text-gray-500",
-      icon: null,
-    },
-    up: {
-      text: "상승",
-      color: "text-rose-500",
-      icon: <i className="icon icon-arrow-up" />,
-    },
-    down: {
-      text: "하락",
-      color: "text-blue-500",
-      icon: <i className="icon icon-arrow-down" />,
-    },
-  } as const;
 
   const rankMeta = RANK_META[rankStatus];
 
@@ -166,10 +131,10 @@ export function StockFocus({ stock, handleStockModal }: StockFocusProps) {
           <div className="text-slate-700 text-sm flex gap-1 pr-2 items-center">
             <span>종목 순위가</span>
             <span className="font-semibold">
-              {stock.prevRank} → {stock.rank}
+              {stock.prevRank || "-"} → {stock.rank || "-"}
             </span>
             <span>으로 {rankMeta.text}했어요.</span>
-            {rankStatus !== "same" && (
+            {rankStatus !== "same" && stock.prevRank && stock.rank && (
               <span className={`${rankMeta.color} flex items-center gap-0.5`}>
                 {rankMeta.icon}
                 {diff}

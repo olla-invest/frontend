@@ -3,6 +3,7 @@ import { CircleCheckIcon } from "lucide-react";
 import type { RecommendationResponse, RecommendedStock, RecommendedTheme } from "@/types/api/watchList";
 import type { WatchListTheme, WatchListStock, StockEventType } from "@/types/api/watchList";
 import { getThemeIcon } from "@/utils/ThemeIcon";
+import { RANK_META, getRankInfo } from "@/utils/rankInfo";
 
 interface RelatedStocksThemesProps {
   recommendData: RecommendationResponse;
@@ -38,31 +39,11 @@ const EVENT_META: Record<StockEventType, EventMeta> = {
 };
 
 export default function RelatedStocksThemes({ recommendData, handleStockModal, handleThemeModal }: RelatedStocksThemesProps) {
-  const themeRankStatus =
-    recommendData.recommendedTheme.prevRank === recommendData.recommendedTheme.rank ? "same" : recommendData.recommendedTheme.prevRank > recommendData.recommendedTheme.rank ? "up" : "down";
+  const themeRankStatus = getRankInfo(recommendData.recommendedTheme.prevRank, recommendData.recommendedTheme.rank).status;
   const themeDiff = Math.abs(recommendData.recommendedTheme.prevRank - recommendData.recommendedTheme.rank);
 
-  const stockRankStatus =
-    recommendData.recommendedStock.prevRank === recommendData.recommendedStock.rank ? "same" : recommendData.recommendedStock.prevRank > recommendData.recommendedStock.rank ? "up" : "down";
+  const stockRankStatus = getRankInfo(recommendData.recommendedStock.prevRank, recommendData.recommendedStock.rank).status;
   const stockDiff = Math.abs(recommendData.recommendedStock.prevRank - recommendData.recommendedStock.rank);
-
-  const RANK_META = {
-    same: {
-      text: "유지",
-      color: "text-gray-500",
-      icon: null,
-    },
-    up: {
-      text: "상승",
-      color: "text-rose-500",
-      icon: <i className="icon icon-arrow-up" />,
-    },
-    down: {
-      text: "하락",
-      color: "text-blue-500",
-      icon: <i className="icon icon-arrow-down" />,
-    },
-  } as const;
 
   const ThemeRankMeta = RANK_META[themeRankStatus];
   const stockRankMeta = RANK_META[stockRankStatus];
@@ -96,7 +77,7 @@ export default function RelatedStocksThemes({ recommendData, handleStockModal, h
                 {recommendData.recommendedTheme.prevRank || "-"} → {recommendData.recommendedTheme.rank || "-"}
               </span>
               <span>으로 {ThemeRankMeta.text}했어요.</span>
-              {themeRankStatus !== "same" && (
+              {themeRankStatus !== "same" && recommendData.recommendedTheme.prevRank && recommendData.recommendedTheme.rank && (
                 <span className={`${ThemeRankMeta.color} flex items-center gap-0.5`}>
                   {ThemeRankMeta.icon}
                   {themeDiff}
@@ -140,7 +121,7 @@ export default function RelatedStocksThemes({ recommendData, handleStockModal, h
                 {recommendData.recommendedStock.prevRank || "-"} → {recommendData.recommendedStock.rank || "-"}
               </span>
               <span>으로 {stockRankMeta.text}했어요.</span>
-              {stockRankStatus !== "same" && (
+              {stockRankStatus !== "same" && recommendData.recommendedStock.prevRank && recommendData.recommendedStock.rank && (
                 <span className={`${stockRankMeta.color} flex items-center gap-0.5`}>
                   {stockRankMeta.icon}
                   {stockDiff}

@@ -57,6 +57,7 @@ export function Header() {
               navigate("/plan");
             }}
             className="hidden md:block"
+            size="sm"
           >
             olla 플랜 업그레이드하기
           </Button> */}
@@ -98,7 +99,8 @@ export function Header() {
                           <button
                             className="w-full px-2 py-1.5 cursor-pointer text-left"
                             onClick={() => {
-                              toast.success("준비중 입니다", { position: "top-center" });
+                              setShowUserMenu(false);
+                              navigate("/mypage");
                             }}
                           >
                             설정

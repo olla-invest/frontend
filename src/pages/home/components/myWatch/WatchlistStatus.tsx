@@ -8,6 +8,8 @@ import { CircleCheckIcon } from "lucide-react";
 import { getThemeIcon } from "@/utils/ThemeIcon";
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
 
+import { RANK_META, getRankInfo } from "@/utils/rankInfo";
+
 interface WatchlistStatusProps {
   themeList: WatchListTheme[] | null;
   stockList: WatchListStock[] | null;
@@ -41,24 +43,6 @@ const EVENT_META: Record<StockEventType, EventMeta> = {
     label: "순위 하락",
   },
 };
-
-const RANK_META = {
-  same: {
-    text: "유지",
-    color: "text-gray-500",
-    icon: null,
-  },
-  up: {
-    text: "상승",
-    color: "text-rose-500",
-    icon: <i className="icon icon-arrow-up" />,
-  },
-  down: {
-    text: "하락",
-    color: "text-blue-500",
-    icon: <i className="icon icon-arrow-down" />,
-  },
-} as const;
 
 const BASE_URL = import.meta.env.VITE_API_BASE_URL;
 
@@ -115,7 +99,7 @@ export default function WatchlistStatus({ themeList, stockList, handleThemeModal
       ),
       cell: ({ row }) => {
         const diff = Math.abs(row.original.prevRank - row.original.rank);
-        const rankStatus = row.original.prevRank === row.original.rank ? "same" : row.original.prevRank > row.original.rank ? "up" : "down";
+        const rankStatus = getRankInfo(row.original.prevRank, row.original.rank).status;
         const rankMeta = RANK_META[rankStatus];
         if (diff === 0) return <div className="text-right">-</div>;
 
@@ -123,10 +107,10 @@ export default function WatchlistStatus({ themeList, stockList, handleThemeModal
           <div className="text-slate-700 text-sm flex gap-1 items-center justify-end">
             <span>종목 순위가</span>
             <span className="font-semibold">
-              {row.original.prevRank} → {row.original.rank}
+              {row.original.prevRank || "-"} → {row.original.rank || "-"}
             </span>
             <span>으로 {rankMeta.text}했어요.</span>
-            {rankStatus !== "same" && (
+            {rankStatus !== "same" && row.original.prevRank && row.original.rank && (
               <span className={`${rankMeta.color} flex items-center gap-0.5 text-sm`}>
                 {rankMeta.icon}
                 {diff}
@@ -180,7 +164,7 @@ export default function WatchlistStatus({ themeList, stockList, handleThemeModal
       header: () => <div className="text-right">테마 순위 변화</div>,
       cell: ({ row }) => {
         const diff = Math.abs(row.original.prevRank - row.original.rank);
-        const rankStatus = row.original.prevRank === row.original.rank ? "same" : row.original.prevRank > row.original.rank ? "up" : "down";
+        const rankStatus = getRankInfo(row.original.prevRank, row.original.rank).status;
         const rankMeta = RANK_META[rankStatus];
 
         if (diff === 0) return <div className="text-right">-</div>;
@@ -195,7 +179,7 @@ export default function WatchlistStatus({ themeList, stockList, handleThemeModal
 
             <span>으로 {rankMeta.text}했어요.</span>
 
-            {rankStatus !== "same" && (
+            {rankStatus !== "same" && row.original.prevRank && row.original.rank && (
               <span className={`${rankMeta.color} flex items-center gap-0.5 w-6.5`}>
                 {rankMeta.icon}
                 {diff}

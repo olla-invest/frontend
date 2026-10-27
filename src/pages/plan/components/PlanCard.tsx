@@ -1,6 +1,9 @@
 import { Button } from "@/components/ui/button";
+import type { SelectPlanType } from "..";
+
 export interface PlanCardProps {
   setModal?: React.Dispatch<React.SetStateAction<string>>;
+  setSelectType?: React.Dispatch<React.SetStateAction<SelectPlanType>>;
   planName: string; //플랜이름
   isRecomend: boolean; //추천 여부
   description: string; //플랜 설명
@@ -12,7 +15,7 @@ export interface PlanCardProps {
   notIncluded?: string[]; //불포함 사항
 }
 
-export default function PlanCard({ setModal, planName, isRecomend = false, description, cost, discountInfo, costInfo, actionType, include, notIncluded }: PlanCardProps) {
+export default function PlanCard({ setModal, setSelectType, planName, isRecomend = false, description, cost, discountInfo, costInfo, actionType, include, notIncluded }: PlanCardProps) {
   const renderBtn = (actionType: string) => {
     const btnStyle = actionType === "upgrade" && !isRecomend ? "outline" : actionType === "downgrade" ? "default" : isRecomend ? "default" : "ghost";
     return (
@@ -20,6 +23,10 @@ export default function PlanCard({ setModal, planName, isRecomend = false, descr
         type="button"
         onClick={() => {
           setModal?.("default");
+          setSelectType?.((prev) => ({
+            ...(prev ?? { planType: "", billingCycle: "" }),
+            planType: planName,
+          }));
         }}
         variant={btnStyle}
         className={`${btnStyle === "outline" ? "text-primary" : ""}`}
